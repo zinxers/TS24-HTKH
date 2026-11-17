@@ -107,3 +107,20 @@ create policy app_user_ts24_app on public.app_user
   for all to ts24_app using (true) with check (true);
 
 revoke all on public.team, public.app_user from anon, authenticated;
+
+-- Hàm trigger không cần ai gọi trực tiếp.
+revoke execute on function public.set_updated_at(), public.app_user_guard_update(), public.app_user_block_delete()
+  from public, anon, authenticated;
+
+-- Supabase mặc định cấp quyền cho anon, authenticated trên object mới trong public.
+-- Bỏ mặc định đó: object mới phải grant rõ ràng (check:rls kiểm).
+alter default privileges for role postgres in schema public
+  revoke all on tables from anon, authenticated;
+alter default privileges for role postgres in schema public
+  revoke all on sequences from anon, authenticated;
+alter default privileges for role postgres in schema public
+  revoke execute on functions from anon, authenticated;
+-- Quyền execute cho PUBLIC là mặc định toàn cục, không thu hồi được theo schema.
+-- Hàm mới do postgres tạo (mọi schema) phải grant execute rõ ràng, kể cả cho ts24_app.
+alter default privileges for role postgres
+  revoke execute on functions from public;

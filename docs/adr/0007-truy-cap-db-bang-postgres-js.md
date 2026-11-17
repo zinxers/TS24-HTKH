@@ -14,6 +14,7 @@ Mốc 2a dựng nền DB (PostgreSQL trên Supabase, ADR-0002) cho `packages/db`
 - Kiểu dòng lấy từ `src/types.generated.ts`, sinh bằng `pnpm --filter @ts24-htkh/db gen:types`; CI sinh lại và `git diff --exit-code` để bắt type lệch schema.
 - Backend kết nối bằng role `ts24_app`: chỉ `select, insert, update` trên bảng nghiệp vụ, không `delete`, `truncate`, không sở hữu bảng. Migration tạo role `nologin`; mật khẩu và `login` đặt ngoài migration (local: `supabase/seed.sql`, giá trị dev công khai; staging/production: người vận hành đặt ngoài repo).
 - RLS bật cho mọi bảng `public`, policy chỉ cho `ts24_app`; `anon`, `authenticated` không có quyền. `pnpm check:rls` kiểm trong CI.
+- Bỏ quyền mặc định Supabase cấp cho `anon`, `authenticated` trên bảng, sequence, hàm mới trong `public` (`alter default privileges`), và bỏ quyền execute mặc định của PUBLIC trên hàm mới do `postgres` tạo; local đặt `auto_expose_new_tables = false`. Lý do: RLS không chặn `TRUNCATE`, view chạy bằng quyền chủ sở hữu. `check:rls` báo lỗi cả khi `anon`/`authenticated` còn bất kỳ quyền nào trên bảng hoặc view `public`. Project cloud (staging/production) cần tắt tùy chọn tự expose tương ứng.
 
 ## Hệ quả
 - Nhẹ: một dependency, tham số tự động, transaction gọn.
