@@ -1,6 +1,8 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // Hướng dẫn agent nằm ở CLAUDE.md; không để Next sinh AGENTS.md.
+  agentRules: false,
   transpilePackages: [
     '@ts24-htkh/shared',
     '@ts24-htkh/platform',
