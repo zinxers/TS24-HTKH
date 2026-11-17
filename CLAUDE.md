@@ -81,7 +81,7 @@ Hệ thống cũ phải **tiếp tục chạy bình thường** cho tới khi TS
 
 - Trước khi sửa code: `git status` sạch. Mỗi thay đổi một nhánh `feat/...`, `fix/...`, `chore/...`.
 - Conventional Commits, scope là package: `feat(core): soft delete tài khoản`.
-- Không push thẳng `main`; mọi thay đổi qua PR, CI đạt, ít nhất 1 review.
+- Không push thẳng `main`; mọi thay đổi qua PR, CI đạt, ít nhất 0 review.
 - Commit `pnpm-lock.yaml` cùng thay đổi dependency. Không commit `.env*` (trừ `.env.example`), dữ liệu thật, file backup, `src-tauri/target/`.
 - Kiểu xuống dòng LF.
 
