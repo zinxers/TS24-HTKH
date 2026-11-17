@@ -10,11 +10,13 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "test:root": "vitest run"
   },
   "devDependencies": {
     "@ts24-htkh/config": "workspace:*",
     "turbo": "^2.11.11",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
   }
 }

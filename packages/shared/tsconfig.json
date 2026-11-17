@@ -1,0 +1,7 @@
+{
+  "extends": "@ts24-htkh/config/tsconfig/library.json",
+  "include": [
+    "src",
+    "*.ts"
+  ]
+}
