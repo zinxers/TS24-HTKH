@@ -1,3 +1,4 @@
 {
-  "extends": "@ts24-htkh/config/tsconfig/base.json"
+  "extends": "@ts24-htkh/config/tsconfig/base.json",
+  "files": []
 }

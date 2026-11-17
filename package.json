@@ -13,7 +13,8 @@
     "test": "turbo run test"
   },
   "devDependencies": {
+    "@ts24-htkh/config": "workspace:*",
     "turbo": "^2.11.11",
-    "typescript": "^7.0.2"
+    "typescript": "~6.0.3"
   }
 }
