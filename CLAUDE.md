@@ -36,15 +36,16 @@ Hệ thống cũ phải **tiếp tục chạy bình thường** cho tới khi TS
 | Việc | Lệnh |
 |---|---|
 | Cài đặt | `pnpm install` (CI: `pnpm install --frozen-lockfile`) |
-| Chạy DB local | `supabase start` (dữ liệu giả từ `supabase/seed.sql`) |
+| Chạy DB local | `pnpm supabase start` (dữ liệu giả từ `supabase/seed.sql`) |
 | Chạy web | `pnpm turbo dev --filter=@ts24-htkh/web` → http://localhost:3000 |
 | Chạy desktop | `pnpm --filter @ts24-htkh/desktop tauri dev` (cần Rust + MSVC + WebView2) |
 | Kiểm tra toàn repo | `pnpm turbo lint typecheck test` |
 | Chỉ phần bị ảnh hưởng | `pnpm turbo lint typecheck test --filter=...[origin/main]` |
 | Kiểm ranh giới lớp | `pnpm depcruise` |
+| Test DB | `pnpm --filter @ts24-htkh/db test:db` (cần `pnpm supabase start`) |
 | Kiểm RLS | `pnpm check:rls` |
-| Tạo migration | `supabase migration new <ten_ngan>` |
-| Chạy lại DB từ đầu | `supabase db reset` (chỉ local) |
+| Tạo migration | `pnpm supabase migration new <ten_ngan>` |
+| Chạy lại DB từ đầu | `pnpm supabase db reset` (chỉ local) |
 | Sinh type từ DB | `pnpm --filter @ts24-htkh/db gen:types` |
 | Build web | `pnpm turbo build --filter=@ts24-htkh/web` |
 | Thêm dependency | `pnpm add <pkg> --filter <tên package>` |

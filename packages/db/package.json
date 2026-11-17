@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:db": "vitest run --config vitest.db.config.ts",
-    "gen:types": "supabase gen types typescript --local > src/types.generated.ts"
+    "gen:types": "supabase gen types typescript --local > src/types.generated.ts",
+    "check:rls": "node scripts/check-rls.ts"
   },
   "dependencies": {
     "@ts24-htkh/shared": "workspace:*",

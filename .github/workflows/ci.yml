@@ -31,3 +31,10 @@ jobs:
       # next build là bước duy nhất bắt server-only khi giao diện lỡ import code server.
       - run: pnpm turbo build --filter=@ts24-htkh/web
       - run: pnpm depcruise
+      # Chỉ Postgres; db start tự áp migration và seed.sql.
+      - run: pnpm supabase db start
+      # Sửa migration mà quên sinh lại type thì fail ở đây.
+      - run: pnpm --filter @ts24-htkh/db gen:types
+      - run: git diff --exit-code packages/db/src/types.generated.ts
+      - run: pnpm --filter @ts24-htkh/db test:db
+      - run: pnpm check:rls

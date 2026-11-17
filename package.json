@@ -12,6 +12,7 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:root": "vitest run",
+    "check:rls": "pnpm --filter @ts24-htkh/db check:rls",
     "depcruise": "depcruise apps packages tools --config .dependency-cruiser.cjs --include-only \"^(apps|packages|tools)/[^/]+/src/\""
   },
   "devDependencies": {

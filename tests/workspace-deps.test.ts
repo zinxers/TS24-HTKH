@@ -8,7 +8,7 @@ const readJson = (path: string) => JSON.parse(readText(path));
 const expected: Record<string, string[]> = {
   shared: [],
   platform: [],
-  db: ['@ts24-htkh/shared', 'server-only'],
+  db: ['@ts24-htkh/shared', 'postgres', 'server-only'],
   storage: ['@ts24-htkh/shared', 'server-only'],
   'xlsx-report': ['@ts24-htkh/shared'],
   core: [
