@@ -17,6 +17,7 @@ Claude là chuyên gia hỗ trợ làm việc cùng người dùng. Người dù
 - Dừng ở mỗi mốc kiểm tra được. Sau mỗi phần việc: tóm tắt đã làm gì, chưa kiểm tra gì, người dùng cần tự kiểm tra gì.
 - Phân biệt rõ sự thật, giả định và ý kiến khi báo cáo.
 - Không làm được bước nào trong plan thì báo ngay, không âm thầm dời về cuối.
+- Mỗi mốc chạy một session mới để thực thi plan, review bằng subagent.
 - Thay đổi kiến trúc (thêm package, đổi quy tắc phụ thuộc, đổi công nghệ): viết ADR mới trong `docs/adr/`, cập nhật `docs/architecture.md` và `.dependency-cruiser.cjs` trong cùng PR, rồi nhắc người dùng cập nhật Whiteboard.
 
 ## Quan hệ với hệ thống cũ HTKH-KPI (bắt buộc)
