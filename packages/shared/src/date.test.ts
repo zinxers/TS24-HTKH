@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { addDays, dayOfWeek, daysBetween, isIsoDate, isoDate, makeDate, parts, toVnDate } from './date';
 
 describe('date', () => {
@@ -34,5 +34,17 @@ describe('date', () => {
     expect(toVnDate(new Date('2026-11-15T16:59:59Z'))).toBe('2026-11-15');
     expect(toVnDate(new Date('2026-11-15T17:00:00Z'))).toBe('2026-11-16');
     expect(toVnDate(new Date('2026-12-31T17:30:00Z'))).toBe('2027-01-01');
+  });
+
+  it('toVnDate không phụ thuộc chuỗi định dạng của locale', () => {
+    // ICU từng đổi định dạng ngắn của en-CA; chỉ được dựa vào từng phần year/month/day.
+    // `format` là getter trả về hàm; kiểu lib khai báo như method nên ép kiểu để spy getter.
+    const proto = Intl.DateTimeFormat.prototype as unknown as { format: unknown };
+    const spy = vi.spyOn(proto, 'format', 'get').mockReturnValue(() => '11/16/2026');
+    try {
+      expect(toVnDate(new Date('2026-11-15T17:00:00Z'))).toBe('2026-11-16');
+    } finally {
+      spy.mockRestore();
+    }
   });
 });

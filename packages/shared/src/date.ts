@@ -45,4 +45,8 @@ const vnFormat = new Intl.DateTimeFormat('en-CA', {
 });
 
 /** Ngày theo giờ Việt Nam của một thời điểm. */
-export const toVnDate = (instant: Date): IsoDate => isoDate(vnFormat.format(instant));
+export function toVnDate(instant: Date): IsoDate {
+  // Ghép từ từng phần, không dựa vào chuỗi định dạng của locale (ICU có thể đổi).
+  const p = Object.fromEntries(vnFormat.formatToParts(instant).map((x) => [x.type, x.value]));
+  return isoDate(`${p.year}-${p.month}-${p.day}`);
+}
