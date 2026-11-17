@@ -55,6 +55,7 @@ shared                                      ──► (không gì cả)
 - Package chỉ import những gì khai báo trong `dependencies` của nó (pnpm chặn import "ké").
 - `core`, `db`, `storage` đánh dấu `server-only`, không khai báo `react`, `next`.
 - Không phụ thuộc vòng.
+- Mọi file trong `apps/web/src` không thuộc `app/api/` là lớp giao diện. Luật kiểm cả `import type` (ADR-0006).
 
 ## 3. Cây thư mục
 

@@ -1,0 +1,25 @@
+{
+  "name": "@ts24-htkh/storage",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ts24-htkh/shared": "workspace:*",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@ts24-htkh/config": "workspace:*",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.15.0",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  }
+}
