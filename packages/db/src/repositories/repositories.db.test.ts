@@ -63,6 +63,15 @@ describe('UserRepository', () => {
     });
   });
 
+  it('cột thời gian trả về chuỗi ISO 8601, khớp type sinh', async () => {
+    await inRollback(appSql(), async (tx) => {
+      const id = await insertStaff(tx, 'iso@example.com');
+      const user = await new UserRepository(tx).findById(id);
+      expect(user?.created_at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+      expect(user?.deleted_at).toBeNull();
+    });
+  });
+
   it('softDelete Trưởng phòng bị DB chặn', async () => {
     await inRollback(appSql(), async (tx) => {
       const head = await headId(tx);
