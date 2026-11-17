@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build / cache
+.next/
+dist/
+out/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# Tauri / Rust
+apps/desktop/src-tauri/target/
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Env (chỉ commit .env.example)
+.env
+.env.*
+!.env.example
+
+# Dữ liệu thật, backup, khóa ký
+*.dump
+*.sql.gz
+backups/
+*.pfx
+*.p12
+*.key
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Claude Code (cấu hình cá nhân)
+CLAUDE.local.md
+.claude/settings.local.json
