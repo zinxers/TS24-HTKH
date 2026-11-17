@@ -28,4 +28,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm turbo lint typecheck test
+      # next build là bước duy nhất bắt server-only khi giao diện lỡ import code server.
+      - run: pnpm turbo build --filter=@ts24-htkh/web
       - run: pnpm depcruise
