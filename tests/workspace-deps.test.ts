@@ -6,7 +6,8 @@ const readJson = (path: string) => JSON.parse(readText(path));
 
 // Nguồn: docs/architecture.md mục 2.
 const expected: Record<string, string[]> = {
-  shared: [],
+  // zod cho schema dùng chung (Mốc 2b); vẫn không phụ thuộc package nội bộ nào.
+  shared: ['zod'],
   platform: [],
   db: ['@ts24-htkh/shared', 'postgres', 'server-only'],
   storage: ['@ts24-htkh/shared', 'server-only'],
