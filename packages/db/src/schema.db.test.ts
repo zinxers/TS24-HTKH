@@ -73,13 +73,45 @@ describe('app_user: luật ở DB', () => {
     });
   });
 
-  it('chặn đổi vai trò Trưởng phòng', async () => {
+  it('hạ Trưởng phòng không nâng ai → lỗi khi kiểm constraint', async () => {
     await inRollback(appSql(), async (tx) => {
       const id = await headId(tx);
       const team = await teamId(tx, 1);
-      await expect(
-        tx`update app_user set role = 'staff', team_id = ${team} where id = ${id}`,
-      ).rejects.toThrow(/không được đổi vai trò Trưởng phòng/);
+      await tx`update app_user set role = 'staff', team_id = ${team} where id = ${id}`;
+      await expect(tx`set constraints all immediate`).rejects.toThrow(/phải có đúng một Trưởng phòng/);
+    });
+  });
+
+  it('bàn giao trong một transaction → đạt, còn đúng một Trưởng phòng', async () => {
+    await inRollback(appSql(), async (tx) => {
+      const oldHead = await headId(tx);
+      const team = await teamId(tx, 1);
+      const newHead = await insertStaff(tx, 'tp.moi@example.com');
+      await tx`update app_user set role = 'manager', team_id = ${team} where id = ${oldHead}`;
+      await tx`update app_user set role = 'head', team_id = null where id = ${newHead}`;
+      await expect(tx`set constraints all immediate`).resolves.toBeDefined();
+      const [row] = await tx<{ n: number }[]>`
+        select count(*)::int as n from app_user where role = 'head' and deleted_at is null`;
+      expect(row!.n).toBe(1);
+      expect(await headId(tx)).toBe(newHead);
+    });
+  });
+
+  it('nâng người thứ hai trước khi hạ người cũ → ux_one_head', async () => {
+    await inRollback(appSql(), async (tx) => {
+      const id = await insertStaff(tx, 'tp.hai@example.com');
+      await expect(tx`update app_user set role = 'head', team_id = null where id = ${id}`).rejects.toThrow(
+        /ux_one_head/,
+      );
+    });
+  });
+
+  it('chặn khóa Trưởng phòng', async () => {
+    await inRollback(appSql(), async (tx) => {
+      const id = await headId(tx);
+      await expect(tx`update app_user set status = 'locked' where id = ${id}`).rejects.toThrow(
+        /không được khóa Trưởng phòng/,
+      );
     });
   });
 
@@ -161,6 +193,25 @@ describe('quyền ts24_app', () => {
     });
   });
 
+  it('insert, select audit_log chạy được', async () => {
+    await inRollback(appSql(), async (tx) => {
+      const actor = await headId(tx);
+      await tx`insert into audit_log (actor_id, action, target_id) values (${actor}, 'account.update', ${actor})`;
+      const rows = await tx`select id from audit_log where actor_id = ${actor}`;
+      expect(rows.length).toBeGreaterThan(0);
+    });
+  });
+
+  it.each([
+    ['update audit_log', (tx: Sql) => tx`update audit_log set action = 'x'`],
+    ['delete from audit_log', (tx: Sql) => tx`delete from audit_log`],
+    ['truncate audit_log', (tx: Sql) => tx`truncate audit_log`],
+  ])('%s bị từ chối', async (_name, run) => {
+    await inRollback(appSql(), async (tx) => {
+      await expect(run(tx)).rejects.toThrow(/permission denied/);
+    });
+  });
+
   it('delete from user_session chạy được (ngoại lệ duy nhất)', async () => {
     await inRollback(appSql(), async (tx) => {
       await expect(tx`delete from user_session`).resolves.toBeDefined();
@@ -173,6 +224,13 @@ describe('anon và authenticated', () => {
     await inRollback(adminSql(), async (tx) => {
       await tx`select set_config('role', ${role}, true)`;
       await expect(tx`select * from app_user`).rejects.toThrow(/permission denied/);
+    });
+  });
+
+  it.each(['anon', 'authenticated'])('%s không đọc được audit_log', async (role) => {
+    await inRollback(adminSql(), async (tx) => {
+      await tx`select set_config('role', ${role}, true)`;
+      await expect(tx`select * from audit_log`).rejects.toThrow(/permission denied/);
     });
   });
 
