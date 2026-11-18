@@ -49,6 +49,7 @@ Hệ thống cũ phải **tiếp tục chạy bình thường** cho tới khi TS
 | Sinh type từ DB | `pnpm --filter @ts24-htkh/db gen:types` |
 | Build web | `pnpm turbo build --filter=@ts24-htkh/web` |
 | Thêm dependency | `pnpm add <pkg> --filter <tên package>` |
+| Đặt mật khẩu | `pnpm --filter @ts24-htkh/set-password start <email>` (xem `docs/runbooks/dat-mat-khau.md`) |
 
 ## Quy ước chung
 
