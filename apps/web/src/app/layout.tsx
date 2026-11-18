@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: 'TS24-HTKH',
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="vi">
-      <body style={{ fontFamily: 'system-ui, sans-serif', margin: 0, padding: 16 }}>{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
