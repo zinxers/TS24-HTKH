@@ -15,6 +15,30 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+describe('apiClient tài khoản', () => {
+  it('accounts.update gửi PATCH JSON, trả account', async () => {
+    const fetch = mockFetch(200, { account: { id: 'a1' } });
+    await expect(apiClient.accounts.update('a1', { fullName: 'B' })).resolves.toEqual({ id: 'a1' });
+    expect(fetch).toHaveBeenCalledWith('/api/v1/accounts/a1', {
+      method: 'PATCH',
+      credentials: 'same-origin',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ fullName: 'B' }),
+    });
+  });
+
+  it('accounts.remove gửi DELETE, 204 → undefined', async () => {
+    const fetch = mockFetch(204);
+    await expect(apiClient.accounts.remove('a1')).resolves.toBeUndefined();
+    expect(fetch).toHaveBeenCalledWith('/api/v1/accounts/a1', { method: 'DELETE', credentials: 'same-origin' });
+  });
+
+  it('teams.list trả mảng team', async () => {
+    mockFetch(200, { teams: [{ id: 't', name: 'T' }] });
+    await expect(apiClient.teams.list()).resolves.toEqual([{ id: 't', name: 'T' }]);
+  });
+});
+
 describe('apiClient.auth', () => {
   it('login gửi JSON, credentials same-origin, trả user', async () => {
     const fetch = mockFetch(200, { user: USER });
