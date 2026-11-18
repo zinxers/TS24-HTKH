@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "tsx --conditions=react-server src/main.ts",
+    "start": "tsx --env-file-if-exists=../../apps/web/.env.local --conditions=react-server src/main.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
