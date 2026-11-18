@@ -37,6 +37,8 @@ describe('proxy', () => {
     const re = new RegExp(`^${config.matcher[0]}$`);
     expect(re.test('/')).toBe(true);
     expect(re.test('/login')).toBe(true);
-    for (const path of ['/_next/static/a.js', '/_next/image', '/favicon.ico']) expect(re.test(path)).toBe(false);
+    for (const path of ['/_next/static/a.js', '/_next/image', '/favicon.ico', '/robots.txt', '/icons/icon.png']) {
+      expect(re.test(path)).toBe(false);
+    }
   });
 });

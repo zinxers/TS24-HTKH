@@ -18,16 +18,19 @@ export default function Page() {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
 
   useEffect(() => {
+    const fail = (e: unknown) => setError(e instanceof ApiError ? e.message : 'Lỗi hệ thống, vui lòng thử lại');
     apiClient.auth.me().then(setUser, async (e: unknown) => {
-      if (e instanceof ApiError && e.status === 401) {
-        // Xóa cookie cũ trước, nếu không proxy sẽ đưa /login về lại `/`.
-        await apiClient.auth.logout().catch(() => undefined);
-        router.replace('/login');
-        return;
+      if (!(e instanceof ApiError && e.status === 401)) return fail(e);
+      // Xóa cookie cũ trước, nếu không proxy sẽ đưa /login về lại `/`. Xóa lỗi thì báo, không chuyển (tránh vòng lặp).
+      try {
+        await apiClient.auth.logout();
+      } catch (logoutFailure) {
+        return fail(logoutFailure);
       }
-      setError(e instanceof ApiError ? e.message : 'Lỗi hệ thống, vui lòng thử lại');
+      router.replace('/login');
     });
   }, [router, attempt]);
 
@@ -46,13 +49,18 @@ export default function Page() {
               {initials(user.fullName)}
             </span>
             <span className="name">{user.fullName}</span>
-            <LogoutButton />
+            <LogoutButton onError={setLogoutError} />
           </div>
         )}
       </header>
       <main className="content">
         {user ? (
           <>
+            {logoutError && (
+              <p role="alert" className="banner-error">
+                {logoutError}
+              </p>
+            )}
             <h1>Xin chào, {user.fullName}</h1>
             <p>
               {ROLE_LABEL[user.role]} · {user.email}

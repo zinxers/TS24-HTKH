@@ -12,5 +12,6 @@ export function proxy(req: NextRequest): NextResponse {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  // Bỏ tài nguyên tĩnh và mọi đường dẫn có đuôi file (robots.txt, ảnh trong public/).
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.[^/]+$).*)'],
 };

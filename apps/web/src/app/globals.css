@@ -261,6 +261,14 @@ body {
 .load-error .text-btn {
   margin-left: -12px;
 }
+.content .banner-error {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-size: 15px;
+}
 
 @media (max-width: 480px) {
   .signin {

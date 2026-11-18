@@ -57,6 +57,24 @@ describe('trang /', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Lỗi hệ thống, vui lòng thử lại');
   });
 
+  it('me 401 mà xóa cookie lỗi → báo lỗi, không chuyển trang (tránh vòng lặp với proxy)', async () => {
+    vi.spyOn(apiClient.auth, 'me').mockRejectedValue(new ApiError('AUTH', 401, 'hết hạn'));
+    vi.spyOn(apiClient.auth, 'logout').mockRejectedValue(new TypeError('Failed to fetch'));
+    render(<Page />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('Lỗi hệ thống, vui lòng thử lại');
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it('Đăng xuất lỗi → báo lỗi, ở lại trang, mở lại nút', async () => {
+    vi.spyOn(apiClient.auth, 'me').mockResolvedValue(USER);
+    vi.spyOn(apiClient.auth, 'logout').mockRejectedValue(new ApiError('INTERNAL', 500, 'Lỗi hệ thống, vui lòng thử lại'));
+    render(<Page />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Đăng xuất' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Đăng xuất không thành công: Lỗi hệ thống, vui lòng thử lại');
+    expect(replace).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Đăng xuất' })).toBeEnabled();
+  });
+
   it('Đăng xuất → gọi logout rồi về /login', async () => {
     vi.spyOn(apiClient.auth, 'me').mockResolvedValue(USER);
     const logout = vi.spyOn(apiClient.auth, 'logout').mockResolvedValue();

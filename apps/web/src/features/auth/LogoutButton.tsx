@@ -2,17 +2,24 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { apiClient } from '../../lib/api-client';
+import { ApiError, apiClient } from '../../lib/api-client';
 
 // Không qua ConfirmDialog: đăng xuất không đổi dữ liệu nghiệp vụ.
-export function LogoutButton() {
+export function LogoutButton({ onError }: { onError: (message: string | null) => void }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
 
   async function onClick() {
     setPending(true);
-    // Lỗi mạng: vẫn chuyển trang; cookie còn thì proxy đưa về lại `/`.
-    await apiClient.auth.logout().catch(() => undefined);
+    onError(null);
+    try {
+      await apiClient.auth.logout();
+    } catch (e) {
+      // Cookie còn thì chuyển về /login cũng bị proxy đưa lại `/`: báo lỗi và ở lại.
+      onError(`Đăng xuất không thành công: ${e instanceof ApiError ? e.message : 'Lỗi hệ thống, vui lòng thử lại'}`);
+      setPending(false);
+      return;
+    }
     router.replace('/login');
   }
 
