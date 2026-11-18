@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { NotFoundError, ValidationError } from '@ts24-htkh/core';
 import { run } from './main';
+import { InputCancelledError } from './read-hidden';
 
 const PASSWORD = 'mat-khau-bi-mat';
 
@@ -12,6 +13,7 @@ function fakeIo(answers: string[], setPassword = vi.fn<SetPassword>(async () => 
     lines,
     setPassword,
     io: {
+      canHideInput: true,
       readHidden: vi.fn(async () => answers.shift() ?? ''),
       print: (line: string) => {
         lines.push(line);
@@ -22,6 +24,22 @@ function fakeIo(answers: string[], setPassword = vi.fn<SetPassword>(async () => 
 }
 
 describe('run', () => {
+  it('terminal không ẩn được ký tự → từ chối trước khi hỏi mật khẩu, trả 1', async () => {
+    const f = fakeIo([PASSWORD, PASSWORD]);
+    f.io.canHideInput = false;
+    expect(await run(['a@b.vn'], f.io)).toBe(1);
+    expect(f.lines.join('\n')).toContain('Chạy lệnh trong PowerShell hoặc cmd');
+    expect(f.io.readHidden).not.toHaveBeenCalled();
+  });
+
+  it('Ctrl+C hoặc hết dữ liệu nhập → in Đã hủy, trả 130', async () => {
+    const f = fakeIo([]);
+    f.io.readHidden.mockRejectedValueOnce(new InputCancelledError());
+    expect(await run(['a@b.vn'], f.io)).toBe(130);
+    expect(f.lines).toContain('Đã hủy');
+    expect(f.setPassword).not.toHaveBeenCalled();
+  });
+
   it('không có email → in hướng dẫn, trả 1', async () => {
     const f = fakeIo([]);
     expect(await run([], f.io)).toBe(1);

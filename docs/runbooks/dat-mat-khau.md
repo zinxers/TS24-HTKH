@@ -21,7 +21,7 @@ node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
    Get-Content apps/web/.env.local | ForEach-Object { $k, $v = $_ -split '=', 2; Set-Item "env:$k" $v }
    ```
 
-2. Chạy lệnh, nhập mật khẩu hai lần (không hiện ký tự):
+2. Chạy lệnh **trong PowerShell hoặc cmd** (Git Bash không ẩn được ký tự nên lệnh từ chối), nhập mật khẩu hai lần (không hiện ký tự):
 
    ```powershell
    pnpm --filter @ts24-htkh/set-password start nhan.vien@ts24.com.vn

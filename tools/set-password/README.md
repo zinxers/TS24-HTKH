@@ -8,7 +8,7 @@ Lệnh CLI cho người vận hành đặt (hoặc đặt lại) mật khẩu đ
 pnpm --filter @ts24-htkh/set-password start <email>
 ```
 
-Lệnh hỏi mật khẩu hai lần, không hiện ký tự. Mật khẩu dài 8–128 ký tự. Không truyền mật khẩu trên dòng lệnh (lệnh từ chối) để mật khẩu không nằm trong lịch sử shell.
+Lệnh hỏi mật khẩu hai lần, không hiện ký tự. Chạy trong PowerShell hoặc cmd; terminal không ẩn được ký tự (vd Git Bash/mintty, hoặc nhập qua pipe) bị từ chối. Ctrl+C để hủy (mã thoát 130). Mật khẩu dài 8–128 ký tự. Không truyền mật khẩu trên dòng lệnh (lệnh từ chối) để mật khẩu không nằm trong lịch sử shell.
 
 ## Biến môi trường
 

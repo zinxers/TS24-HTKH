@@ -1,7 +1,9 @@
 import { AppError, getContainer } from '@ts24-htkh/core';
-import { readHidden } from './read-hidden';
+import { InputCancelledError, readHidden } from './read-hidden';
 
 export interface Io {
+  /** false khi stdin không phải TTY (vd Git Bash/mintty): terminal sẽ hiện mật khẩu. */
+  canHideInput: boolean;
   readHidden(prompt: string): Promise<string>;
   print(line: string): void;
   setPassword(email: string, password: string): Promise<void>;
@@ -17,9 +19,23 @@ export async function run(args: string[], io: Io): Promise<number> {
     io.print(USAGE);
     return 1;
   }
+  if (!io.canHideInput) {
+    io.print('Terminal này không ẩn được ký tự khi nhập mật khẩu (vd Git Bash). Chạy lệnh trong PowerShell hoặc cmd.');
+    return 1;
+  }
 
-  const password = await io.readHidden('Mật khẩu mới: ');
-  const again = await io.readHidden('Nhập lại mật khẩu: ');
+  let password: string;
+  let again: string;
+  try {
+    password = await io.readHidden('Mật khẩu mới: ');
+    again = await io.readHidden('Nhập lại mật khẩu: ');
+  } catch (error) {
+    if (error instanceof InputCancelledError) {
+      io.print('Đã hủy');
+      return 130;
+    }
+    throw error;
+  }
   if (password !== again) {
     io.print('Hai lần nhập mật khẩu không khớp');
     return 1;
@@ -40,7 +56,8 @@ export async function run(args: string[], io: Io): Promise<number> {
 
 if (import.meta.main) {
   process.exitCode = await run(process.argv.slice(2), {
-    readHidden,
+    canHideInput: process.stdin.isTTY === true,
+    readHidden: (prompt) => readHidden(prompt),
     print: (line) => console.log(line),
     setPassword: (email, password) => getContainer().authService.setPassword(email, password),
   });
