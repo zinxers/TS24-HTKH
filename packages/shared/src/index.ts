@@ -5,3 +5,4 @@ export * from './period';
 export * from './schedule-weeks';
 export * from './auth';
 export * from './schemas/auth';
+export * from './schemas/accounts';
