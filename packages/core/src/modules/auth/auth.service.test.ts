@@ -229,6 +229,19 @@ describe('login', () => {
     expect(fake.sessions).toHaveLength(0);
   });
 
+  it('lần sai thứ 10: câu chặn theo số đếm, không phụ thuộc đồng hồ app lệch với DB', async () => {
+    fake.userStore.recordFailedLogin = async () => ({
+      failedLoginCount: 10,
+      loginBlockedUntil: new Date(NOW.getTime() - 60_000).toISOString(),
+    });
+    await expect(service.login(user().email, 'sai')).rejects.toThrow(MSG_BLOCKED);
+  });
+
+  it('dòng tài khoản biến mất khi ghi lần sai → câu chung, không lỗi 500', async () => {
+    fake.userStore.recordFailedLogin = async () => null;
+    await expect(service.login(user().email, 'sai')).rejects.toThrow(new AuthError(MSG_WRONG));
+  });
+
   it('chưa có mật khẩu: câu chung, có tính lần sai', async () => {
     user().password_hash = null;
     await expect(service.login(user().email, CORRECT)).rejects.toThrow(MSG_WRONG);

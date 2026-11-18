@@ -52,8 +52,15 @@ describe('UserRepository: đăng nhập', () => {
         expect(await users.recordFailedLogin(id, 10, 900)).toEqual({ failedLoginCount: i, loginBlockedUntil: null });
       }
       const tenth = await users.recordFailedLogin(id, 10, 900);
-      expect(tenth.failedLoginCount).toBe(10);
-      expect(Math.abs(inSeconds(tenth.loginBlockedUntil) - 900)).toBeLessThan(5);
+      expect(tenth?.failedLoginCount).toBe(10);
+      expect(Math.abs(inSeconds(tenth?.loginBlockedUntil ?? null) - 900)).toBeLessThan(5);
+    });
+  });
+
+  it('recordFailedLogin với id không có → null', async () => {
+    await inRollback(appSql(), async (tx) => {
+      const users = new UserRepository(tx);
+      expect(await users.recordFailedLogin('00000000-0000-0000-0000-000000000000', 10, 900)).toBeNull();
     });
   });
 

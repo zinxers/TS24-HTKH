@@ -47,8 +47,8 @@ export class AuthService {
     const ok = await hasher.verify(password, cred.passwordHash ?? DUMMY_HASH);
     if (!ok || !cred.passwordHash) {
       const after = await users.recordFailedLogin(cred.id, MAX_LOGIN_FAILS, LOGIN_BLOCK_SECONDS);
-      const blocked = after.loginBlockedUntil && Date.parse(after.loginBlockedUntil) > now.getTime();
-      throw new AuthError(blocked ? MSG_BLOCKED : MSG_WRONG);
+      // Theo số đếm (DB đặt chặn khi đếm >= ngưỡng), không so đồng hồ app với now() của DB.
+      throw new AuthError(after && after.failedLoginCount >= MAX_LOGIN_FAILS ? MSG_BLOCKED : MSG_WRONG);
     }
 
     // Kiểm khóa sau mật khẩu: đoán sai không lộ tài khoản bị khóa.

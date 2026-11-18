@@ -52,7 +52,11 @@ export class UserRepository extends BaseRepository<UserRow> {
   }
 
   /** Tăng nguyên tử trong một câu: hai lần sai song song không mất lượt đếm. */
-  async recordFailedLogin(id: string, threshold: number, blockSeconds: number): Promise<FailedLoginResult> {
+  async recordFailedLogin(
+    id: string,
+    threshold: number,
+    blockSeconds: number,
+  ): Promise<FailedLoginResult | null> {
     const [row] = await this.sql<FailedLoginResult[]>`
       update app_user
       set failed_login_count = failed_login_count + 1,
@@ -62,7 +66,7 @@ export class UserRepository extends BaseRepository<UserRow> {
         end
       where id = ${id}
       returning failed_login_count as "failedLoginCount", login_blocked_until as "loginBlockedUntil"`;
-    return row!;
+    return row ?? null;
   }
 
   /**
