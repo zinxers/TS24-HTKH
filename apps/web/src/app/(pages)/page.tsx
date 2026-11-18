@@ -16,6 +16,8 @@ function initials(fullName: string): string {
 export default function Page() {
   const router = useRouter();
   const [user, setUser] = useState<CurrentUser | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     apiClient.auth.me().then(setUser, async (e: unknown) => {
@@ -23,9 +25,16 @@ export default function Page() {
         // Xóa cookie cũ trước, nếu không proxy sẽ đưa /login về lại `/`.
         await apiClient.auth.logout().catch(() => undefined);
         router.replace('/login');
+        return;
       }
+      setError(e instanceof ApiError ? e.message : 'Lỗi hệ thống, vui lòng thử lại');
     });
-  }, [router]);
+  }, [router, attempt]);
+
+  function retry() {
+    setError(null);
+    setAttempt((n) => n + 1);
+  }
 
   return (
     <>
@@ -49,6 +58,13 @@ export default function Page() {
               {ROLE_LABEL[user.role]} · {user.email}
             </p>
           </>
+        ) : error ? (
+          <div className="load-error">
+            <p role="alert">{error}</p>
+            <button className="text-btn" type="button" onClick={retry}>
+              Thử lại
+            </button>
+          </div>
         ) : (
           <p aria-busy="true">Đang tải…</p>
         )}

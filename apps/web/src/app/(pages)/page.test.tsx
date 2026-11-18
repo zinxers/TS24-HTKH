@@ -4,7 +4,9 @@ import { ApiError, apiClient } from '../../lib/api-client';
 import Page from './page';
 
 const replace = vi.fn();
-vi.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }));
+// Router ổn định giữa các lần render, như useRouter thật của Next.
+const router = { replace: (...args: unknown[]) => replace(...args) };
+vi.mock('next/navigation', () => ({ useRouter: () => router }));
 
 const USER = {
   id: 'u1',
@@ -34,6 +36,25 @@ describe('trang /', () => {
     render(<Page />);
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
     expect(logout).toHaveBeenCalled();
+  });
+
+  it('me lỗi khác 401 → hiện câu lỗi, Thử lại gọi lại me', async () => {
+    const me = vi
+      .spyOn(apiClient.auth, 'me')
+      .mockRejectedValueOnce(new ApiError('INTERNAL', 500, 'Lỗi hệ thống, vui lòng thử lại'))
+      .mockResolvedValueOnce(USER);
+    render(<Page />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('Lỗi hệ thống, vui lòng thử lại');
+    expect(replace).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Thử lại' }));
+    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Xin chào, Trần Thị Quản Lý Một');
+    expect(me).toHaveBeenCalledTimes(2);
+  });
+
+  it('me lỗi mạng (không phải ApiError) → hiện câu lỗi chung', async () => {
+    vi.spyOn(apiClient.auth, 'me').mockRejectedValue(new TypeError('Failed to fetch'));
+    render(<Page />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('Lỗi hệ thống, vui lòng thử lại');
   });
 
   it('Đăng xuất → gọi logout rồi về /login', async () => {

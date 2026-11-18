@@ -249,6 +249,18 @@ body {
   color: var(--secondary);
   margin: 0;
 }
+.load-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.load-error p {
+  color: var(--danger);
+}
+.load-error .text-btn {
+  margin-left: -12px;
+}
 
 @media (max-width: 480px) {
   .signin {
