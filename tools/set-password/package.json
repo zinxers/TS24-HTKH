@@ -1,0 +1,23 @@
+{
+  "name": "@ts24-htkh/set-password",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx --conditions=react-server src/main.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ts24-htkh/core": "workspace:*",
+    "tsx": "^4.23.15"
+  },
+  "devDependencies": {
+    "@ts24-htkh/config": "workspace:*",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.15.0",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  }
+}

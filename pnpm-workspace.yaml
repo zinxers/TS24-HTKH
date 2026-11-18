@@ -2,3 +2,7 @@ packages:
   - apps/*
   - packages/*
   - tools/*
+
+# Không chạy build script của esbuild (phụ thuộc của tsx); binary đến từ optional dependency.
+allowBuilds:
+  esbuild: false
