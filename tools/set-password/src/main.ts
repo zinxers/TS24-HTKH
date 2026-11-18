@@ -1,9 +1,13 @@
-import { AppError, getContainer } from '@ts24-htkh/core';
+import { AppError, getContainer, getEnv } from '@ts24-htkh/core';
 import { InputCancelledError, readHidden } from './read-hidden';
 
 export interface Io {
   /** false khi stdin không phải TTY (vd Git Bash/mintty): terminal sẽ hiện mật khẩu. */
   canHideInput: boolean;
+  /** Lỗi cấu hình (thiếu DATABASE_URL, SESSION_SECRET…) hoặc null nếu đủ. */
+  checkEnv(): string | null;
+  /** host:port của DATABASE_URL, in ra để người vận hành kiểm đúng môi trường. */
+  target: string;
   readHidden(prompt: string): Promise<string>;
   print(line: string): void;
   setPassword(email: string, password: string): Promise<void>;
@@ -23,6 +27,14 @@ export async function run(args: string[], io: Io): Promise<number> {
     io.print('Terminal này không ẩn được ký tự khi nhập mật khẩu (vd Git Bash). Chạy lệnh trong PowerShell hoặc cmd.');
     return 1;
   }
+  // Kiểm trước khi hỏi mật khẩu, để không bắt người dùng gõ xong mới báo lỗi.
+  const envProblem = io.checkEnv();
+  if (envProblem) {
+    io.print(envProblem);
+    io.print('Đặt DATABASE_URL và SESSION_SECRET rồi chạy lại (xem docs/runbooks/dat-mat-khau.md).');
+    return 1;
+  }
+  io.print(`Cơ sở dữ liệu: ${io.target}`);
 
   let password: string;
   let again: string;
@@ -57,6 +69,16 @@ export async function run(args: string[], io: Io): Promise<number> {
 if (import.meta.main) {
   process.exitCode = await run(process.argv.slice(2), {
     canHideInput: process.stdin.isTTY === true,
+    checkEnv: () => {
+      try {
+        getEnv();
+        return null;
+      } catch (error) {
+        return error instanceof Error ? error.message : 'Cấu hình không hợp lệ';
+      }
+    },
+    // Chỉ host:port, không in user/mật khẩu trong chuỗi kết nối.
+    target: URL.parse(process.env.DATABASE_URL ?? '')?.host || 'không rõ',
     readHidden: (prompt) => readHidden(prompt),
     print: (line) => console.log(line),
     setPassword: (email, password) => getContainer().authService.setPassword(email, password),

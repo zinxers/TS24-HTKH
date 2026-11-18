@@ -15,17 +15,15 @@ node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 
 ## 2. Đặt (hoặc đặt lại) mật khẩu cho một tài khoản
 
-1. Đặt `DATABASE_URL` (role `ts24_app` của môi trường đó) và `SESSION_SECRET` trong phiên PowerShell. Local, lấy từ `apps/web/.env.local`:
-
-   ```powershell
-   Get-Content apps/web/.env.local | ForEach-Object { $k, $v = $_ -split '=', 2; Set-Item "env:$k" $v }
-   ```
+1. Staging/production: đặt `DATABASE_URL` (role `ts24_app` của môi trường đó) và `SESSION_SECRET` trong phiên PowerShell. Local: bỏ qua, lệnh tự nạp `apps/web/.env.local` (biến đặt sẵn trong phiên được ưu tiên hơn file).
 
 2. Chạy lệnh **trong PowerShell hoặc cmd** (Git Bash không ẩn được ký tự nên lệnh từ chối), nhập mật khẩu hai lần (không hiện ký tự):
 
    ```powershell
    pnpm --filter @ts24-htkh/set-password start nhan.vien@ts24.com.vn
    ```
+
+   Lệnh in `Cơ sở dữ liệu: <host:port>` trước khi hỏi mật khẩu. **Kiểm đúng máy chủ** (local là `127.0.0.1:54322`); sai thì bấm Ctrl+C.
 
 3. Kết quả đúng: `Đã đặt mật khẩu cho <email>, các phiên cũ đã bị đăng xuất`. Mọi phiên cũ của tài khoản bị xóa; bộ đếm sai và tạm chặn về 0.
 

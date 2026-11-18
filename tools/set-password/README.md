@@ -17,14 +17,10 @@ Lệnh hỏi mật khẩu hai lần, không hiện ký tự. Chạy trong PowerS
 | `DATABASE_URL` | Chuỗi kết nối của role `ts24_app` |
 | `SESSION_SECRET` | Cùng giá trị với web (ít nhất 32 byte) |
 
-Local: đặt hai biến trong phiên PowerShell trước khi chạy, ví dụ lấy từ `apps/web/.env.local`:
+Local: lệnh tự nạp `apps/web/.env.local` nếu có. Biến đã đặt sẵn trong phiên luôn được ưu tiên hơn file. Thiếu biến thì lệnh báo ngay, trước khi hỏi mật khẩu.
 
-```powershell
-Get-Content apps/web/.env.local | ForEach-Object { $k, $v = $_ -split '=', 2; Set-Item "env:$k" $v }
-```
-
-Staging/production: chỉ chạy khi được duyệt, xem `docs/runbooks/dat-mat-khau.md`.
+Staging/production: đặt hai biến trong phiên PowerShell trước khi chạy, và chỉ chạy khi được duyệt (xem `docs/runbooks/dat-mat-khau.md`).
 
 ## Ghi chú kỹ thuật
 
-Script chạy bằng `tsx --conditions=react-server` vì `core`/`db` có `import 'server-only'` (chỉ cho chạy ở điều kiện `react-server`) và mã nguồn TypeScript cần biên dịch khi chạy.
+Script chạy bằng `tsx --env-file-if-exists=../../apps/web/.env.local --conditions=react-server` vì `core`/`db` có `import 'server-only'` (chỉ cho chạy ở điều kiện `react-server`) và mã nguồn TypeScript cần biên dịch khi chạy.

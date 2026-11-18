@@ -14,6 +14,8 @@ function fakeIo(answers: string[], setPassword = vi.fn<SetPassword>(async () => 
     setPassword,
     io: {
       canHideInput: true,
+      checkEnv: (): string | null => null,
+      target: '127.0.0.1:54322',
       readHidden: vi.fn(async () => answers.shift() ?? ''),
       print: (line: string) => {
         lines.push(line);
@@ -30,6 +32,25 @@ describe('run', () => {
     expect(await run(['a@b.vn'], f.io)).toBe(1);
     expect(f.lines.join('\n')).toContain('Chạy lệnh trong PowerShell hoặc cmd');
     expect(f.io.readHidden).not.toHaveBeenCalled();
+  });
+
+  it('thiếu biến môi trường → báo rõ và chỉ cách đặt, trước khi hỏi mật khẩu, trả 1', async () => {
+    const f = fakeIo([PASSWORD, PASSWORD]);
+    f.io.checkEnv = () => 'Thiếu biến môi trường DATABASE_URL';
+    expect(await run(['a@b.vn'], f.io)).toBe(1);
+    const out = f.lines.join('\n');
+    expect(out).toContain('Thiếu biến môi trường DATABASE_URL');
+    expect(out).toContain('docs/runbooks/dat-mat-khau.md');
+    expect(f.io.readHidden).not.toHaveBeenCalled();
+  });
+
+  it('in máy chủ DB đích trước khi hỏi mật khẩu', async () => {
+    const f = fakeIo([PASSWORD, PASSWORD]);
+    f.io.readHidden.mockImplementation(async () => {
+      expect(f.lines).toContain('Cơ sở dữ liệu: 127.0.0.1:54322');
+      return PASSWORD;
+    });
+    expect(await run(['a@b.vn'], f.io)).toBe(0);
   });
 
   it('Ctrl+C hoặc hết dữ liệu nhập → in Đã hủy, trả 130', async () => {
