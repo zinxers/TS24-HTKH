@@ -65,6 +65,8 @@ ts24-htkh/
 │  ├─ web/                        @ts24-htkh/web — Next.js, deploy Vercel (Root Directory = apps/web)
 │  │  ├─ src/app/(pages)/          login, kpi, team, reports, schedule, ts24, accounts
 │  │  ├─ src/app/api/v1/           route handler mỏng → @ts24-htkh/core
+│  │  │  └─ _lib/                  handle() (lỗi → JSON), requireUser(), cookie phiên
+│  │  ├─ src/proxy.ts              gợi ý điều hướng theo cookie có/không (lớp giao diện, không phải luật)
 │  │  ├─ src/components/           ConfirmDialog, DateRange, Chart
 │  │  ├─ src/features/<nghiệp vụ>/ màn hình + hook
 │  │  ├─ src/lib/api-client.ts     nơi duy nhất giao diện gọi API
@@ -77,8 +79,9 @@ ts24-htkh/
 │  ├─ core/  db/  storage/  xlsx-report/  shared/  platform/  config/
 ├─ tools/
 │  ├─ sheets-migration/           ETL một lần Google Sheet → PostgreSQL (chỉ đọc Sheet)
+│  ├─ set-password/               CLI người vận hành đặt mật khẩu (runbooks/dat-mat-khau.md)
 │  └─ backup-verify/
-├─ supabase/                      migrations/, seed.sql, config.toml
+├─ supabase/                      migrations/ (team, app_user, user_session…), seed.sql, config.toml
 ├─ templates/                     file mẫu .xlsx gốc
 ├─ docs/                          architecture.md, adr/, specs/, plans/, runbooks/, GLOSSARY.md
 ├─ .claude/rules/                 quy tắc cho Claude Code theo vùng code
