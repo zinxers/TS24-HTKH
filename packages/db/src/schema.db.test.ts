@@ -160,6 +160,12 @@ describe('quyền ts24_app', () => {
       await expect(run(tx)).rejects.toThrow(/permission denied|must be owner/);
     });
   });
+
+  it('delete from user_session chạy được (ngoại lệ duy nhất)', async () => {
+    await inRollback(appSql(), async (tx) => {
+      await expect(tx`delete from user_session`).resolves.toBeDefined();
+    });
+  });
 });
 
 describe('anon và authenticated', () => {
@@ -167,6 +173,13 @@ describe('anon và authenticated', () => {
     await inRollback(adminSql(), async (tx) => {
       await tx`select set_config('role', ${role}, true)`;
       await expect(tx`select * from app_user`).rejects.toThrow(/permission denied/);
+    });
+  });
+
+  it.each(['anon', 'authenticated'])('%s không đọc được user_session', async (role) => {
+    await inRollback(adminSql(), async (tx) => {
+      await tx`select set_config('role', ${role}, true)`;
+      await expect(tx`select * from user_session`).rejects.toThrow(/permission denied/);
     });
   });
 });

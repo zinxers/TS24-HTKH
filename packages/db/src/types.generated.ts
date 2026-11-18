@@ -25,14 +25,14 @@ export type Database = {
           Tables: {
             "app_user": {
                   Row: {
-                    "created_at": string,"deleted_at": string | null,"deleted_by": string | null,"email": string,"failed_login_count": number,"full_name": string,"id": string,"password_hash": string | null,"role": string,"status": string,"team_id": string | null,"updated_at": string
+                    "created_at": string,"deleted_at": string | null,"deleted_by": string | null,"email": string,"failed_login_count": number,"full_name": string,"id": string,"login_blocked_until": string | null,"password_hash": string | null,"role": string,"status": string,"team_id": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"deleted_at"?: string | null,"deleted_by"?: string | null,"email": string,"failed_login_count"?: number,"full_name": string,"id"?: string,"password_hash"?: string | null,"role": string,"status"?: string,"team_id"?: string | null,"updated_at"?: string
+                    "created_at"?: string,"deleted_at"?: string | null,"deleted_by"?: string | null,"email": string,"failed_login_count"?: number,"full_name": string,"id"?: string,"login_blocked_until"?: string | null,"password_hash"?: string | null,"role": string,"status"?: string,"team_id"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"deleted_at"?: string | null,"deleted_by"?: string | null,"email"?: string,"failed_login_count"?: number,"full_name"?: string,"id"?: string,"password_hash"?: string | null,"role"?: string,"status"?: string,"team_id"?: string | null,"updated_at"?: string
+                    "created_at"?: string,"deleted_at"?: string | null,"deleted_by"?: string | null,"email"?: string,"failed_login_count"?: number,"full_name"?: string,"id"?: string,"login_blocked_until"?: string | null,"password_hash"?: string | null,"role"?: string,"status"?: string,"team_id"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -62,6 +62,26 @@ isOneToOne: false
                   }
                   Relationships: [
                     
+                  ]
+                },"user_session": {
+                  Row: {
+                    "created_at": string,"expires_at": string,"id": string,"token_hash": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"expires_at": string,"id"?: string,"token_hash": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"expires_at"?: string,"id"?: string,"token_hash"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "user_session_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "app_user"
+      referencedColumns: ["id"]
+    }
                   ]
                 }
           }

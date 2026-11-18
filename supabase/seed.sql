@@ -18,5 +18,10 @@ from (values
 ) as v (email, full_name, role, sort_order)
 join public.team t on t.sort_order = v.sort_order;
 
+-- Mật khẩu dev công khai `matkhau-dev-ts24` cho mọi tài khoản seed, chỉ local.
+-- Không dùng ở staging/production.
+update public.app_user
+set password_hash = '$argon2id$v=19$m=19456,t=2,p=1$uGYSrQkXyFahRQ77ZqF3Mw$lbcC5W8ZXk3tQEXWI33c9Op2bB8/LaqcSjy/k9Rgyt4';
+
 -- Mật khẩu dev công khai cho role backend (chỉ local).
 alter role ts24_app with login password 'ts24_app_dev';
