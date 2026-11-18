@@ -1,3 +1,4 @@
+import type { Role } from '@ts24-htkh/shared';
 import type { Sql } from '../client';
 import type { Database } from '../types.generated';
 import { BaseRepository } from './base.repository';
@@ -15,6 +16,30 @@ export interface UserCredentials {
 export interface FailedLoginResult {
   failedLoginCount: number;
   loginBlockedUntil: string | null;
+}
+
+export type UserListRow = UserRow & { team_name: string | null };
+
+export interface CreateUserInput {
+  email: string;
+  fullName: string;
+  role: 'manager' | 'staff';
+  teamId: string;
+  passwordHash: string;
+}
+
+export interface UpdateUserPatch {
+  fullName?: string;
+  role?: Role;
+  teamId?: string | null;
+}
+
+/** Email đã có tài khoản còn hoạt động (23505 trên ux_app_user_email). */
+export class EmailTakenError extends Error {
+  constructor() {
+    super('Email đã có tài khoản');
+    this.name = 'EmailTakenError';
+  }
 }
 
 const normalize = (email: string) => email.trim().toLowerCase();
@@ -35,6 +60,58 @@ export class UserRepository extends BaseRepository<UserRow> {
     const [row] = await this.sql<UserRow[]>`
       select ${this.columns()} from app_user where id = ${id} and deleted_at is null`;
     return row ?? null;
+  }
+
+  /** Khóa hàng tới hết transaction: hai thao tác song song trên cùng đích chạy tuần tự. */
+  async findByIdForUpdate(id: string): Promise<UserRow | null> {
+    const [row] = await this.sql<UserRow[]>`
+      select ${this.columns()} from app_user where id = ${id} and deleted_at is null for update`;
+    return row ?? null;
+  }
+
+  async listActive(filter: { teamId?: string }): Promise<UserListRow[]> {
+    const byTeam = filter.teamId === undefined ? this.sql`` : this.sql`and u.team_id = ${filter.teamId}`;
+    return this.sql<UserListRow[]>`
+      select u.id, u.email, u.full_name, u.role, u.team_id, u.status, u.failed_login_count,
+        u.login_blocked_until, u.created_at, u.updated_at, u.deleted_at, u.deleted_by,
+        t.name as team_name
+      from app_user u left join team t on t.id = u.team_id
+      where u.deleted_at is null ${byTeam}
+      order by array_position(array['head', 'manager', 'staff'], u.role), u.full_name`;
+  }
+
+  async create(input: CreateUserInput): Promise<UserRow> {
+    try {
+      const [row] = await this.sql<UserRow[]>`
+        insert into app_user (email, full_name, role, team_id, password_hash)
+        values (${normalize(input.email)}, ${input.fullName}, ${input.role}, ${input.teamId}, ${input.passwordHash})
+        returning ${this.columns()}`;
+      return row!;
+    } catch (error) {
+      const e = error as { code?: string; constraint_name?: string };
+      if (e.code === '23505' && e.constraint_name === 'ux_app_user_email') throw new EmailTakenError();
+      throw error;
+    }
+  }
+
+  async update(id: string, patch: UpdateUserPatch): Promise<UserRow> {
+    const set: Record<string, unknown> = {};
+    if (patch.fullName !== undefined) set.full_name = patch.fullName;
+    if (patch.role !== undefined) set.role = patch.role;
+    if (patch.teamId !== undefined) set.team_id = patch.teamId;
+    const [row] = await this.sql<UserRow[]>`
+      update app_user set ${this.sql(set)} where id = ${id} and deleted_at is null
+      returning ${this.columns()}`;
+    if (!row) throw new Error(`app_user ${id} không tồn tại`);
+    return row;
+  }
+
+  async setStatus(id: string, status: 'active' | 'locked'): Promise<UserRow> {
+    const [row] = await this.sql<UserRow[]>`
+      update app_user set status = ${status} where id = ${id} and deleted_at is null
+      returning ${this.columns()}`;
+    if (!row) throw new Error(`app_user ${id} không tồn tại`);
+    return row;
   }
 
   async findByEmail(email: string): Promise<UserRow | null> {
