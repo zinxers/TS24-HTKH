@@ -1,4 +1,4 @@
-import type { SessionRepository, UserRepository } from '@ts24-htkh/db';
+import type { AuditLogRepository, SessionRepository, TeamRepository, UserRepository } from '@ts24-htkh/db';
 
 type Methods<T, K extends keyof T> = { [P in K]: T[P] };
 
@@ -10,7 +10,18 @@ export type UserStore = Methods<
   | 'recordFailedLogin'
   | 'clearFailedLoginsUnlessBlocked'
   | 'setPasswordHash'
+  | 'findById'
+  | 'findByIdForUpdate'
+  | 'listActive'
+  | 'create'
+  | 'update'
+  | 'setStatus'
+  | 'softDelete'
 >;
+
+export type TeamStore = Methods<TeamRepository, 'list'>;
+
+export type AuditStore = Methods<AuditLogRepository, 'record'>;
 
 export type SessionStore = Methods<
   SessionRepository,
@@ -20,6 +31,7 @@ export type SessionStore = Methods<
 export interface Repos {
   users: UserStore;
   sessions: SessionStore;
+  audit: AuditStore;
 }
 
 /** Chạy nhiều repository trong một transaction; fn ném lỗi thì rollback. */
