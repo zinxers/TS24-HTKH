@@ -56,7 +56,8 @@ export class AuthService {
 
     const row = await users.findByEmail(email);
     if (!row) throw new AuthError(MSG_WRONG);
-    if (cred.failedLoginCount > 0) await users.resetFailedLogins(cred.id);
+    // Kiểm chặn lần nữa, nguyên tử với việc xóa đếm: chặn có thể vừa được đặt trong lúc verify.
+    if (!(await users.clearFailedLoginsUnlessBlocked(cred.id))) throw new AuthError(MSG_BLOCKED);
     await sessions.deleteExpiredByUser(cred.id);
     const token = newToken();
     await sessions.create(cred.id, hashToken(token, this.deps.sessionSecret), this.expiryFrom(now));

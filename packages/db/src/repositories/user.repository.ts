@@ -65,9 +65,16 @@ export class UserRepository extends BaseRepository<UserRow> {
     return row!;
   }
 
-  async resetFailedLogins(id: string): Promise<void> {
-    await this.sql`
-      update app_user set failed_login_count = 0, login_blocked_until = null where id = ${id}`;
+  /**
+   * Về 0 khi đăng nhập đúng, nhưng chỉ khi không đang bị chặn (kiểm và ghi trong một câu):
+   * một lần sai song song có thể vừa đặt chặn trong lúc verify. Trả false nếu đang bị chặn.
+   */
+  async clearFailedLoginsUnlessBlocked(id: string): Promise<boolean> {
+    const rows = await this.sql`
+      update app_user set failed_login_count = 0, login_blocked_until = null
+      where id = ${id} and (login_blocked_until is null or login_blocked_until <= now())
+      returning id`;
+    return rows.length > 0;
   }
 
   async setPasswordHash(id: string, hash: string): Promise<void> {

@@ -79,11 +79,13 @@ class Fake {
       }
       return { failedLoginCount: u.failed_login_count, loginBlockedUntil: u.login_blocked_until };
     },
-    resetFailedLogins: async (id) => {
-      this.calls.push(`resetFailedLogins:${id}`);
+    clearFailedLoginsUnlessBlocked: async (id) => {
+      this.calls.push(`clearFailedLoginsUnlessBlocked:${id}`);
       const u = this.users.find((x) => x.id === id)!;
+      if (u.login_blocked_until && Date.parse(u.login_blocked_until) > this.now.getTime()) return false;
       u.failed_login_count = 0;
       u.login_blocked_until = null;
+      return true;
     },
     setPasswordHash: async (id, hash) => {
       this.calls.push(`setPasswordHash:${id}:${this.transactions}`);
@@ -213,7 +215,18 @@ describe('login', () => {
     user().login_blocked_until = new Date(NOW.getTime() + 900_000).toISOString();
     fake.now = new Date(NOW.getTime() + 900_001);
     await expect(service.login(user().email, CORRECT)).resolves.toHaveProperty('token');
-    expect(fake.calls).toContain('resetFailedLogins:u1');
+    expect(fake.calls).toContain('clearFailedLoginsUnlessBlocked:u1');
+  });
+
+  it('bị chặn trong lúc verify (lần sai song song thứ 10) → đúng mật khẩu vẫn bị chặn, không tạo phiên', async () => {
+    user().failed_login_count = 9;
+    hasher.verify = async (password, phc) => {
+      user().failed_login_count = 10;
+      user().login_blocked_until = new Date(NOW.getTime() + 900_000).toISOString();
+      return phc === `h:${password}`;
+    };
+    await expect(service.login(user().email, CORRECT)).rejects.toThrow(MSG_BLOCKED);
+    expect(fake.sessions).toHaveLength(0);
   });
 
   it('chưa có mật khẩu: câu chung, có tính lần sai', async () => {

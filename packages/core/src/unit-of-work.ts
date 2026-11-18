@@ -5,7 +5,11 @@ type Methods<T, K extends keyof T> = { [P in K]: T[P] };
 /** Phần của repository mà service dùng; test cài bằng store giả. */
 export type UserStore = Methods<
   UserRepository,
-  'findCredentialsByEmail' | 'findByEmail' | 'recordFailedLogin' | 'resetFailedLogins' | 'setPasswordHash'
+  | 'findCredentialsByEmail'
+  | 'findByEmail'
+  | 'recordFailedLogin'
+  | 'clearFailedLoginsUnlessBlocked'
+  | 'setPasswordHash'
 >;
 
 export type SessionStore = Methods<

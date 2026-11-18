@@ -61,25 +61,36 @@ describe('UserRepository: đăng nhập', () => {
     const sql = appSql();
     const users = new UserRepository(sql);
     const id = await idOf(sql, 'nhan.vien.3b@example.com');
+    const clean = () => sql`update app_user set failed_login_count = 0, login_blocked_until = null where id = ${id}`;
     try {
-      await users.resetFailedLogins(id);
+      await clean();
       await Promise.all([users.recordFailedLogin(id, 10, 900), users.recordFailedLogin(id, 10, 900)]);
       expect((await users.findCredentialsByEmail('nhan.vien.3b@example.com'))?.failedLoginCount).toBe(2);
     } finally {
-      await users.resetFailedLogins(id);
+      await clean();
     }
   });
 
-  it('resetFailedLogins về 0 và bỏ chặn', async () => {
+  it('clearFailedLoginsUnlessBlocked: chưa chặn hoặc hết chặn → về 0, trả true', async () => {
     await inRollback(appSql(), async (tx) => {
       const users = new UserRepository(tx);
       const id = await idOf(tx, 'nhan.vien.2a@example.com');
-      await tx`update app_user set failed_login_count = 10, login_blocked_until = now() + interval '1 hour' where id = ${id}`;
-      await users.resetFailedLogins(id);
+      await tx`update app_user set failed_login_count = 10, login_blocked_until = now() - interval '1 second' where id = ${id}`;
+      expect(await users.clearFailedLoginsUnlessBlocked(id)).toBe(true);
       expect(await users.findCredentialsByEmail('nhan.vien.2a@example.com')).toMatchObject({
         failedLoginCount: 0,
         loginBlockedUntil: null,
       });
+    });
+  });
+
+  it('clearFailedLoginsUnlessBlocked: đang chặn → giữ nguyên, trả false', async () => {
+    await inRollback(appSql(), async (tx) => {
+      const users = new UserRepository(tx);
+      const id = await idOf(tx, 'nhan.vien.2a@example.com');
+      await tx`update app_user set failed_login_count = 10, login_blocked_until = now() + interval '1 hour' where id = ${id}`;
+      expect(await users.clearFailedLoginsUnlessBlocked(id)).toBe(false);
+      expect((await users.findCredentialsByEmail('nhan.vien.2a@example.com'))?.failedLoginCount).toBe(10);
     });
   });
 
