@@ -149,6 +149,28 @@ describe('rateSetSchema', () => {
   it.each([1.5, -1, 1_000_001])('đơn giá %j bị chặn', (v) => {
     expect(rateSetSchema.safeParse({ from: '2026-11-20', rates: { ...rates(), 'Chăm sóc KH': v } }).success).toBe(false);
   });
+  const messages = (input: unknown) => rateSetSchema.safeParse(input).error?.issues.map((i) => i.message);
+  it('thiếu kênh → "Thiếu đơn giá kênh <kenh>"', () => {
+    const rest: Partial<Record<string, number>> = rates();
+    delete rest['Chăm sóc KH'];
+    expect(messages({ from: '2026-11-20', rates: rest })).toEqual(['Thiếu đơn giá kênh Chăm sóc KH']);
+  });
+  it('kênh lạ → "Kênh - Tình trạng không hợp lệ"', () => {
+    expect(messages({ from: '2026-11-20', rates: { ...rates(), 'Kênh lạ': 1 } })).toEqual([
+      'Kênh - Tình trạng không hợp lệ',
+    ]);
+  });
+  it.each([1.5, -1, 1_000_001, '5000', null])('đơn giá %j → thông báo tiếng Việt', (v) => {
+    expect(messages({ from: '2026-11-20', rates: { ...rates(), 'Chăm sóc KH': v } })).toEqual([
+      'Đơn giá phải là số nguyên từ 0 đến 1.000.000',
+    ]);
+  });
+  it('ngày sai, thiếu ngày, rates không phải object, body không phải object → tiếng Việt', () => {
+    expect(messages({ from: '2026-13-01', rates: rates() })).toEqual(['Ngày không hợp lệ']);
+    expect(messages({ rates: rates() })).toEqual(['Ngày không hợp lệ']);
+    expect(messages({ from: '2026-11-20', rates: 5 })).toEqual(['Đơn giá phải là số nguyên từ 0 đến 1.000.000']);
+    expect(messages(null)).toEqual(['Dữ liệu đơn giá không hợp lệ']);
+  });
   it('biên 0 và 1000000 hợp lệ', () => {
     expect(rateSetSchema.safeParse({ from: '2026-11-20', rates: { ...rates(), 'Chăm sóc KH': 0, 'Chat Hoàn Thành': 1_000_000 } }).success).toBe(true);
   });

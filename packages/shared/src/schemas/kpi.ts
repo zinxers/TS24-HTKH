@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { daysBetween, isIsoDate, type IsoDate } from '../date';
-import { KENH, MAX_NOI_DUNG, MAX_RANGE_DAYS, MAX_RATE, MAX_ROWS_PER_SUBMIT, PHAN_LOAI } from '../kpi';
+import { KENH, MAX_NOI_DUNG, MAX_RANGE_DAYS, MAX_RATE, MAX_ROWS_PER_SUBMIT, PHAN_LOAI, type Kenh } from '../kpi';
 
 // Thông báo giữ nguyên văn hệ thống cũ HTKH-KPI.
 const MSG = {
@@ -75,8 +75,20 @@ export const kpiRangeSchema = z
   });
 export type KpiRange = z.infer<typeof kpiRangeSchema>;
 
-export const rateSetSchema = z.object({
-  from: isoDateField,
-  rates: z.record(z.enum(KENH), z.number().int().min(0).max(MAX_RATE)),
-});
+const MSG_RATE = 'Đơn giá phải là số nguyên từ 0 đến 1.000.000';
+
+const rateAmount = (kenh: Kenh) =>
+  z
+    .number({ error: (i) => (i.input === undefined ? `Thiếu đơn giá kênh ${kenh}` : MSG_RATE) })
+    .int(MSG_RATE)
+    .min(0, MSG_RATE)
+    .max(MAX_RATE, MSG_RATE);
+
+/** Đủ đúng 11 kênh: thiếu kênh hoặc kênh lạ đều bị chặn. */
+const rates = z.strictObject(
+  Object.fromEntries(KENH.map((k) => [k, rateAmount(k)])) as Record<Kenh, ReturnType<typeof rateAmount>>,
+  { error: (i) => (i.code === 'unrecognized_keys' ? MSG.kenh : MSG_RATE) },
+);
+
+export const rateSetSchema = z.object({ from: isoDateField, rates }, { error: 'Dữ liệu đơn giá không hợp lệ' });
 export type RateSetInput = z.infer<typeof rateSetSchema>;

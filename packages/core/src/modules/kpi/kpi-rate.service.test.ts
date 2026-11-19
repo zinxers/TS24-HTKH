@@ -101,15 +101,29 @@ describe('set', () => {
     expect(fake.upserts).toEqual(['2026-11-19:H']);
   });
 
-  it('thiếu kênh hoặc giá sai → ValidationError, không ghi', async () => {
+  it('00:30 VN ngày 20/11 (UTC vẫn 19/11): from 19/11 → ValidationError; from 20/11 → được', async () => {
+    service = new KpiRateService({
+      kpiRates: fake.kpiRates,
+      uow: fake.uow,
+      now: () => new Date('2026-11-19T17:30:00.000Z'),
+    });
+    await expect(service.set(H, { from: isoDate('2026-11-19'), rates })).rejects.toEqual(
+      new ValidationError('Ngày áp dụng phải từ hôm nay trở đi'),
+    );
+    expect(fake.upserts).toEqual([]);
+    await service.set(H, { from: isoDate('2026-11-20'), rates });
+    expect(fake.upserts).toEqual(['2026-11-20:H']);
+  });
+
+  it('thiếu kênh hoặc giá sai → ValidationError tiếng Việt, không ghi', async () => {
     const thieu: Record<string, number> = { ...rates };
     delete thieu['Chăm sóc KH'];
-    await expect(service.set(H, { from: isoDate('2026-11-20'), rates: thieu as typeof rates })).rejects.toBeInstanceOf(
-      ValidationError,
+    await expect(service.set(H, { from: isoDate('2026-11-20'), rates: thieu as typeof rates })).rejects.toEqual(
+      new ValidationError('Thiếu đơn giá kênh Chăm sóc KH'),
     );
     await expect(
       service.set(H, { from: isoDate('2026-11-20'), rates: { ...rates, 'Chăm sóc KH': -1 } }),
-    ).rejects.toBeInstanceOf(ValidationError);
+    ).rejects.toEqual(new ValidationError('Đơn giá phải là số nguyên từ 0 đến 1.000.000'));
     expect(fake.upserts).toEqual([]);
   });
 });
