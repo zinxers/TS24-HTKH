@@ -31,6 +31,8 @@ export const transferHeadSchema = z.object({
 });
 
 export const profileUpdateSchema = z.object({ fullName });
+/** `id` trên đường dẫn `/accounts/[id]`; sai thì 400 thay vì lỗi uuid của Postgres. */
+export const accountIdSchema = z.uuid();
 
 export type AccountCreateInput = z.infer<typeof accountCreateSchema>;
 export type AccountUpdateInput = z.infer<typeof accountUpdateSchema>;

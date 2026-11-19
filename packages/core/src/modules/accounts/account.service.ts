@@ -158,7 +158,10 @@ export class AccountService {
         actorId: actor.id,
         action: 'account.transfer_head',
         targetId: target.id,
-        detail: { toUserId: target.id, newRole: input.newRole, newTeamId: input.newTeamId },
+        detail: {
+          actor: { role: { from: me.role, to: input.newRole }, teamId: { from: me.team_id, to: input.newTeamId } },
+          target: { role: { from: target.role, to: 'head' }, teamId: { from: target.team_id, to: null } },
+        },
       });
       await sessions.deleteByUser(actor.id);
       await sessions.deleteByUser(target.id);

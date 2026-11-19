@@ -100,6 +100,20 @@ describe('body sai → 400', () => {
   });
 });
 
+describe('id trên đường dẫn không phải uuid → 400, không gọi service', () => {
+  const bad = { params: Promise.resolve({ id: 'abc' }) };
+  it.each([
+    ['PATCH [id]', () => byId.PATCH(req('PATCH', { fullName: 'B' }), bad)],
+    ['DELETE [id]', () => byId.DELETE(req('DELETE'), bad)],
+    ['PATCH status', () => status.PATCH(req('PATCH', { status: 'locked' }), bad)],
+    ['POST password', () => password.POST(req('POST', { password: PASSWORD }), bad)],
+  ])('%s', async (_name, call) => {
+    const res = await call();
+    expect(res.status).toBe(400);
+    for (const fn of Object.values(accountService)) expect(fn).not.toHaveBeenCalled();
+  });
+});
+
 describe('lỗi nghiệp vụ → mã HTTP', () => {
   it.each([
     [new ForbiddenError('Bạn không có quyền thực hiện thao tác này'), 403],

@@ -309,7 +309,15 @@ describe('transferHead', () => {
     expect(fake.users.get('SA')).toMatchObject({ role: 'head', team_id: null });
     expect(fake.deletedSessions.sort()).toEqual(['H', 'SA']);
     expect(fake.audits).toEqual([
-      { actorId: 'H', action: 'account.transfer_head', targetId: 'SA', detail: { toUserId: 'SA', newRole: 'manager', newTeamId: A } },
+      {
+        actorId: 'H',
+        action: 'account.transfer_head',
+        targetId: 'SA',
+        detail: {
+          actor: { role: { from: 'head', to: 'manager' }, teamId: { from: null, to: A } },
+          target: { role: { from: 'staff', to: 'head' }, teamId: { from: A, to: null } },
+        },
+      },
     ]);
   });
 
