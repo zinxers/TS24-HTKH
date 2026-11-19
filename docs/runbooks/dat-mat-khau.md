@@ -1,6 +1,10 @@
 # Runbook: đặt mật khẩu, `SESSION_SECRET`, tài khoản bị tạm chặn
 
-Dành cho người vận hành. Quyết định nền: ADR-0008.
+Dành cho người vận hành. Quyết định nền: ADR-0008, ADR-0009.
+
+**Đường chính:** đặt mật khẩu trên trang `/accounts` (menu ⋯ → "Đặt mật khẩu…"). Trưởng phòng đặt cho mọi người trừ chính mình; Quản lý đặt cho Nhân Viên team mình. Đặt xong, mọi phiên cũ của tài khoản bị đăng xuất và bộ đếm sai về 0.
+
+**CLI (mục 2) chỉ dùng khi khẩn cấp:** chưa có ai đăng nhập được với quyền phù hợp, hoặc Trưởng phòng cần đặt lại mật khẩu của chính mình.
 
 ## 1. Tạo `SESSION_SECRET`
 
@@ -36,7 +40,7 @@ node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 Triệu chứng: nhân viên thấy "Nhập sai quá nhiều lần, vui lòng thử lại sau 15 phút" (sau 10 lần sai).
 
 - Cách 1: chờ 15 phút rồi đăng nhập lại bằng mật khẩu đúng.
-- Cách 2: quên mật khẩu → đặt lại bằng mục 2 (đồng thời bỏ chặn).
+- Cách 2: quên mật khẩu → Quản lý hoặc Trưởng phòng đặt lại trên `/accounts` (đồng thời bỏ chặn); khẩn cấp thì dùng mục 2.
 
 Khác với "Tài khoản đã bị khóa, liên hệ Quản lý hoặc Trưởng phòng": đó là `status = 'locked'` do quản lý đặt; đặt lại mật khẩu **không** mở khóa.
 

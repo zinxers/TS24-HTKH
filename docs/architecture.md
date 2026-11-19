@@ -76,12 +76,13 @@ ts24-htkh/
 │     ├─ src-tauri/  (src/lib.rs, tauri.conf.json, tauri.store.conf.json, capabilities/remote.json, icons/)
 │     └─ packaging/msix/
 ├─ packages/
-│  ├─ core/  db/  storage/  xlsx-report/  shared/  platform/  config/
+│  ├─ core/                       src/policies/ (ma trận quyền), src/modules/ (auth, accounts), container.ts
+│  ├─ db/  storage/  xlsx-report/  shared/  platform/  config/
 ├─ tools/
 │  ├─ sheets-migration/           ETL một lần Google Sheet → PostgreSQL (chỉ đọc Sheet)
-│  ├─ set-password/               CLI người vận hành đặt mật khẩu (runbooks/dat-mat-khau.md)
+│  ├─ set-password/               CLI đặt mật khẩu khẩn cấp; đường chính là trang /accounts (runbooks/dat-mat-khau.md)
 │  └─ backup-verify/
-├─ supabase/                      migrations/ (team, app_user, user_session…), seed.sql, config.toml
+├─ supabase/                      migrations/ (team, app_user, user_session, audit_log…), seed.sql, config.toml
 ├─ templates/                     file mẫu .xlsx gốc
 ├─ docs/                          architecture.md, adr/, specs/, plans/, runbooks/, GLOSSARY.md
 ├─ .claude/rules/                 quy tắc cho Claude Code theo vùng code
@@ -93,10 +94,11 @@ ts24-htkh/
 Bên trong một module nghiệp vụ (ví dụ `accounts`):
 
 ```
-packages/core/src/modules/accounts/   account.entity.ts · account.service.ts · account.policy.ts · account.dto.ts · *.test.ts
-packages/db/src/repositories/          account.repository.ts · account.repository.test.ts
-apps/web/src/app/api/v1/accounts/      route.ts · [id]/route.ts
-apps/web/src/features/accounts/        AccountList.tsx · AccountForm.tsx · useAccounts.ts
+packages/core/src/policies/            permissions.ts (ma trận quyền dùng chung, ADR-0009) · *.test.ts
+packages/core/src/modules/accounts/   account.service.ts · account.policy.ts · account.dto.ts · *.test.ts
+packages/db/src/repositories/          user.repository.ts · team.repository.ts · audit-log.repository.ts · *.db.test.ts
+apps/web/src/app/api/v1/accounts/      route.ts · [id]/route.ts · [id]/status · [id]/password · transfer-head
+apps/web/src/features/accounts/        AccountsScreen.tsx · AccountDialogs.tsx · RowMenu.tsx · useConfirmAction.ts
 ```
 
 ## 4. Luồng một request: nhân viên gửi báo cáo KPI
