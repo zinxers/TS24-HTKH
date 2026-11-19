@@ -7,7 +7,7 @@ Nguồn cũ (chỉ đọc, `D:\Downloads\AI\HTKH-KPI`):
 - `app/src/Config.js`: danh mục `KENH`, `PHAN_LOAI`, `KPI_RATES` (dòng 16).
 - `app/src/Pure.js`: `validateReportRow` (487), `buildSubmission` (594), `rateOn` (851), `computeKpi` (859).
 - `app/src/Rates.js`: `readRates_`, `ratesSet_`.
-- `app/tests/submit.test.js`: test gửi báo cáo, đã chuyển sang `packages/shared` và `packages/core`.
+- `app/tests/submit.test.js`: test gửi báo cáo, tham chiếu khi viết test ở `packages/shared` và `packages/core`.
 
 Mã mới: `packages/shared/src/kpi.ts`, `packages/shared/src/schemas/kpi.ts`, `packages/core/src/modules/kpi/`,
 `supabase/migrations/20261119012818_kpi_report_rate.sql`, `apps/web/src/app/api/v1/kpi-reports`, `kpi-rates`, `apps/web/src/app/(pages)/kpi`.
@@ -59,7 +59,8 @@ khoảng ngày xem KPI tối đa 400 ngày (tính cả hai đầu: `from`..`to` 
 ## Tính tiền và KPI của tôi (`GET /api/v1/kpi-reports/mine?from&to`)
 
 - Tiền một dòng = đơn giá của kênh ở phiên bản có `effective_from` lớn nhất ≤ ngày gửi (giờ `Asia/Ho_Chi_Minh`), tính trong view `kpi_report_priced`
-  (khác bản cũ: `rateOn` trong `Pure.js` chọn theo ngày cuối kỳ).
+  Cùng ngữ nghĩa bản cũ (`computeKpi` tính từng dòng theo `rateOn` của ngày của chính dòng đó). Khác ở hai điểm: ngày là ngày VN của `created_at`, và tính bằng SQL (view)
+  thay vì hàm thuần. Chỉ đối soát cũ (`Pure.js` dòng 189, 240) tính theo ngày cuối kỳ; phần đó thuộc mốc sau.
 - Kết quả: 11 dòng kênh (`soLuong`, `donGia`, `thanhTien`), `tongSoLuong`, `tongTien`, `byPhanLoai`, `byDay`, `items` (mới nhất trước).
 - `donGia = null` khi dòng của kênh đó trong kỳ có hơn một mức giá; kênh không có dòng thì `donGia` là giá hôm nay.
 - Chỉ trả dữ liệu của chính người gọi, mọi id trong request bị bỏ qua.
