@@ -67,3 +67,10 @@ export function can(
   if (target.id === actor.id || target.role === 'head') return false;
   return actor.role === 'head' || isOwnStaff(actor, target);
 }
+
+export type KpiAction = 'kpi.submit' | 'rate.set';
+
+/** Mọi tài khoản đang hoạt động gửi được KPI; chỉ Trưởng phòng đổi đơn giá. */
+export function canKpi(actor: CurrentUser, action: KpiAction): boolean {
+  return action === 'kpi.submit' || actor.role === 'head';
+}

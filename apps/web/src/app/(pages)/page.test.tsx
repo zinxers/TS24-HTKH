@@ -35,6 +35,15 @@ describe('trang /: tài khoản', () => {
     else expect(link).not.toBeInTheDocument();
   });
 
+  it('mọi vai trò có liên kết tới Nhập KPI, KPI của tôi, Đơn giá KPI', async () => {
+    vi.spyOn(apiClient.auth, 'me').mockResolvedValue({ ...USER, role: 'staff' });
+    render(<Page />);
+    await screen.findByRole('heading', { level: 1 });
+    expect(screen.getByRole('link', { name: /Nhập KPI/ })).toHaveAttribute('href', '/kpi');
+    expect(screen.getByRole('link', { name: /KPI của tôi/ })).toHaveAttribute('href', '/kpi/mine');
+    expect(screen.getByRole('link', { name: /Đơn giá KPI/ })).toHaveAttribute('href', '/kpi/rates');
+  });
+
   it('nhãn vai trò Nhân Viên', async () => {
     vi.spyOn(apiClient.auth, 'me').mockResolvedValue({ ...USER, role: 'staff' });
     render(<Page />);

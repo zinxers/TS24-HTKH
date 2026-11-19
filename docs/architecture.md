@@ -63,9 +63,9 @@ shared                                      ──► (không gì cả)
 ts24-htkh/
 ├─ apps/
 │  ├─ web/                        @ts24-htkh/web — Next.js, deploy Vercel (Root Directory = apps/web)
-│  │  ├─ src/app/(pages)/          login, kpi, team, reports, schedule, ts24, accounts
+│  │  ├─ src/app/(pages)/          login, kpi (kpi, kpi/mine, kpi/rates), team, reports, schedule, ts24, accounts
 │  │  ├─ src/app/api/v1/           route handler mỏng → @ts24-htkh/core
-│  │  │  └─ _lib/                  handle() (lỗi → JSON), requireUser(), cookie phiên
+│  │  │  └─ _lib/                  handle() (lỗi → JSON), parseVi() (thông báo zod tiếng Việt), requireUser(), cookie phiên
 │  │  ├─ src/proxy.ts              gợi ý điều hướng theo cookie có/không (lớp giao diện, không phải luật)
 │  │  ├─ src/components/           ConfirmDialog, DateRange, Chart
 │  │  ├─ src/features/<nghiệp vụ>/ màn hình + hook
@@ -76,13 +76,13 @@ ts24-htkh/
 │     ├─ src-tauri/  (src/lib.rs, tauri.conf.json, tauri.store.conf.json, capabilities/remote.json, icons/)
 │     └─ packaging/msix/
 ├─ packages/
-│  ├─ core/                       src/policies/ (ma trận quyền), src/modules/ (auth, accounts), container.ts
+│  ├─ core/                       src/policies/ (ma trận quyền), src/modules/ (auth, accounts, kpi), container.ts
 │  ├─ db/  storage/  xlsx-report/  shared/  platform/  config/
 ├─ tools/
 │  ├─ sheets-migration/           ETL một lần Google Sheet → PostgreSQL (chỉ đọc Sheet)
 │  ├─ set-password/               CLI đặt mật khẩu khẩn cấp; đường chính là trang /accounts (runbooks/dat-mat-khau.md)
 │  └─ backup-verify/
-├─ supabase/                      migrations/ (team, app_user, user_session, audit_log…), seed.sql, config.toml
+├─ supabase/                      migrations/ (team, app_user, user_session, audit_log, kpi_report, kpi_rate…), seed.sql, config.toml
 ├─ templates/                     file mẫu .xlsx gốc
 ├─ docs/                          architecture.md, adr/, specs/, plans/, runbooks/, GLOSSARY.md
 ├─ .claude/rules/                 quy tắc cho Claude Code theo vùng code

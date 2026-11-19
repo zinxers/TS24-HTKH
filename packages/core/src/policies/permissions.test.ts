@@ -1,6 +1,6 @@
 import type { CurrentUser } from '@ts24-htkh/shared';
 import { describe, expect, it } from 'vitest';
-import { can, canSee, type AccountAction } from './permissions';
+import { can, canKpi, canSee, type AccountAction } from './permissions';
 
 const A = 'team-a';
 const B = 'team-b';
@@ -114,5 +114,17 @@ describe('canSee: phạm vi xem', () => {
   ])('%#', (actor, visible, hidden) => {
     for (const t of visible) expect(canSee(actor, t)).toBe(true);
     for (const t of hidden) expect(canSee(actor, t)).toBe(false);
+  });
+});
+
+describe('canKpi', () => {
+  it('kpi.submit: mọi vai trò được gửi', () => {
+    for (const a of [H, M, S]) expect(canKpi(a, 'kpi.submit')).toBe(true);
+  });
+
+  it('rate.set: chỉ Trưởng phòng', () => {
+    expect(canKpi(H, 'rate.set')).toBe(true);
+    expect(canKpi(M, 'rate.set')).toBe(false);
+    expect(canKpi(S, 'rate.set')).toBe(false);
   });
 });

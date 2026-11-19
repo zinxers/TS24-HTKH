@@ -1,4 +1,11 @@
-import type { AuditLogRepository, SessionRepository, TeamRepository, UserRepository } from '@ts24-htkh/db';
+import type {
+  AuditLogRepository,
+  KpiRateRepository,
+  KpiReportRepository,
+  SessionRepository,
+  TeamRepository,
+  UserRepository,
+} from '@ts24-htkh/db';
 
 type Methods<T, K extends keyof T> = { [P in K]: T[P] };
 
@@ -28,10 +35,19 @@ export type SessionStore = Methods<
   'create' | 'findActiveWithUser' | 'extend' | 'deleteByTokenHash' | 'deleteByUser' | 'deleteExpiredByUser'
 >;
 
+export type KpiReportStore = Methods<
+  KpiReportRepository,
+  'insertMany' | 'summaryByKenh' | 'countByPhanLoai' | 'countByDay' | 'listMine'
+>;
+
+export type KpiRateStore = Methods<KpiRateRepository, 'listVersions' | 'findVersion' | 'upsertVersion' | 'todayRates'>;
+
 export interface Repos {
   users: UserStore;
   sessions: SessionStore;
   audit: AuditStore;
+  kpiReports: KpiReportStore;
+  kpiRates: KpiRateStore;
 }
 
 /** Chạy nhiều repository trong một transaction; fn ném lỗi thì rollback. */

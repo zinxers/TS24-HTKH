@@ -75,6 +75,58 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"kpi_rate": {
+                  Row: {
+                    "amount": number,"created_at": string,"created_by": string | null,"effective_from": string,"id": string,"kenh": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount": number,"created_at"?: string,"created_by"?: string | null,"effective_from": string,"id"?: string,"kenh": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "amount"?: number,"created_at"?: string,"created_by"?: string | null,"effective_from"?: string,"id"?: string,"kenh"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "kpi_rate_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "app_user"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"kpi_report": {
+                  Row: {
+                    "created_at": string,"delete_reason": string | null,"deleted_at": string | null,"deleted_by": string | null,"full_name": string,"id": string,"kenh": string,"noi_dung": string,"phan_loai": string,"row_id": string,"team_id": string | null,"ticket": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"delete_reason"?: string | null,"deleted_at"?: string | null,"deleted_by"?: string | null,"full_name": string,"id"?: string,"kenh": string,"noi_dung": string,"phan_loai": string,"row_id": string,"team_id"?: string | null,"ticket": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"delete_reason"?: string | null,"deleted_at"?: string | null,"deleted_by"?: string | null,"full_name"?: string,"id"?: string,"kenh"?: string,"noi_dung"?: string,"phan_loai"?: string,"row_id"?: string,"team_id"?: string | null,"ticket"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "kpi_report_deleted_by_fkey"
+      columns: ["deleted_by"]
+isOneToOne: false
+      referencedRelation: "app_user"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "kpi_report_team_id_fkey"
+      columns: ["team_id"]
+isOneToOne: false
+      referencedRelation: "team"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "kpi_report_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "app_user"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"team": {
                   Row: {
                     "created_at": string,"id": string,"name": string,"sort_order": number,"updated_at": string
@@ -112,7 +164,33 @@ isOneToOne: false
                 }
           }
           Views: {
-            [_ in never]: never
+            "kpi_report_priced": {
+                  Row: {
+                    "amount": number,"created_at": string,"delete_reason": string | null,"deleted_at": string | null,"deleted_by": string | null,"full_name": string,"id": string,"kenh": string,"noi_dung": string,"phan_loai": string,"report_date": string | null,"row_id": string,"team_id": string | null,"ticket": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "kpi_report_deleted_by_fkey"
+      columns: ["deleted_by"]
+isOneToOne: false
+      referencedRelation: "app_user"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "kpi_report_team_id_fkey"
+      columns: ["team_id"]
+isOneToOne: false
+      referencedRelation: "team"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "kpi_report_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "app_user"
+      referencedColumns: ["id"]
+    }
+                  ]
+                }
           }
           Functions: {
             [_ in never]: never

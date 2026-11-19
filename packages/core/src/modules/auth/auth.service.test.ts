@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { AuthError, NotFoundError, ValidationError } from '../../errors';
-import type { SessionStore, UnitOfWork, UserStore } from '../../unit-of-work';
+import type { Repos, SessionStore, UnitOfWork, UserStore } from '../../unit-of-work';
 import { AuthService } from './auth.service';
 import { DUMMY_HASH, type PasswordHasher } from './password-hasher';
 import { hashToken } from './session-token';
@@ -123,7 +123,7 @@ class Fake {
   readonly uow: UnitOfWork = {
     transaction: async (fn) => {
       this.transactions += 1;
-      return fn({ users: this.userStore, sessions: this.sessionStore, audit: { record: async () => {} } });
+      return fn({ users: this.userStore, sessions: this.sessionStore, audit: { record: async () => {} } } as Partial<Repos> as Repos);
     },
   };
 
