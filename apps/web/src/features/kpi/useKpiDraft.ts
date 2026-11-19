@@ -20,11 +20,13 @@ export const toInput = ({ rowId, ticket, kenh, phanLoai, noiDung }: DraftRow) =>
 
 const keyOf = (userId: string) => `ts24-htkh:kpi-draft:${userId}`;
 
+const ROW_ID = /^[A-Za-z0-9-]{8,64}$/;
+
 function load(userId: string): DraftRow[] {
   try {
     const parsed: unknown = JSON.parse(localStorage.getItem(keyOf(userId)) ?? '[]');
     if (!Array.isArray(parsed)) return [];
-    return (parsed as DraftRow[]).filter((r) => typeof r?.rowId === 'string').map((r) => ({
+    return (parsed as DraftRow[]).filter((r) => typeof r?.rowId === 'string' && ROW_ID.test(r.rowId)).map((r) => ({
       rowId: r.rowId,
       ticket: r.ticket ?? '',
       kenh: r.kenh ?? '',
@@ -40,6 +42,15 @@ function load(userId: string): DraftRow[] {
 /** Nháp nhập KPI tự lưu ở localStorage theo người dùng; localStorage hỏng thì vẫn dùng được trong phiên. */
 export function useKpiDraft(userId: string) {
   const [rows, setRows] = useState<DraftRow[]>(() => load(userId));
+
+  // Tab khác ghi nháp thì nạp lại; ghi lại cùng nội dung không phát sự kiện nên không lặp.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === keyOf(userId)) setRows(load(userId));
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [userId]);
 
   useEffect(() => {
     try {

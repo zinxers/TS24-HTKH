@@ -5,6 +5,7 @@ import { KENH, MAX_NOI_DUNG, MAX_RANGE_DAYS, MAX_RATE, MAX_ROWS_PER_SUBMIT, PHAN
 // Thông báo giữ nguyên văn hệ thống cũ HTKH-KPI.
 const MSG = {
   rowIdMissing: 'Thiếu mã dòng',
+  rowObject: 'Dòng không hợp lệ',
   rowIdInvalid: 'Mã dòng không hợp lệ',
   ticket: 'Ticket phải có dạng TICKET/số',
   kenh: 'Kênh - Tình trạng không hợp lệ',
@@ -29,16 +30,19 @@ const ticket = z.preprocess(
 );
 
 /** Trường thừa (team, name, email, timestamp...) bị zod bỏ: server lấy từ người dùng đang đăng nhập. */
-export const kpiRowSchema = z.object({
-  rowId,
-  ticket,
-  kenh: z.preprocess(nfcTrim, z.enum(KENH, { error: MSG.kenh })),
-  phanLoai: z.preprocess(nfcTrim, z.enum(PHAN_LOAI, { error: MSG.phanLoai })),
-  noiDung: z.preprocess(
-    nfcTrim,
-    z.string({ error: MSG.noiDungEmpty }).min(1, MSG.noiDungEmpty).max(MAX_NOI_DUNG, MSG.noiDungMax),
-  ),
-});
+export const kpiRowSchema = z.object(
+  {
+    rowId,
+    ticket,
+    kenh: z.preprocess(nfcTrim, z.enum(KENH, { error: MSG.kenh })),
+    phanLoai: z.preprocess(nfcTrim, z.enum(PHAN_LOAI, { error: MSG.phanLoai })),
+    noiDung: z.preprocess(
+      nfcTrim,
+      z.string({ error: MSG.noiDungEmpty }).min(1, MSG.noiDungEmpty).max(MAX_NOI_DUNG, MSG.noiDungMax),
+    ),
+  },
+  { error: MSG.rowObject },
+);
 export type KpiRowInput = z.infer<typeof kpiRowSchema>;
 
 /** Từng phần tử kiểm riêng bằng `checkKpiRow` để trả lỗi theo dòng. */

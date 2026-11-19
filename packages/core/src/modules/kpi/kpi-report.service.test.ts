@@ -105,6 +105,11 @@ describe('submit', () => {
     for (const r of out.results.slice(0, 5)) {
       expect(r.status === 'error' && r.errors.length > 0).toBe(true);
     }
+    for (const r of out.results.slice(0, 3)) {
+      expect(r.status === 'error' && r.errors).toEqual([{ field: '', message: 'Dòng không hợp lệ' }]);
+    }
+    const longStr = await service.submit(S, ['x'.repeat(10000)]);
+    expect(longStr.results[0]).toMatchObject({ errors: [{ field: '', message: 'Dòng không hợp lệ' }] });
     expect(out.results[4]).toMatchObject({ rowId: 'abcdefgh', status: 'error' });
     expect(out.results[4]!.status === 'error' && out.results[4]!.errors).toContainEqual({
       field: 'noiDung',

@@ -74,4 +74,26 @@ describe('useKpiDraft', () => {
     localStorage.setItem(KEY, '{không phải json');
     expect(renderHook(() => useKpiDraft('u1')).result.current.rows).toEqual([]);
   });
+
+  it('sự kiện storage cùng key nạp lại nháp, key khác bị bỏ qua', () => {
+    const { result } = renderHook(() => useKpiDraft('u1'));
+    const row = { rowId: 'abcdefgh-1', ticket: 'TICKET/9', kenh: '', phanLoai: '', noiDung: '' };
+    act(() => {
+      localStorage.setItem(KEY, JSON.stringify([row]));
+      window.dispatchEvent(new StorageEvent('storage', { key: KEY }));
+    });
+    expect(result.current.rows).toMatchObject([{ rowId: 'abcdefgh-1', ticket: 'TICKET/9' }]);
+    act(() => {
+      localStorage.setItem('khac', '[]');
+      window.dispatchEvent(new StorageEvent('storage', { key: 'khac' }));
+    });
+    expect(result.current.rows).toHaveLength(1);
+  });
+
+  it('bỏ dòng nháp có rowId sai dạng', () => {
+    const good = { rowId: 'abcdefgh-1', ticket: '' };
+    localStorage.setItem(KEY, JSON.stringify([good, { rowId: 'short' }, { rowId: 'có dấu!!!!!!' }]));
+    const { result } = renderHook(() => useKpiDraft('u1'));
+    expect(result.current.rows.map((r) => r.rowId)).toEqual(['abcdefgh-1']);
+  });
 });

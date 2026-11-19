@@ -54,6 +54,9 @@ khoảng ngày xem KPI tối đa 400 ngày (tính cả hai đầu: `from`..`to` 
 - `kpi_report` chỉ thêm: trigger chặn xóa cứng và chặn sửa trừ ba cột xóa mềm và `updated_at`. Chưa có thao tác sửa/xóa trên giao diện (bản cũ cũng không có).
 - Thông báo lỗi dòng giữ nguyên văn bản cũ: "Thiếu mã dòng", "Mã dòng không hợp lệ", "Ticket phải có dạng TICKET/số",
   "Kênh - Tình trạng không hợp lệ", "Phân loại Ticket không hợp lệ", "Chưa nhập nội dung hỗ trợ", "Nội dung hỗ trợ tối đa 1000 ký tự".
+  Do người viết đặt (không có trong bản cũ): "Dòng không hợp lệ" (phần tử không phải object: số, null, mảng, chuỗi), lỗi ở `field` rỗng.
+- Lưu ý gửi lại: vì gửi idempotent theo `rowId` (`on conflict do nothing`), nếu lần gửi đã commit nhưng phản hồi bị mất, người dùng sửa dòng đó rồi gửi lại
+  thì server trả `ok` và giữ nguyên nội dung gốc đã lưu, bản sửa không được ghi.
 - Cả lần gửi: "Không có dòng nào để gửi", "Mỗi lần gửi tối đa 200 dòng".
 
 ## Tính tiền và KPI của tôi (`GET /api/v1/kpi-reports/mine?from&to`)

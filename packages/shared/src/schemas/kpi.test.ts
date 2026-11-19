@@ -105,6 +105,12 @@ describe('kpiRowSchema', () => {
   });
 });
 
+describe('checkKpiRow phần tử không phải object', () => {
+  it.each([5, null, [], 'x'.repeat(10000)])('trả "Dòng không hợp lệ" cho %#', (v) => {
+    expect(checkKpiRow(v).errors).toEqual([{ field: '', message: 'Dòng không hợp lệ' }]);
+  });
+});
+
 describe('kpiSubmitSchema', () => {
   const msg = (v: unknown) => kpiSubmitSchema.safeParse(v).error?.issues[0]?.message;
   it('1..200 phần tử, phần tử không kiểm ở đây', () => {
