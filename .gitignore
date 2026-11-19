@@ -44,3 +44,6 @@ CLAUDE.local.md
 
 # graphify (graph sinh tự động)
 graphify-out/
+
+# MCP cấu hình cục bộ
+.mcp.json
