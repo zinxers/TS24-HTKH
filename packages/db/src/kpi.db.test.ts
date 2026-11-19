@@ -1,3 +1,4 @@
+import { DEFAULT_KPI_RATES, KENH, PHAN_LOAI } from '@ts24-htkh/shared';
 import { afterAll, describe, expect, it } from 'vitest';
 import { relationsGrantedToClientRoles, tablesWithoutRls } from './check-rls';
 import type { Sql } from './client';
@@ -7,21 +8,6 @@ afterAll(async () => {
   await appSql().end();
   await adminSql().end();
 });
-
-const KENH = [
-  'PI Hoàn Thành',
-  'PO Hoàn Thành',
-  'PI Nhận thông tin',
-  'PO Nhận thông tin',
-  'Teamviewer Hoàn Thành',
-  'Email Nhận thông tin',
-  'Email Hoàn Thành',
-  'Chat Nhận thông tin',
-  'Chat Hoàn Thành',
-  'Trường hợp khó',
-  'Chăm sóc KH',
-];
-const GIA = [1000, 1000, 600, 600, 2000, 600, 1500, 600, 1500, 4000, 5000];
 
 type Row = Partial<{
   rowId: string;
@@ -46,8 +32,7 @@ describe('kpi_rate', () => {
     const rows = await appSql()<{ kenh: string; amount: number }[]>`
       select kenh, amount from kpi_rate where effective_from = '2000-01-01'`;
     expect(rows).toHaveLength(11);
-    const byKenh = new Map(rows.map((r) => [r.kenh, r.amount]));
-    KENH.forEach((k, i) => expect(byKenh.get(k)).toBe(GIA[i]));
+    expect(Object.fromEntries(rows.map((r) => [r.kenh, r.amount]))).toEqual(DEFAULT_KPI_RATES);
   });
 
   it('chặn insert effective_from hôm qua và chặn xóa dòng', async () => {
@@ -55,7 +40,7 @@ describe('kpi_rate', () => {
       await expect(
         tx`insert into kpi_rate (effective_from, kenh, amount)
            values ((now() at time zone 'Asia/Ho_Chi_Minh')::date - 1, 'PI Hoàn Thành', 1)`,
-      ).rejects.toThrow();
+      ).rejects.toThrow(/kpi_rate/);
     });
     await inRollback(adminSql(), async (tx) => {
       // admin cũng bị trigger chặn, không chỉ vì thiếu grant
@@ -76,6 +61,31 @@ describe('kpi_rate', () => {
         where effective_from = (now() at time zone 'Asia/Ho_Chi_Minh')::date and kenh = 'PI Hoàn Thành'`;
       expect(r!.amount).toBe(2222);
     });
+  });
+});
+
+describe('kpi_rate (quyền)', () => {
+  it('ts24_app không sửa được dòng đơn giá của ngày đã qua', async () => {
+    await inRollback(appSql(), async (tx) => {
+      await expect(tx`update kpi_rate set amount = 1 where effective_from = '2000-01-01'`).rejects.toThrow(/kpi_rate/);
+    });
+  });
+});
+
+describe('danh mục DB khớp shared', () => {
+  const listed = async (table: string, column: string) => {
+    const defs = await adminSql()<{ def: string }[]>`
+      select pg_get_constraintdef(c.oid) as def from pg_constraint c
+      where c.conrelid = ${`public.${table}`}::regclass and c.contype = 'c'
+        and pg_get_constraintdef(c.oid) like ${`%${column}%ARRAY%`}`;
+    expect(defs).toHaveLength(1);
+    return [...defs[0]!.def.matchAll(/'((?:[^']|'')*)'::text/g)].map((m) => m[1]!.replaceAll("''", "'"));
+  };
+
+  it('kenh (kpi_report, kpi_rate) và phan_loai đúng danh sách, đúng thứ tự', async () => {
+    expect(await listed('kpi_report', 'kenh')).toEqual([...KENH]);
+    expect(await listed('kpi_rate', 'kenh')).toEqual([...KENH]);
+    expect(await listed('kpi_report', 'phan_loai')).toEqual([...PHAN_LOAI]);
   });
 });
 
@@ -112,11 +122,12 @@ describe('kpi_report', () => {
   it('không sửa được ticket, không xóa cứng được', async () => {
     await inRollback(appSql(), async (tx) => {
       const id = await insertReport(tx);
-      await expect(tx`update kpi_report set ticket = 'TICKET/999' where id = ${id}`).rejects.toThrow();
+      await expect(tx`update kpi_report set ticket = 'TICKET/999' where id = ${id}`).rejects.toThrow(/kpi_report/);
     });
-    await inRollback(appSql(), async (tx) => {
+    await inRollback(adminSql(), async (tx) => {
+      // admin: trigger chặn xóa cứng, không chỉ vì thiếu grant
       const id = await insertReport(tx);
-      await expect(tx`delete from kpi_report where id = ${id}`).rejects.toThrow();
+      await expect(tx`delete from kpi_report where id = ${id}`).rejects.toThrow(/kpi_report/);
     });
   });
 
@@ -139,6 +150,10 @@ describe('kpi_report', () => {
 });
 
 describe('kpi_report_priced', () => {
+  it('ts24_app đọc được view', async () => {
+    await expect(appSql()`select count(*) from kpi_report_priced`).resolves.toHaveLength(1);
+  });
+
   it('chọn giá theo ngày gửi giờ VN', async () => {
     await inRollback(adminSql(), async (tx) => {
       await tx`set local session_replication_role = replica`; // bỏ qua trigger chặn ngày quá khứ
