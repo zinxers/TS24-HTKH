@@ -18,3 +18,10 @@ export {
 } from './repositories/user.repository';
 export { AuditLogRepository, type AuditAction, type AuditEntry } from './repositories/audit-log.repository';
 export { SessionRepository, type SessionWithUser } from './repositories/session.repository';
+export {
+  KpiReportRepository,
+  type KenhSummary,
+  type KpiItemRow,
+  type NewKpiReport,
+} from './repositories/kpi-report.repository';
+export { KpiRateRepository, type RateVersionRow } from './repositories/kpi-rate.repository';
