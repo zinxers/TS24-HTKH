@@ -74,6 +74,13 @@ describe('MyKpiScreen', () => {
     expect(screen.getByText('15/11/2026')).toBeInTheDocument();
   });
 
+  it('không có cảnh báo key trùng trong console', async () => {
+    const err = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    render(<MyKpiScreen />);
+    await screen.findByRole('table', { name: 'Tổng hợp theo kênh' });
+    expect(err.mock.calls.filter((c) => String(c[0]).includes('same key'))).toEqual([]);
+  });
+
   it('lỗi từ API hiện message', async () => {
     mine.mockRejectedValue(new ApiError('VALIDATION', 400, 'Khoảng ngày tối đa 400 ngày'));
     render(<MyKpiScreen />);

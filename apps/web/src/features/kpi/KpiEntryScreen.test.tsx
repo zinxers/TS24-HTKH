@@ -40,6 +40,13 @@ describe('KpiEntryScreen', () => {
     expect(screen.getByRole('button', { name: 'Gửi 1 dòng' })).toBeEnabled();
   });
 
+  it('tắt Thêm dòng khi đủ 200 dòng', async () => {
+    const rows = Array.from({ length: 200 }, (_, i) => ({ rowId: `row-${String(i).padStart(8, '0')}`, ticket: '', kenh: '', phanLoai: '', noiDung: '' }));
+    localStorage.setItem('ts24-htkh:kpi-draft:u1', JSON.stringify(rows));
+    render(<KpiEntryScreen />);
+    expect(await screen.findByRole('button', { name: '+ Thêm dòng' })).toBeDisabled();
+  });
+
   it('bấm Gửi mở ConfirmDialog "Gửi N dòng?"; Hủy không gọi API', async () => {
     const submit = vi.spyOn(apiClient.kpi, 'submit');
     await openWithRow();

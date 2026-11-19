@@ -10,6 +10,9 @@ import { errorMessage } from '../accounts/labels';
 import { useConfirmAction } from '../accounts/useConfirmAction';
 import { KpiShell, fmtDate, fmtNumber, useKpiUser } from './KpiShell';
 
+// Bản mặc định do migration tạo; bản khác có thể có createdBy null (dữ liệu seed).
+const DEFAULT_FROM = '2000-01-01';
+
 /** "1.800", "1800", " 1 800 " → 1800; ô trống hoặc không phải số → NaN (API trả lỗi tiếng Việt). */
 const parseAmount = (s: string) => (s.trim() === '' ? NaN : Number(s.replace(/[.\s]/g, '')));
 
@@ -70,7 +73,7 @@ export function RatesPanel() {
                 <th>Kênh - Tình trạng</th>
                 {shown.map((v) => (
                   <th key={v.from} className={v === current ? 'ver cur' : 'ver'}>
-                    {v.createdBy === null ? 'Mặc định' : fmtDate(v.from)}
+                    {v.from === DEFAULT_FROM ? 'Mặc định' : `Từ ${fmtDate(v.from)}`}
                     {v === current && <span className="badge">Hiện hành</span>}
                   </th>
                 ))}
@@ -78,13 +81,13 @@ export function RatesPanel() {
             </thead>
             <tbody>
               {KENH_GROUPS.flatMap((g) => [
-                <tr className="grp" key={g.name}>
+                <tr className="grp" key={`g:${g.name}`}>
                   <th scope="row" colSpan={shown.length + 1}>
                     {g.name}
                   </th>
                 </tr>,
                 ...g.kenh.map((k) => (
-                  <tr key={k}>
+                  <tr key={`k:${k}`}>
                     <td className="kenh">{k}</td>
                     {shown.map((v) => (
                       <td key={v.from} className={v === current ? 'num cur' : 'num'}>

@@ -24,7 +24,14 @@ function load(userId: string): DraftRow[] {
   try {
     const parsed: unknown = JSON.parse(localStorage.getItem(keyOf(userId)) ?? '[]');
     if (!Array.isArray(parsed)) return [];
-    return (parsed as DraftRow[]).filter((r) => typeof r?.rowId === 'string').map((r) => ({ ...r, errors: {} }));
+    return (parsed as DraftRow[]).filter((r) => typeof r?.rowId === 'string').map((r) => ({
+      rowId: r.rowId,
+      ticket: r.ticket ?? '',
+      kenh: r.kenh ?? '',
+      phanLoai: r.phanLoai ?? '',
+      noiDung: r.noiDung ?? '',
+      errors: {},
+    }));
   } catch {
     return [];
   }

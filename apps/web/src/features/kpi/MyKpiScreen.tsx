@@ -145,14 +145,14 @@ function KpiResult({ kpi }: { kpi: MyKpi }) {
             {KENH_GROUPS.map((g) => {
               const lines = g.kenh.map(line);
               return [
-                <tr className="grp" key={g.name}>
+                <tr className="grp" key={`g:${g.name}`}>
                   <th scope="row">{g.name}</th>
                   <td className="num">{fmtNumber(lines.reduce((s, l) => s + l.soLuong, 0))}</td>
                   <td />
                   <td className="num">{fmtNumber(lines.reduce((s, l) => s + l.thanhTien, 0))}</td>
                 </tr>,
                 ...lines.map((l) => (
-                  <tr key={l.kenh}>
+                  <tr key={`k:${l.kenh}`}>
                     <td className="kenh">{l.kenh}</td>
                     <td className="num">{fmtNumber(l.soLuong)}</td>
                     {l.donGia === null ? (

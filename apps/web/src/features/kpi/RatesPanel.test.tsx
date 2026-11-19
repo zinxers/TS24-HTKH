@@ -40,6 +40,20 @@ describe('RatesPanel', () => {
     expect(within(table).getByText('1.800')).toBeInTheDocument();
   });
 
+  it('nhãn cột: "Mặc định" chỉ cho bản 2000-01-01; bản khác createdBy null hiện ngày; không cảnh báo key', async () => {
+    const err = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    vi.spyOn(apiClient.auth, 'me').mockResolvedValue(user('staff'));
+    const seeded: RateVersion = { ...V1, from: '2026-11-09' as never, createdBy: null };
+    vi.spyOn(apiClient.kpi, 'rates').mockResolvedValue([V0, seeded]);
+    render(<RatesPanel />);
+    const table = await screen.findByRole('table', { name: 'Lịch sử đơn giá' });
+    const heads = within(table).getAllByRole('columnheader').map((h) => h.textContent);
+    expect(heads[1]).toContain('Từ 09/11/2026');
+    expect(heads[1]).toContain('Hiện hành');
+    expect(heads[2]).toBe('Mặc định');
+    expect(err.mock.calls.filter((c) => String(c[0]).includes('same key'))).toEqual([]);
+  });
+
   it.each([
     ['head', true],
     ['manager', false],

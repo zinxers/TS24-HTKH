@@ -63,6 +63,13 @@ describe('useKpiDraft', () => {
     expect(result.current.rows).toHaveLength(1);
   });
 
+  it('dòng nháp cũ thiếu field: mặc định chuỗi rỗng', () => {
+    localStorage.setItem(KEY, JSON.stringify([{ rowId: 'abc-12345' }]));
+    expect(renderHook(() => useKpiDraft('u1')).result.current.rows[0]).toEqual({
+      rowId: 'abc-12345', ticket: '', kenh: '', phanLoai: '', noiDung: '', errors: {},
+    });
+  });
+
   it('dữ liệu hỏng trong localStorage: bắt đầu rỗng', () => {
     localStorage.setItem(KEY, '{không phải json');
     expect(renderHook(() => useKpiDraft('u1')).result.current.rows).toEqual([]);

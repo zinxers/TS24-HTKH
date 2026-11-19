@@ -98,7 +98,7 @@ function EntryBody({ userId, onAuthLost }: { userId: string; onAuthLost: () => v
           </tbody>
         </table>
         <div className="entry-foot">
-          <button className="btn btn-secondary" type="button" onClick={draft.addRow}>
+          <button className="btn btn-secondary" type="button" disabled={n >= MAX_ROWS_PER_SUBMIT} onClick={draft.addRow}>
             + Thêm dòng
           </button>
           <span className="hint-line">Tối đa {MAX_ROWS_PER_SUBMIT} dòng mỗi lần gửi · thêm dòng không hỏi xác nhận</span>
