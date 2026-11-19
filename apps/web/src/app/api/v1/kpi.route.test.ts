@@ -43,17 +43,28 @@ describe('401 khi chưa đăng nhập', () => {
   it.each(cases)('%s', async (_n, call) => {
     authService.authenticate.mockRejectedValue(new AuthError('Chưa đăng nhập'));
     expect((await call()).status).toBe(401);
+    for (const fn of [kpiReportService.submit, kpiReportService.mine, kpiRateService.list, kpiRateService.set]) {
+      expect(fn).not.toHaveBeenCalled();
+    }
   });
 });
 
 describe('POST /kpi-reports', () => {
-  it.each([['không phải JSON', 'x{'], ['rows không phải mảng', { rows: 'a' }], ['rows rỗng', { rows: [] }]])(
-    '400 khi %s',
-    async (_n, body) => {
-      expect((await reports.POST(req('POST', body))).status).toBe(400);
-      expect(kpiReportService.submit).not.toHaveBeenCalled();
-    },
-  );
+  it.each([
+    ['không phải JSON', 'x{', 'Dữ liệu không hợp lệ'],
+    ['rows rỗng', { rows: [] }, 'Không có dòng nào để gửi'],
+    ['quá 200 dòng', { rows: Array(201).fill({}) }, 'Mỗi lần gửi tối đa 200 dòng'],
+  ])('400 khi %s', async (_n, body, message) => {
+    const res = await reports.POST(req('POST', body));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error.message).toBe(message);
+    expect(kpiReportService.submit).not.toHaveBeenCalled();
+  });
+
+  it('400 khi rows không phải mảng', async () => {
+    expect((await reports.POST(req('POST', { rows: 'a' }))).status).toBe(400);
+    expect(kpiReportService.submit).not.toHaveBeenCalled();
+  });
 
   it('phần tử rác: 200 và chuyển nguyên rows cho service', async () => {
     const rows = [null, 5, 'x', [], { rowId: 1 }];
@@ -67,13 +78,18 @@ describe('POST /kpi-reports', () => {
 });
 
 describe('GET /kpi-reports/mine', () => {
-  it.each(['', '?from=2026-11-01', '?from=bad&to=2026-11-02', '?from=2026-11-05&to=2026-11-01'])(
-    '400 với query %s',
-    async (q) => {
-      expect((await mine.GET(req('GET', undefined, mineUrl(q)))).status).toBe(400);
-      expect(kpiReportService.mine).not.toHaveBeenCalled();
-    },
-  );
+  it.each([
+    ['', 'Ngày không hợp lệ'],
+    ['?to=2026-11-01', 'Ngày không hợp lệ'],
+    ['?from=bad&to=2026-11-02', 'Ngày không hợp lệ'],
+    ['?from=2026-11-05&to=2026-11-01', 'Từ ngày phải trước hoặc bằng Đến ngày'],
+    ['?from=2024-01-01&to=2026-11-01', 'Khoảng ngày tối đa 400 ngày'],
+  ])('400 với query %s', async (q, message) => {
+    const res = await mine.GET(req('GET', undefined, mineUrl(q)));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error.message).toBe(message);
+    expect(kpiReportService.mine).not.toHaveBeenCalled();
+  });
 
   it('200 { kpi }', async () => {
     kpiReportService.mine.mockResolvedValue({ total: 1 });
@@ -95,6 +111,9 @@ describe('/kpi-rates', () => {
   it('PUT 400 khi body sai', async () => {
     expect((await rates.PUT(req('PUT', { from: 'x' }))).status).toBe(400);
     expect((await rates.PUT(req('PUT', 'x{'))).status).toBe(400);
+    const bad = await rates.PUT(req('PUT', { from: '2026-12-01', rates: { ...RATES, [KENH[0]]: 1.5 } }));
+    expect(bad.status).toBe(400);
+    expect((await bad.json()).error.message).toBe('Đơn giá phải là số nguyên từ 0 đến 1.000.000');
     expect(kpiRateService.set).not.toHaveBeenCalled();
   });
 
