@@ -17,6 +17,12 @@ async function twoUsers(tx: Sql) {
   return [rows[0]!.id, rows[1]!.id] as const;
 }
 
+function deferred() {
+  let resolve!: () => void;
+  const promise = new Promise<void>((r) => (resolve = r));
+  return { promise, resolve };
+}
+
 const row = (userId: string, o: Partial<NewKpiReport> = {}): NewKpiReport => ({
   rowId: 'repo-0000001',
   userId,
@@ -46,15 +52,22 @@ describe('KpiReportRepository', () => {
       await tx`set local session_replication_role = replica`; // cho phép đặt created_at
       const [a] = await twoUsers(tx);
       const repo = new KpiReportRepository(tx);
-      await repo.insertMany([row(a)]);
-      await tx`update kpi_report set created_at = '2031-10-09T16:30:00Z' where row_id = 'repo-0000001'`;
-      const day = (d: string) => repo.summaryByKenh(a, range(d, d));
-      expect((await day('2031-10-09')).map((r) => r.count)).toEqual([1]);
-      expect(await day('2031-10-10')).toEqual([]);
-      expect(await repo.listMine(a, range('2031-10-10', '2031-10-10'))).toEqual([]);
-      expect(await repo.countByDay(a, range('2031-10-09', '2031-10-09'))).toEqual([{ date: '2031-10-09', count: 1 }]);
-      expect(await repo.countByPhanLoai(a, range('2031-10-09', '2031-10-09'))).toEqual([
-        { phanLoai: 'Hỗ trợ sử dụng', count: 1 },
+      await repo.insertMany([row(a), row(a, { rowId: 'repo-0000002' })]);
+      await tx`update kpi_report set created_at = '2031-10-09T16:30:00Z' where row_id = 'repo-0000001'`; // 23:30 VN, 09/10
+      await tx`update kpi_report set created_at = '2031-10-09T17:30:00Z' where row_id = 'repo-0000002'`; // 00:30 VN, 10/10
+      const day = (d: string) => range(d, d);
+      const ids = async (d: string) => (await repo.listMine(a, day(d))).length;
+      for (const [d, n] of [['2031-10-09', 1], ['2031-10-10', 1]] as const) {
+        expect((await repo.summaryByKenh(a, day(d))).map((r) => r.count)).toEqual([n]);
+        expect(await ids(d)).toBe(n);
+        expect(await repo.countByDay(a, day(d))).toEqual([{ date: d, count: n }]);
+      }
+      expect(await repo.countByDay(a, range('2031-10-09', '2031-10-10'))).toEqual([
+        { date: '2031-10-09', count: 1 },
+        { date: '2031-10-10', count: 1 },
+      ]);
+      expect(await repo.countByPhanLoai(a, range('2031-10-09', '2031-10-10'))).toEqual([
+        { phanLoai: 'Hỗ trợ sử dụng', count: 2 },
       ]);
     });
   });
@@ -88,14 +101,52 @@ describe('KpiReportRepository', () => {
     });
   });
 
-  it('row_id của A, B chèn cùng row_id → []; listMine(B) rỗng', async () => {
-    await inRollback(appSql(), async (tx) => {
+  it('row_id của A, B chèn cùng row_id → []; listMine(B) rỗng, dòng vẫn của A', async () => {
+    await inRollback(adminSql(), async (tx) => {
+      await tx`set local session_replication_role = replica`;
       const [a, b] = await twoUsers(tx);
       const repo = new KpiReportRepository(tx);
+      const r = range('2031-01-01', '2031-12-31');
       await repo.insertMany([row(a)]);
+      await tx`update kpi_report set created_at = '2031-05-05T05:00:00Z' where row_id = 'repo-0000001'`;
       expect(await repo.insertMany([row(b)])).toEqual([]);
-      expect(await repo.listMine(b, range('2031-01-01', '2031-12-31'))).toEqual([]);
+      expect(await repo.listMine(a, r)).toHaveLength(1);
+      expect(await repo.listMine(b, r)).toEqual([]);
+      const [d] = await tx<{ user_id: string }[]>`select user_id from kpi_report where row_id = 'repo-0000001'`;
+      expect(d!.user_id).toBe(a);
     });
+  });
+
+  it('hai transaction song song cùng row_id: một bên [rowId], bên kia [], DB 1 dòng', async () => {
+    const rowId = 'par-00000001';
+    const gate = deferred();
+    const inserted = deferred();
+    try {
+      const [a] = await twoUsers(appSql());
+      const t1 = appSql().begin(async (tx) => {
+        const out = await new KpiReportRepository(tx as unknown as Sql).insertMany([row(a, { rowId })]);
+        inserted.resolve();
+        await gate.promise; // giữ transaction mở
+        return out;
+      });
+      await inserted.promise;
+      let t2Done = false;
+      const t2 = appSql()
+        .begin((tx) => new KpiReportRepository(tx as unknown as Sql).insertMany([row(a, { rowId })]))
+        .finally(() => (t2Done = true));
+      await new Promise((r) => setTimeout(r, 300));
+      expect(t2Done).toBe(false); // t2 bị chặn chờ t1 commit
+      gate.resolve();
+      expect([await t1, await t2]).toEqual([[rowId], []]);
+      const [c] = await appSql()<{ n: string }[]>`select count(*) as n from kpi_report where row_id = ${rowId}`;
+      expect(Number(c!.n)).toBe(1);
+    } finally {
+      gate.resolve();
+      await adminSql().begin(async (tx) => {
+        await tx`set local session_replication_role = replica`; // bỏ trigger chặn xóa cứng
+        await tx`delete from kpi_report where row_id = ${rowId}`;
+      });
+    }
   });
 });
 
