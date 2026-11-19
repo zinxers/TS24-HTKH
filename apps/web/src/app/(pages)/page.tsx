@@ -1,17 +1,15 @@
 'use client';
 
-import type { CurrentUser, Role } from '@ts24-htkh/shared';
+import type { CurrentUser } from '@ts24-htkh/shared';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { LogoutButton } from '../../features/auth/LogoutButton';
+import { AppBar } from '../../components/AppBar';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { ProfileDialog } from '../../features/accounts/AccountDialogs';
+import { ROLE_LABEL } from '../../features/accounts/labels';
+import { useConfirmAction } from '../../features/accounts/useConfirmAction';
 import { ApiError, apiClient } from '../../lib/api-client';
-
-const ROLE_LABEL: Record<Role, string> = { head: 'Trưởng phòng', manager: 'Quản lý', staff: 'Nhân viên' };
-
-function initials(fullName: string): string {
-  const words = fullName.trim().split(/\s+/);
-  return ((words[0]?.[0] ?? '') + (words.length > 1 ? (words.at(-1)?.[0] ?? '') : '')).toUpperCase();
-}
 
 export default function Page() {
   const router = useRouter();
@@ -19,6 +17,9 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [logoutError, setLogoutError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  // Hết phiên khi sửa: tải lại `me` để chạy đúng luồng 401 bên dưới.
+  const action = useConfirmAction(() => setAttempt((n) => n + 1));
 
   useEffect(() => {
     const fail = (e: unknown) => setError(e instanceof ApiError ? e.message : 'Lỗi hệ thống, vui lòng thử lại');
@@ -41,18 +42,7 @@ export default function Page() {
 
   return (
     <>
-      <header className="bar">
-        <span className="app">TS24-HTKH</span>
-        {user && (
-          <div className="who">
-            <span className="avatar" aria-hidden="true">
-              {initials(user.fullName)}
-            </span>
-            <span className="name">{user.fullName}</span>
-            <LogoutButton onError={setLogoutError} />
-          </div>
-        )}
-      </header>
+      <AppBar user={user} onLogoutError={setLogoutError} />
       <main className="content">
         {user ? (
           <>
@@ -65,6 +55,42 @@ export default function Page() {
             <p>
               {ROLE_LABEL[user.role]} · {user.email}
             </p>
+            <nav className="group menu" aria-label="Thao tác">
+              {user.role !== 'staff' && (
+                <Link className="menu-row" href="/accounts">
+                  Quản lý tài khoản{' '}
+                  <span className="chev" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
+              )}
+              <button className="menu-row" type="button" onClick={() => setEditing(true)}>
+                Sửa họ tên{' '}
+                <span className="chev" aria-hidden="true">
+                  ›
+                </span>
+              </button>
+            </nav>
+            {editing && (
+              <ProfileDialog
+                fullName={user.fullName}
+                error={action.error}
+                busy={action.busy}
+                onCancel={() => setEditing(false)}
+                onSubmit={(fullName) =>
+                  action.ask({
+                    title: 'Sửa họ tên',
+                    message: `Đổi họ tên thành “${fullName.trim()}”?`,
+                    confirmLabel: 'Lưu',
+                    run: async () => {
+                      setUser(await apiClient.me.updateProfile(fullName));
+                      setEditing(false);
+                    },
+                  })
+                }
+              />
+            )}
+            <ConfirmDialog {...action.dialogProps} />
           </>
         ) : error ? (
           <div className="load-error">

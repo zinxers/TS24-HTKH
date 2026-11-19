@@ -53,7 +53,8 @@ class Fake {
   transactions = 0;
   now = NOW;
 
-  readonly userStore: UserStore = {
+  // Chỉ cài các hàm AuthService dùng.
+  readonly userStore = {
     findCredentialsByEmail: async (email) => {
       const u = this.users.find((x) => x.email === email.trim().toLowerCase());
       return u
@@ -91,7 +92,7 @@ class Fake {
       this.calls.push(`setPasswordHash:${id}:${this.transactions}`);
       this.users.find((x) => x.id === id)!.password_hash = hash;
     },
-  };
+  } as UserStore;
 
   readonly sessionStore: SessionStore = {
     create: async (userId, tokenHash, expiresAt) => {
@@ -122,7 +123,7 @@ class Fake {
   readonly uow: UnitOfWork = {
     transaction: async (fn) => {
       this.transactions += 1;
-      return fn({ users: this.userStore, sessions: this.sessionStore });
+      return fn({ users: this.userStore, sessions: this.sessionStore, audit: { record: async () => {} } });
     },
   };
 

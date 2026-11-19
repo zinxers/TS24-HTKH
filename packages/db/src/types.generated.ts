@@ -49,6 +49,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"audit_log": {
+                  Row: {
+                    "action": string,"actor_id": string,"created_at": string,"detail": NonNullable<Json>,"id": string,"target_id": string | null,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "action": string,"actor_id": string,"created_at"?: string,"detail"?: NonNullable<Json>,"id"?: string,"target_id"?: string | null,"updated_at"?: string
+                  }
+                  Update: {
+                    "action"?: string,"actor_id"?: string,"created_at"?: string,"detail"?: NonNullable<Json>,"id"?: string,"target_id"?: string | null,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "audit_log_actor_id_fkey"
+      columns: ["actor_id"]
+isOneToOne: false
+      referencedRelation: "app_user"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "audit_log_target_id_fkey"
+      columns: ["target_id"]
+isOneToOne: false
+      referencedRelation: "app_user"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"team": {
                   Row: {
                     "created_at": string,"id": string,"name": string,"sort_order": number,"updated_at": string

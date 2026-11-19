@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, apiClient } from '../../lib/api-client';
 import Page from './page';
@@ -19,6 +19,43 @@ const USER = {
 beforeEach(() => {
   vi.restoreAllMocks();
   replace.mockReset();
+});
+
+describe('trang /: tài khoản', () => {
+  it.each([
+    ['head', true],
+    ['manager', true],
+    ['staff', false],
+  ] as const)('%s: liên kết Quản lý tài khoản hiện = %s', async (role, shown) => {
+    vi.spyOn(apiClient.auth, 'me').mockResolvedValue({ ...USER, role, teamId: role === 'head' ? null : 't1' });
+    render(<Page />);
+    await screen.findByRole('heading', { level: 1 });
+    const link = screen.queryByRole('link', { name: /Quản lý tài khoản/ });
+    if (shown) expect(link).toHaveAttribute('href', '/accounts');
+    else expect(link).not.toBeInTheDocument();
+  });
+
+  it('nhãn vai trò Nhân Viên', async () => {
+    vi.spyOn(apiClient.auth, 'me').mockResolvedValue({ ...USER, role: 'staff' });
+    render(<Page />);
+    expect(await screen.findByText(/Nhân Viên · /)).toBeInTheDocument();
+  });
+
+  it('Sửa họ tên: form → xác nhận → API, cập nhật lời chào', async () => {
+    vi.spyOn(apiClient.auth, 'me').mockResolvedValue(USER);
+    const update = vi.spyOn(apiClient.me, 'updateProfile').mockResolvedValue({ ...USER, fullName: 'Tên Mới' });
+    render(<Page />);
+    fireEvent.click(await screen.findByRole('button', { name: /Sửa họ tên/ }));
+    const form = screen.getByRole('dialog', { name: 'Sửa họ tên' });
+    fireEvent.change(screen.getByLabelText('Họ tên'), { target: { value: 'Tên Mới' } });
+    fireEvent.submit(form.querySelector('form')!);
+    expect(update).not.toHaveBeenCalled();
+    const confirm = screen.getAllByRole('dialog').at(-1)!;
+    fireEvent.click(within(confirm).getByRole('button', { name: 'Lưu' }));
+    await waitFor(() => expect(update).toHaveBeenCalledWith('Tên Mới'));
+    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Xin chào, Tên Mới');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
 });
 
 describe('trang /', () => {

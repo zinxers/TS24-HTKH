@@ -11,7 +11,7 @@ paths:
 | Policy | Trả lời "người này có được làm việc này không", ném `ForbiddenError` | Ghi dữ liệu |
 | Service | Điều phối: kiểm quyền → xử lý → ghi trong transaction → ghi `audit_log` | Biết về request/response HTTP |
 
-- Mỗi module ở `src/modules/<nghiệp vụ>/`: `*.entity.ts`, `*.service.ts`, `*.policy.ts`, `*.dto.ts`, test cùng thư mục.
+- Mỗi module ở `src/modules/<nghiệp vụ>/`: `*.entity.ts` (khi có luật riêng của đối tượng), `*.service.ts`, `*.policy.ts`, `*.dto.ts`, test cùng thư mục.
 - Phụ thuộc (repository, storage, client ngoài) truyền qua constructor; chỉ `src/container.ts` được `new` các phụ thuộc thật.
 - Ma trận quyền ở `src/policies/permissions.ts`. Mỗi action có test cho tài khoản được phép và tài khoản bị chặn.
 - Không import `react`, `next`, `@ts24-htkh/platform`. Đầu file dùng `import 'server-only'` ở điểm vào package.

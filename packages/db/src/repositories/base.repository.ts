@@ -13,10 +13,13 @@ export abstract class BaseRepository<Row extends object> {
     return row ?? null;
   }
 
-  async softDelete(id: string, actorId: string): Promise<void> {
-    await this.sql`
+  /** Trả true khi có dòng bị xóa (false: không có hoặc đã xóa trước đó). */
+  async softDelete(id: string, actorId: string): Promise<boolean> {
+    const rows = await this.sql`
       update ${this.sql(this.table)}
       set deleted_at = now(), deleted_by = ${actorId}
-      where id = ${id} and deleted_at is null`;
+      where id = ${id} and deleted_at is null
+      returning id`;
+    return rows.length > 0;
   }
 }
