@@ -41,3 +41,6 @@ Thumbs.db
 # Claude Code (cấu hình cá nhân)
 CLAUDE.local.md
 .claude/settings.local.json
+
+# graphify (graph sinh tự động)
+graphify-out/
