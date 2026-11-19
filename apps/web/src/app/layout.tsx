@@ -4,6 +4,7 @@ import './globals.css';
 import './controls.css';
 import './dialogs.css';
 import './accounts.css';
+import './kpi.css';
 
 export const metadata: Metadata = {
   title: 'TS24-HTKH',

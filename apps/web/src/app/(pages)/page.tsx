@@ -56,6 +56,24 @@ export default function Page() {
               {ROLE_LABEL[user.role]} · {user.email}
             </p>
             <nav className="group menu" aria-label="Thao tác">
+              <Link className="menu-row" href="/kpi">
+                Nhập KPI{' '}
+                <span className="chev" aria-hidden="true">
+                  ›
+                </span>
+              </Link>
+              <Link className="menu-row" href="/kpi/mine">
+                KPI của tôi{' '}
+                <span className="chev" aria-hidden="true">
+                  ›
+                </span>
+              </Link>
+              <Link className="menu-row" href="/kpi/rates">
+                Đơn giá KPI{' '}
+                <span className="chev" aria-hidden="true">
+                  ›
+                </span>
+              </Link>
               {user.role !== 'staff' && (
                 <Link className="menu-row" href="/accounts">
                   Quản lý tài khoản{' '}

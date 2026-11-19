@@ -4,7 +4,12 @@ import type {
   AccountUpdateInput,
   AccountView,
   CurrentUser,
+  IsoDate,
+  KpiSubmitResult,
   LoginInput,
+  MyKpi,
+  RateSetInput,
+  RateVersion,
   Team,
   TransferHeadInput,
 } from '@ts24-htkh/shared';
@@ -34,13 +39,14 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return body as T;
 }
 
-const sendJson = (method: 'POST' | 'PATCH', body: unknown): RequestInit => ({
+const sendJson = (method: 'POST' | 'PATCH' | 'PUT', body: unknown): RequestInit => ({
   method,
   headers: { 'content-type': 'application/json' },
   body: JSON.stringify(body),
 });
 const postJson = (body: unknown) => sendJson('POST', body);
 const patchJson = (body: unknown) => sendJson('PATCH', body);
+const putJson = (body: unknown) => sendJson('PUT', body);
 
 /** Nơi duy nhất giao diện gọi API. */
 export const apiClient = {
@@ -65,6 +71,15 @@ export const apiClient = {
   },
   teams: {
     list: async () => (await request<{ teams: Team[] }>('/teams')).teams,
+  },
+  kpi: {
+    /** `rows` là các dòng thô của form; server kiểm từng dòng. */
+    submit: (rows: unknown[]) => request<KpiSubmitResult>('/kpi-reports', postJson({ rows })),
+    mine: async (range: { from: IsoDate; to: IsoDate }) =>
+      (await request<{ kpi: MyKpi }>(`/kpi-reports/mine?from=${range.from}&to=${range.to}`)).kpi,
+    rates: async () => (await request<{ versions: RateVersion[] }>('/kpi-rates')).versions,
+    setRates: async (input: RateSetInput) =>
+      (await request<{ versions: RateVersion[] }>('/kpi-rates', putJson(input))).versions,
   },
   me: {
     updateProfile: async (fullName: string) =>
