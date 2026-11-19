@@ -1,16 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { ConfirmDialog } from './ConfirmDialog';
-
-// jsdom chưa cài showModal/close của <dialog>.
-beforeAll(() => {
-  HTMLDialogElement.prototype.showModal = function () {
-    this.setAttribute('open', '');
-  };
-  HTMLDialogElement.prototype.close = function () {
-    this.removeAttribute('open');
-  };
-});
 
 function setup(props: Partial<Parameters<typeof ConfirmDialog>[0]> = {}) {
   const onConfirm = vi.fn();
@@ -57,6 +47,39 @@ describe('ConfirmDialog', () => {
     fireEvent(screen.getByRole('dialog'), new Event('cancel', { cancelable: true }));
     fireEvent.click(screen.getByRole('button', { name: 'Hủy' }));
     expect(onCancel).toHaveBeenCalledTimes(2);
+  });
+
+  it('đang mở rồi đóng (không có animation) thì gỡ ngay', () => {
+    const props = { title: 'T', message: 'M', confirmLabel: 'OK', onConfirm: vi.fn(), onCancel: vi.fn() };
+    const { rerender } = render(<ConfirmDialog open {...props} />);
+    rerender(<ConfirmDialog open={false} {...props} />);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('đóng xong trả focus về phần tử đã mở hộp thoại, kể cả khi nút bị khóa lúc đang xử lý', () => {
+    const props = { title: 'T', message: 'M', confirmLabel: 'OK', onConfirm: vi.fn(), onCancel: vi.fn() };
+    const { rerender } = render(
+      <>
+        <button type="button">Mở</button>
+        <ConfirmDialog open={false} {...props} />
+      </>,
+    );
+    const opener = screen.getByRole('button', { name: 'Mở' });
+    opener.focus();
+    rerender(
+      <>
+        <button type="button">Mở</button>
+        <ConfirmDialog open busy {...props} />
+      </>,
+    );
+    (document.activeElement as HTMLElement).blur();
+    rerender(
+      <>
+        <button type="button">Mở</button>
+        <ConfirmDialog open={false} {...props} />
+      </>,
+    );
+    expect(opener).toHaveFocus();
   });
 
   it('đóng thì không hiện', () => {

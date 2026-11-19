@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import './globals.css';
+import './controls.css';
+import './dialogs.css';
+import './accounts.css';
 
 export const metadata: Metadata = {
   title: 'TS24-HTKH',

@@ -1,0 +1,213 @@
+/* Điều khiển dùng chung: nút, menu ⋯, sheet, alert và chuyển động (mẫu v2 theo Apple HIG, Mốc 3). */
+:root {
+  --fill: rgba(120, 120, 128, 0.12); /* nền hover/nhấn, như systemFill */
+  --fill-strong: rgba(120, 120, 128, 0.2);
+  --elevated: #ffffff; /* lớp nổi: menu, alert */
+  --shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.18), 0 0 0 0.5px rgba(0, 0, 0, 0.08);
+  --ease-out: cubic-bezier(0.32, 0.72, 0, 1); /* gần đường cong sheet của iOS */
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fill: rgba(120, 120, 128, 0.24);
+    --fill-strong: rgba(120, 120, 128, 0.36);
+    --elevated: #2c2c2e;
+    --shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 0 0.5px rgba(255, 255, 255, 0.12);
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Nút. Nhấn: đổi tức thì, không transition (HIG: thao tác thường xuyên không thêm motion). ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+.btn[disabled] {
+  opacity: 0.55;
+  cursor: default;
+}
+.btn:active:not([disabled]),
+.text-btn:active,
+.icon-btn:active {
+  opacity: 0.6;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover:not([disabled]) {
+  background: var(--accent-hover);
+}
+.btn-secondary {
+  background: var(--fill-strong);
+  color: var(--label);
+}
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* Nút ⋯: 32×32 trên desktop (HIG tối thiểu 28), 44×44 trên màn hẹp. */
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--secondary);
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.icon-btn:hover,
+.icon-btn[aria-expanded='true'] {
+  background: var(--fill-strong);
+  color: var(--label);
+}
+.icon-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* ---------- Menu kéo xuống ---------- */
+.popover {
+  position: fixed;
+  z-index: 10;
+  width: 200px;
+  padding: 5px;
+  border-radius: 10px;
+  background: var(--elevated);
+  color: var(--label);
+  box-shadow: var(--shadow-pop);
+  transform-origin: top right;
+  animation: pop-in 160ms var(--ease-out);
+}
+.popover button {
+  position: relative;
+  display: flex;
+  width: 100%;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: default;
+}
+.popover button:hover,
+.popover button:focus-visible {
+  outline: none;
+  background: var(--accent);
+  color: #fff;
+}
+.popover .destructive {
+  margin-top: 11px;
+  color: var(--danger);
+}
+.popover .destructive::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 10px;
+  right: 10px;
+  border-top: 0.5px solid var(--separator);
+}
+.popover .destructive:hover,
+.popover .destructive:focus-visible {
+  background: var(--danger);
+  color: #fff;
+}
+.popover .cancel {
+  display: none;
+}
+
+/* ---------- Màn hẹp ≤ 640px: menu ⋯ thành action sheet ---------- */
+@media (max-width: 640px) {
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Menu ⋯ thành action sheet ở đáy, làm tối nền phía sau. */
+  .popover {
+    inset: auto 8px calc(8px + env(safe-area-inset-bottom)) 8px !important;
+    width: auto;
+    padding: 0;
+    background: transparent;
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.4);
+    transform-origin: bottom center;
+    animation: slide-up 380ms var(--ease-out);
+  }
+  .popover .items {
+    overflow: hidden;
+    border-radius: 14px;
+    background: var(--elevated);
+  }
+  .popover button {
+    justify-content: center;
+    height: 56px;
+    padding: 0;
+    border-radius: 0;
+    color: var(--accent);
+    font-size: 20px;
+  }
+  .popover .items button + button {
+    border-top: 0.5px solid var(--separator);
+  }
+  .popover .destructive {
+    margin-top: 0;
+  }
+  .popover .destructive::before {
+    display: none;
+  }
+  .popover button:hover,
+  .popover button:focus-visible {
+    background: var(--fill);
+    color: var(--accent);
+  }
+  .popover .destructive:hover,
+  .popover .destructive:focus-visible {
+    background: var(--fill);
+    color: var(--danger);
+  }
+  .popover .cancel {
+    display: flex;
+    margin-top: 8px;
+    border-radius: 14px;
+    background: var(--elevated);
+    font-weight: 600;
+  }
+}
+
+/* Giảm chuyển động: chỉ mờ dần, ngắn. */
+@media (prefers-reduced-motion: reduce) {
+  .popover {
+    animation: fade-in 120ms linear !important;
+  }
+}
