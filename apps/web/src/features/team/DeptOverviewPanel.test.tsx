@@ -17,7 +17,11 @@ describe('DeptOverviewPanel', () => {
     render(<DeptOverviewPanel range={RANGE} />);
     const byTeam = await screen.findByRole('table', { name: 'Theo team' });
     expect(screen.getByText('Người có báo cáo').previousSibling).toHaveTextContent('4 / 8');
-    expect(within(byTeam).getByRole('row', { name: /Cả phòng/ })).toHaveTextContent('4 / 8');
+    const dept = within(byTeam).getByRole('row', { name: /Cả phòng/ });
+    expect(dept).toHaveTextContent('4 / 8');
+    // Kỳ trước và % lấy nguyên từ totals của API (số cố ý không khớp tổng client).
+    expect(dept).toHaveTextContent('99');
+    expect(dept).toHaveTextContent('+7%');
     expect(screen.getByText('so với 16/09/2026 – 15/10/2026')).toBeInTheDocument();
     expect(within(byTeam).getByRole('row', { name: /Thuế, Kế toán và Hệ thống quản lý/ })).toHaveTextContent('+20%');
     expect(within(byTeam).getByRole('row', { name: /Bảo hiểm xã hội/ })).toHaveTextContent('−6%');

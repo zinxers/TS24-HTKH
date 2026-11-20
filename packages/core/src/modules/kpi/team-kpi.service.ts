@@ -106,6 +106,7 @@ export class TeamKpiService {
     );
 
     const all = [...teamLines, noTeam];
+    const deptPrev = prevCounts.reduce((n, c) => n + c.count, 0);
     const sum = (k: 'total' | 'money' | 'active' | 'people') => all.reduce((n, l) => n + l[k], 0);
     const groups = KENH_GROUPS.map((g) => {
       const count = (byKenh: KenhCounts) => g.kenh.reduce((n, k) => n + byKenh[k], 0);
@@ -116,7 +117,14 @@ export class TeamKpiService {
     return {
       teams: teamLines,
       noTeam,
-      totals: { total: sum('total'), money: sum('money'), active: sum('active'), people: sum('people') },
+      totals: {
+        total: sum('total'),
+        money: sum('money'),
+        active: sum('active'),
+        people: sum('people'),
+        prevTotal: deptPrev,
+        change: change(sum('total'), deptPrev),
+      },
       groups,
       prev,
     };

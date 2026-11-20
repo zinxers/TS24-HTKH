@@ -241,7 +241,8 @@ describe('overview', () => {
     expect(o.teams[0]).toMatchObject({ total: 3, money: 3500, active: 2, people: 3, prevTotal: 1, change: 200 });
     expect(o.teams[1]).toMatchObject({ total: 2, money: 3800, active: 2, people: 3, prevTotal: 0, change: null });
     expect(o.noTeam).toEqual({ total: 1, money: 500, active: 1, people: 1, prevTotal: 0, change: null });
-    expect(o.totals).toEqual({ total: 6, money: 7800, active: 5, people: 7 });
+    // Cả phòng: prevTotal cộng mọi team kể cả null (1), change = (6-1)/1 = 500%.
+    expect(o.totals).toEqual({ total: 6, money: 7800, active: 5, people: 7, prevTotal: 1, change: 500 });
     expect(o.totals.active).toBeLessThanOrEqual(o.totals.people);
     expect(o.groups.find((g) => g.name === 'PI / PO')).toEqual({ name: 'PI / PO', byTeam: [2, 0], noTeam: 0, total: 2 });
     expect(o.groups.find((g) => g.name === 'Chăm sóc KH')).toEqual({ name: 'Chăm sóc KH', byTeam: [0, 0], noTeam: 1, total: 1 });

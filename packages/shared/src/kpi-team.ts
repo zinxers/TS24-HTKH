@@ -45,7 +45,7 @@ export interface DeptLine {
 export interface DeptOverview {
   teams: (DeptLine & { team: Team })[];
   noTeam: DeptLine;
-  totals: { total: number; money: number; active: number; people: number };
+  totals: { total: number; money: number; active: number; people: number; prevTotal: number; change: number | null };
   groups: { name: string; byTeam: number[]; noTeam: number; total: number }[];
   prev: { from: IsoDate; to: IsoDate };
 }

@@ -38,7 +38,7 @@ const line = (total: number) => ({ total, money: total * 1000, active: 1, people
 export const overview = (): DeptOverview => ({
   teams: TEAMS.map((team, i) => ({ team, ...line(12 - i * 4), change: [20, -6, null][i] ?? null })),
   noTeam: { ...line(3), change: null },
-  totals: { total: 27, money: 27000, active: 4, people: 8 },
+  totals: { total: 27, money: 27000, active: 4, people: 8, prevTotal: 99, change: 7 },
   groups: [{ name: 'PI / PO', byTeam: [5, 4, 3], noTeam: 1, total: 13 }],
   prev: { from: '2026-09-16' as never, to: '2026-10-15' as never },
 });

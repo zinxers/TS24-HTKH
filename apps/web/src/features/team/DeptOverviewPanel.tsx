@@ -13,9 +13,8 @@ const pct = (change: number | null) => {
   if (change < 0) return { text: `−${-change}%`, cls: 'num down' };
   return { text: '0%', cls: 'num' };
 };
-const changeOf = (total: number, prevTotal: number) => (prevTotal ? Math.round(((total - prevTotal) * 100) / prevTotal) : null);
 
-function LineCells({ l }: { l: Pick<DeptLine, 'total' | 'money' | 'active' | 'people' | 'prevTotal' | 'change'> }) {
+function LineCells({ l }: { l: DeptLine }) {
   const c = pct(l.change);
   return (
     <>
@@ -55,7 +54,6 @@ export function DeptOverviewPanel({ range }: { range: Period }) {
     );
   if (!data) return null;
   const { teams, noTeam, totals, groups, prev } = data;
-  const prevTotal = teams.reduce((s, t) => s + t.prevTotal, noTeam.prevTotal);
 
   return (
     <section>
@@ -112,7 +110,7 @@ export function DeptOverviewPanel({ range }: { range: Period }) {
               <th scope="row" className="name">
                 Cả phòng
               </th>
-              <LineCells l={{ ...totals, prevTotal, change: changeOf(totals.total, prevTotal) }} />
+              <LineCells l={totals} />
             </tr>
           </tfoot>
         </table>
