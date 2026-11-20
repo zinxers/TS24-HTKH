@@ -4,13 +4,17 @@ import type {
   AccountUpdateInput,
   AccountView,
   CurrentUser,
+  DeptOverview,
   IsoDate,
   KpiSubmitResult,
+  KpiTrend,
   LoginInput,
   MyKpi,
   RateSetInput,
   RateVersion,
   Team,
+  TeamKpi,
+  TeamMemberKpi,
   TransferHeadInput,
 } from '@ts24-htkh/shared';
 
@@ -77,6 +81,18 @@ export const apiClient = {
     submit: (rows: unknown[]) => request<KpiSubmitResult>('/kpi-reports', postJson({ rows })),
     mine: async (range: { from: IsoDate; to: IsoDate }) =>
       (await request<{ kpi: MyKpi }>(`/kpi-reports/mine?from=${range.from}&to=${range.to}`)).kpi,
+    team: async (teamId: string, range: { from: IsoDate; to: IsoDate }) =>
+      (await request<{ report: TeamKpi }>(`/teams/${teamId}/kpi?from=${range.from}&to=${range.to}`)).report,
+    member: async (teamId: string, userId: string, range: { from: IsoDate; to: IsoDate }) =>
+      (
+        await request<{ member: TeamMemberKpi }>(
+          `/teams/${teamId}/kpi/members/${userId}?from=${range.from}&to=${range.to}`,
+        )
+      ).member,
+    overview: async (range: { from: IsoDate; to: IsoDate }) =>
+      (await request<{ overview: DeptOverview }>(`/kpi-reports/overview?from=${range.from}&to=${range.to}`)).overview,
+    trend: async (team: string, unit: 'week' | 'month') =>
+      (await request<{ trend: KpiTrend }>(`/kpi-reports/trend?team=${team}&unit=${unit}`)).trend,
     rates: async () => (await request<{ versions: RateVersion[] }>('/kpi-rates')).versions,
     setRates: async (input: RateSetInput) =>
       (await request<{ versions: RateVersion[] }>('/kpi-rates', putJson(input))).versions,
