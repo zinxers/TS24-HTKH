@@ -25,3 +25,4 @@ export {
   type NewKpiReport,
 } from './repositories/kpi-report.repository';
 export { KpiRateRepository, type RateVersionRow } from './repositories/kpi-rate.repository';
+export { KpiTeamRepository } from './repositories/kpi-team.repository';

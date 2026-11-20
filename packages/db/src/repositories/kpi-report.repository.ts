@@ -1,6 +1,7 @@
 import type { IsoDate, KpiRange } from '@ts24-htkh/shared';
 import type { Sql } from '../client';
 import type { Database } from '../types.generated';
+import { createdAtInRange } from './kpi-range';
 
 export interface NewKpiReport {
   rowId: string;
@@ -30,11 +31,8 @@ export interface KenhSummary {
 export class KpiReportRepository {
   constructor(private readonly sql: Sql) {}
 
-  /** Khoảng [from, to] theo ngày VN; dùng được ix_kpi_report_user_created. */
   private inRange(r: KpiRange) {
-    return this.sql`
-      created_at >= (${r.from}::date::timestamp at time zone 'Asia/Ho_Chi_Minh')
-      and created_at < ((${r.to}::date + 1)::timestamp at time zone 'Asia/Ho_Chi_Minh')`;
+    return createdAtInRange(this.sql, r);
   }
 
   /** Trả row_id thật sự được tạo; row_id đã có (của ai cũng vậy) bị bỏ qua. */
