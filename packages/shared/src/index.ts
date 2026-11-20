@@ -8,3 +8,4 @@ export * from './schemas/auth';
 export * from './schemas/accounts';
 export * from './kpi';
 export * from './schemas/kpi';
+export * from './kpi-team';
