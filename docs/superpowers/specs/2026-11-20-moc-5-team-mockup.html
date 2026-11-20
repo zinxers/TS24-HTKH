@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mẫu KPI theo team</title>
+<link rel="stylesheet" href="../../../apps/web/src/app/globals.css">
+<link rel="stylesheet" href="../../../apps/web/src/app/controls.css">
+<link rel="stylesheet" href="../../../apps/web/src/app/dialogs.css">
+<link rel="stylesheet" href="../../../apps/web/src/app/accounts.css">
+<link rel="stylesheet" href="../../../apps/web/src/app/kpi.css">
+<style>
+  /* Phần mới của mẫu (sẽ vào team.css) */
+  .mock-note { font-size: 13px; color: var(--secondary); border: 1px dashed var(--secondary); border-radius: 8px; padding: 8px 12px; margin: 0 0 16px; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid var(--bar); margin: 8px 0 16px; padding-bottom: 8px; }
+  .tabs .chip.dept { font-weight: 600; }
+  .scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; background: var(--group); }
+  .team-table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 15px; }
+  .team-table th, .team-table td { padding: 10px 12px; border-bottom: 1px solid var(--bar); white-space: nowrap; }
+  .team-table thead th { font-size: 13px; color: var(--secondary); font-weight: 600; text-align: right; }
+  .team-table thead th:first-child { text-align: left; }
+  .team-table .name { position: sticky; left: 0; background: var(--group); text-align: left; z-index: 1; }
+  .team-table .name button { all: unset; cursor: pointer; color: var(--accent); }
+  .team-table .name button:focus-visible { outline: 2px solid var(--accent); border-radius: 4px; }
+  .team-table tr.off td { color: var(--secondary); }
+  .team-table tr.off .name button { color: var(--secondary); }
+  .tag { display: inline-block; font-size: 12px; border: 1px solid var(--secondary); border-radius: 999px; padding: 0 6px; margin-left: 6px; }
+  .team-table tfoot td { font-weight: 600; border-bottom: 0; }
+  .up { color: #1a7f37; } .down { color: var(--danger); }
+  .trend { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; align-items: end; height: 160px; padding: 12px; background: var(--group); border-radius: 12px; }
+  .trend.m6 { grid-template-columns: repeat(6, 1fr); }
+  .trend .col { display: flex; flex-direction: column; align-items: center; justify-content: end; height: 100%; font-size: 11px; color: var(--secondary); gap: 4px; }
+  .trend .b { width: 100%; max-width: 28px; background: var(--accent); border-radius: 4px 4px 0 0; }
+  .trend .col.running .b { opacity: .45; }
+  .member { margin-top: 16px; background: var(--group); border-radius: 12px; padding: 16px; }
+  .member h3 { margin: 0 0 4px; font-size: 17px; }
+  .hidden { display: none; }
+  .head-row { display:flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<header class="bar"><span class="app">TS24-HTKH</span>
+  <div class="who"><span class="avatar">NH</span><span class="name">Nguyễn Văn Hùng (Trưởng phòng)</span></div>
+</header>
+<main class="content wide">
+  <a class="back" href="#">‹ Trang chủ</a>
+  <p class="mock-note">MẪU – dữ liệu giả. Trưởng phòng thấy tab mọi team và "Tổng quan phòng". Quản lý chỉ thấy bảng team mình, không có hàng tab.</p>
+  <h1>KPI theo team</h1>
+
+  <div class="tabs" role="tablist" aria-label="Chọn team">
+    <button class="chip" role="tab" aria-pressed="true" data-tab="t1">Thuế, Kế toán và HTQL</button>
+    <button class="chip" role="tab" aria-pressed="false" data-tab="t1">BHXH và QLNS</button>
+    <button class="chip" role="tab" aria-pressed="false" data-tab="t1">HĐĐT, Hải quan và CĐS</button>
+    <button class="chip dept" role="tab" aria-pressed="false" data-tab="dept">Tổng quan phòng</button>
+  </div>
+
+  <div class="chips" aria-label="Chọn kỳ nhanh">
+    <button class="chip" aria-pressed="false">Tuần này</button><button class="chip" aria-pressed="false">Tuần trước</button>
+    <button class="chip" aria-pressed="true">Tháng này</button><button class="chip" aria-pressed="false">Tháng trước</button>
+    <button class="chip" aria-pressed="false">Quý này</button><button class="chip" aria-pressed="false">Quý trước</button>
+  </div>
+  <div class="range"><label>Từ ngày <input class="kin" type="date" value="2026-10-16"></label> <label>Đến ngày <input class="kin" type="date" value="2026-11-15"></label></div>
+
+  <!-- TAB TEAM -->
+  <section id="t1">
+    <div class="stat-row">
+      <div class="stat"><div class="v">1.284</div><div class="l">Ticket</div></div>
+      <div class="stat"><div class="v">1.732.400 đ</div><div class="l">Tiền KPI</div></div>
+      <div class="stat"><div class="v">6 / 7</div><div class="l">Người có báo cáo</div></div>
+    </div>
+
+    <h2 class="sec-title">Thành viên</h2>
+    <div class="scroll-x">
+    <table class="team-table">
+      <thead><tr><th class="name">Họ tên</th><th>PI / PO</th><th>Teamviewer</th><th>Email</th><th>Chat</th><th>Trường hợp khó</th><th>Chăm sóc KH</th><th>Tổng</th><th>Tiền</th><th>Ngày có BC</th></tr></thead>
+      <tbody>
+        <tr><td class="name"><button>Lê Thị An</button></td><td class="num">142</td><td class="num">18</td><td class="num">35</td><td class="num">40</td><td class="num">3</td><td class="num">1</td><td class="num">239</td><td class="num">331.500</td><td class="num">20</td></tr>
+        <tr><td class="name"><button>Phạm Minh Bảo</button></td><td class="num">120</td><td class="num">22</td><td class="num">28</td><td class="num">51</td><td class="num">5</td><td class="num">0</td><td class="num">226</td><td class="num">322.900</td><td class="num">19</td></tr>
+        <tr><td class="name"><button>Trần Quốc Cường</button><span class="tag">Quản lý</span></td><td class="num">98</td><td class="num">10</td><td class="num">40</td><td class="num">22</td><td class="num">8</td><td class="num">2</td><td class="num">180</td><td class="num">267.400</td><td class="num">17</td></tr>
+        <tr><td class="name"><button>Đỗ Hải Dương</button></td><td class="num">160</td><td class="num">25</td><td class="num">30</td><td class="num">45</td><td class="num">2</td><td class="num">0</td><td class="num">262</td><td class="num">346.000</td><td class="num">21</td></tr>
+        <tr><td class="name"><button>Vũ Thu Hà</button></td><td class="num">131</td><td class="num">12</td><td class="num">26</td><td class="num">38</td><td class="num">1</td><td class="num">1</td><td class="num">209</td><td class="num">270.100</td><td class="num">18</td></tr>
+        <tr><td class="name"><button>Ngô Gia Khánh</button></td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr class="off"><td class="name"><button>Hoàng Lan</button><span class="tag">Không hoạt động</span></td><td class="num">90</td><td class="num">8</td><td class="num">40</td><td class="num">27</td><td class="num">3</td><td class="num">0</td><td class="num">168</td><td class="num">194.500</td><td class="num">12</td></tr>
+      </tbody>
+      <tfoot><tr><td class="name">Tổng</td><td class="num">741</td><td class="num">95</td><td class="num">199</td><td class="num">223</td><td class="num">22</td><td class="num">4</td><td class="num">1.284</td><td class="num">1.732.400</td><td class="num">—</td></tr></tfoot>
+    </table>
+    </div>
+    <p class="muted">Bấm tên để xem các dòng KPI của người đó. "Ngày có BC" đếm cả dòng gửi khi ở team khác.</p>
+
+    <div class="member" aria-label="Chi tiết thành viên">
+      <div class="head-row"><h3>Lê Thị An · 239 ticket · 331.500 đ</h3><button class="text-btn">Đóng</button></div>
+      <table class="sent-table">
+        <thead><tr><th>Thời điểm</th><th>Ticket</th><th>Kênh - Tình trạng</th><th>Phân loại</th><th>Nội dung</th></tr></thead>
+        <tbody>
+          <tr><td class="d">15/11 16:42</td><td class="t tk">TICKET/88412</td><td class="k">Chat Hoàn Thành</td><td>Hỗ trợ sử dụng</td><td class="n">Hướng dẫn kê khai tờ khai 01/GTGT</td></tr>
+          <tr><td class="d">15/11 15:10</td><td class="t tk">TICKET/88390</td><td class="k">PI Hoàn Thành</td><td>Cấu hình phần mềm</td><td class="n">Cài chữ ký số trên máy mới</td></tr>
+          <tr><td class="d">14/11 09:05</td><td class="t tk">TICKET/88201</td><td class="k">Trường hợp khó</td><td>Lỗi hệ thống, lỗi tích hợp</td><td class="n">Lỗi đồng bộ dữ liệu kế toán</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="head-row" style="margin-top:24px"><h2 class="sec-title">Xu hướng</h2>
+      <div class="chips"><button class="chip" aria-pressed="true">12 tuần</button><button class="chip" aria-pressed="false">6 tháng</button></div></div>
+    <div class="trend" aria-label="Ticket 12 tuần TS24 gần nhất">
+      <div class="col"><div class="b" style="height:55%"></div>T35</div><div class="col"><div class="b" style="height:62%"></div>T36</div>
+      <div class="col"><div class="b" style="height:58%"></div>T37</div><div class="col"><div class="b" style="height:70%"></div>T38</div>
+      <div class="col"><div class="b" style="height:66%"></div>T39</div><div class="col"><div class="b" style="height:74%"></div>T40</div>
+      <div class="col"><div class="b" style="height:80%"></div>T41</div><div class="col"><div class="b" style="height:72%"></div>T42</div>
+      <div class="col"><div class="b" style="height:85%"></div>T43</div><div class="col"><div class="b" style="height:90%"></div>T44</div>
+      <div class="col"><div class="b" style="height:78%"></div>T45</div><div class="col running"><div class="b" style="height:30%"></div>T46</div>
+    </div>
+    <p class="muted">Cột mờ là kỳ đang chạy. Rê/chạm cột hiện số ticket và tiền của kỳ.</p>
+  </section>
+
+  <!-- TAB TỔNG QUAN -->
+  <section id="dept" class="hidden">
+    <div class="stat-row">
+      <div class="stat"><div class="v">3.905</div><div class="l">Ticket cả phòng</div></div>
+      <div class="stat"><div class="v">5.210.300 đ</div><div class="l">Tiền KPI</div></div>
+      <div class="stat"><div class="v">18 / 21</div><div class="l">Người có báo cáo</div></div>
+    </div>
+    <h2 class="sec-title">Theo team <span class="muted">so với 16/09 – 15/10</span></h2>
+    <div class="scroll-x">
+    <table class="team-table" style="min-width:620px">
+      <thead><tr><th class="name">Team</th><th>Ticket</th><th>Kỳ trước</th><th>Thay đổi</th><th>Tiền</th><th>Có BC / Người</th></tr></thead>
+      <tbody>
+        <tr><td class="name">Thuế, Kế toán và HTQL</td><td class="num">1.284</td><td class="num">1.190</td><td class="num up">+8%</td><td class="num">1.732.400</td><td class="num">6 / 7</td></tr>
+        <tr><td class="name">BHXH và QLNS</td><td class="num">1.320</td><td class="num">1.402</td><td class="num down">−6%</td><td class="num">1.760.900</td><td class="num">6 / 7</td></tr>
+        <tr><td class="name">HĐĐT, Hải quan và CĐS</td><td class="num">1.271</td><td class="num">1.205</td><td class="num up">+5%</td><td class="num">1.685.000</td><td class="num">5 / 6</td></tr>
+        <tr class="off"><td class="name">Không thuộc team</td><td class="num">30</td><td class="num">0</td><td class="num">—</td><td class="num">32.000</td><td class="num">1 / 1</td></tr>
+      </tbody>
+      <tfoot><tr><td class="name">Cả phòng</td><td class="num">3.905</td><td class="num">3.797</td><td class="num up">+3%</td><td class="num">5.210.300</td><td class="num">18 / 21</td></tr></tfoot>
+    </table>
+    </div>
+    <h2 class="sec-title">Nhóm kênh × team</h2>
+    <div class="scroll-x">
+    <table class="team-table" style="min-width:620px">
+      <thead><tr><th class="name">Nhóm kênh</th><th>Thuế, KT</th><th>BHXH</th><th>HĐĐT</th><th>Không team</th><th>Tổng</th></tr></thead>
+      <tbody>
+        <tr><td class="name">PI / PO</td><td class="num">741</td><td class="num">780</td><td class="num">702</td><td class="num">20</td><td class="num">2.243</td></tr>
+        <tr><td class="name">Teamviewer</td><td class="num">95</td><td class="num">88</td><td class="num">110</td><td class="num">0</td><td class="num">293</td></tr>
+        <tr><td class="name">Email</td><td class="num">199</td><td class="num">170</td><td class="num">205</td><td class="num">5</td><td class="num">579</td></tr>
+        <tr><td class="name">Chat</td><td class="num">223</td><td class="num">260</td><td class="num">230</td><td class="num">5</td><td class="num">718</td></tr>
+        <tr><td class="name">Trường hợp khó</td><td class="num">22</td><td class="num">18</td><td class="num">20</td><td class="num">0</td><td class="num">60</td></tr>
+        <tr><td class="name">Chăm sóc KH</td><td class="num">4</td><td class="num">4</td><td class="num">4</td><td class="num">0</td><td class="num">12</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="head-row" style="margin-top:24px"><h2 class="sec-title">Xu hướng cả phòng</h2>
+      <div class="chips"><button class="chip" aria-pressed="false">12 tuần</button><button class="chip" aria-pressed="true">6 tháng</button></div></div>
+    <div class="trend m6">
+      <div class="col"><div class="b" style="height:60%"></div>T6</div><div class="col"><div class="b" style="height:68%"></div>T7</div>
+      <div class="col"><div class="b" style="height:72%"></div>T8</div><div class="col"><div class="b" style="height:65%"></div>T9</div>
+      <div class="col"><div class="b" style="height:88%"></div>T10</div><div class="col running"><div class="b" style="height:40%"></div>T11</div>
+    </div>
+    <p class="muted">Mỗi cột chồng 3 màu theo team ở bản thật (mẫu vẽ một màu).</p>
+  </section>
+</main>
+<script>
+  document.querySelectorAll('.tabs .chip').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.tabs .chip').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+      b.setAttribute('aria-pressed', 'true');
+      var dept = b.dataset.tab === 'dept';
+      document.getElementById('t1').classList.toggle('hidden', dept);
+      document.getElementById('dept').classList.toggle('hidden', !dept);
+    });
+  });
+</script>
+</body>
+</html>
