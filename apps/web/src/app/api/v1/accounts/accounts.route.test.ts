@@ -180,8 +180,8 @@ describe('thành công', () => {
   });
 
   it('GET teams → { teams }', async () => {
-    accountService.listTeams.mockResolvedValue([{ id: TEAM, name: 'Team A' }]);
-    expect(await (await teams.GET()).json()).toEqual({ teams: [{ id: TEAM, name: 'Team A' }] });
+    accountService.listTeams.mockResolvedValue([{ id: TEAM, name: 'Team A', shortName: 'TA' }]);
+    expect(await (await teams.GET()).json()).toEqual({ teams: [{ id: TEAM, name: 'Team A', shortName: 'TA' }] });
   });
 
   it('PATCH me → { user }', async () => {

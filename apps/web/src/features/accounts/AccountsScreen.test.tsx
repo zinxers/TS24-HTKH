@@ -34,8 +34,8 @@ function setup(me: AccountView, accounts: AccountView[]) {
   vi.spyOn(apiClient.auth, 'me').mockResolvedValue(asUser(me));
   const list = vi.spyOn(apiClient.accounts, 'list').mockResolvedValue(accounts);
   vi.spyOn(apiClient.teams, 'list').mockResolvedValue([
-    { id: A, name: 'Team A' },
-    { id: B, name: 'Team B' },
+    { id: A, name: 'Team A', shortName: 'TA' },
+    { id: B, name: 'Team B', shortName: 'TB' },
   ]);
   render(<AccountsScreen />);
   return { list };

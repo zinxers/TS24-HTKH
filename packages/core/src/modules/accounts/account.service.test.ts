@@ -123,8 +123,8 @@ class Fake {
   teamStore = {
     list: async () =>
       [
-        { id: A, name: 'Team A' },
-        { id: B, name: 'Team B' },
+        { id: A, name: 'Team A', short_name: 'TA' },
+        { id: B, name: 'Team B', short_name: 'TB' },
       ] as TeamRow[],
   } as TeamStore;
 
@@ -338,10 +338,10 @@ describe('transferHead', () => {
 });
 
 describe('listTeams', () => {
-  it('trả id và tên', async () => {
+  it('trả id, tên và tên ngắn', async () => {
     expect(await service.listTeams()).toEqual([
-      { id: A, name: 'Team A' },
-      { id: B, name: 'Team B' },
+      { id: A, name: 'Team A', shortName: 'TA' },
+      { id: B, name: 'Team B', shortName: 'TB' },
     ]);
   });
 });
