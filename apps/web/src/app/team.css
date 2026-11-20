@@ -1,0 +1,38 @@
+/* Trang /team (mẫu duyệt 2026-11-20). Dùng lại .chip, .stat, .sent-table, .num, .muted từ kpi.css. */
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid var(--separator); margin: 8px 0 16px; padding-bottom: 8px; }
+.tabs .chip[aria-selected='true'] { background: var(--accent); color: #fff; }
+.tabs .chip.dept { font-weight: 600; }
+
+/* Bảng cuộn ngang trong khung; cột Họ tên cố định bên trái. min-width theo mẫu duyệt. */
+.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; background: var(--group); }
+.team-table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 15px; }
+.team-table.narrow { min-width: 620px; }
+.team-table th, .team-table td { padding: 10px 12px; border-bottom: 0.5px solid var(--separator); white-space: nowrap; }
+.team-table thead th { font-size: 13px; color: var(--secondary); font-weight: 600; text-align: right; }
+.team-table thead th:first-child { text-align: left; }
+.team-table .name { position: sticky; left: 0; z-index: 1; min-width: 180px; background: var(--group); text-align: left; font-weight: 400; }
+.team-table .name button { all: unset; cursor: pointer; color: var(--accent); }
+.team-table .name button:focus-visible { outline: 2px solid var(--accent); border-radius: 4px; }
+.team-table tr.off td, .team-table tr.off .name, .team-table tr.off .name button { color: var(--secondary); }
+.team-table tfoot th, .team-table tfoot td { font-weight: 600; border-bottom: 0; }
+.tag { display: inline-block; font-size: 12px; border: 1px solid var(--secondary); border-radius: 999px; padding: 0 6px; margin-left: 6px; color: var(--secondary); }
+.up { color: #1a7f37; }
+.down { color: var(--danger); }
+@media (prefers-color-scheme: dark) { .up { color: #32d74b; } }
+
+.member { margin-top: 16px; background: var(--group); border-radius: 12px; padding: 16px; }
+.member h3 { margin: 0 0 4px; font-size: 17px; }
+.head-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.trend-head { margin-top: 24px; }
+
+.trend { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; align-items: end; height: 160px; margin: 0; padding: 12px; list-style: none; background: var(--group); border-radius: 12px; }
+.trend.m6 { grid-template-columns: repeat(6, 1fr); }
+.trend .col { display: flex; flex-direction: column; align-items: center; justify-content: end; height: 100%; min-width: 0; font-size: 11px; color: var(--secondary); gap: 4px; }
+.trend .b { width: 100%; max-width: 28px; background: var(--accent); border-radius: 4px 4px 0 0; }
+.trend .col.running .b { opacity: 0.45; }
+
+@media (max-width: 640px) {
+  .team-table th, .team-table td { padding-left: 8px; padding-right: 8px; }
+  .team-table .name { min-width: 140px; }
+  .trend { gap: 3px; padding: 8px; }
+}
