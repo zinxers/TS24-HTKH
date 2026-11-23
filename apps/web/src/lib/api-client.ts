@@ -12,6 +12,10 @@ import type {
   MyKpi,
   RateSetInput,
   RateVersion,
+  ReportNotes,
+  ReportNoteSaveInput,
+  ReportPreview,
+  ReportType,
   Team,
   TeamKpi,
   TeamMemberKpi,
@@ -96,6 +100,14 @@ export const apiClient = {
     rates: async () => (await request<{ versions: RateVersion[] }>('/kpi-rates')).versions,
     setRates: async (input: RateSetInput) =>
       (await request<{ versions: RateVersion[] }>('/kpi-rates', putJson(input))).versions,
+  },
+  reports: {
+    preview: async (type: ReportType, start: IsoDate) =>
+      (await request<{ preview: ReportPreview }>(`/reports/${type}?start=${start}`)).preview,
+    saveNotes: async (type: ReportType, input: ReportNoteSaveInput) =>
+      (await request<{ notes: ReportNotes }>(`/reports/${type}/notes`, putJson(input))).notes,
+    /** URL tải .xlsx; dùng cho thẻ tải/Platform, không qua request(). */
+    fileUrl: (type: ReportType, start: IsoDate) => `/api/v1/reports/${type}/file?start=${start}`,
   },
   me: {
     updateProfile: async (fullName: string) =>
