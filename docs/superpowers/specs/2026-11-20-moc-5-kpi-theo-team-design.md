@@ -133,7 +133,7 @@ Service mới `TeamKpiService` trong `packages/core/src/modules/kpi/team-kpi.ser
 - Cách tính: như hệ thống cũ (`deptOverview` gộp kết quả `team.report` của từng team).
   Service gọi phần tính của `report` cho từng team (số team nhỏ, khoảng 3), cộng thêm một câu cho dòng `team_id` rỗng
   và một câu đếm tổng ticket kỳ trước theo team.
-- `teams`: mỗi team một phần tử `{ teamId, name, total, money, active, people, prevTotal, change }`, theo `sort_order`.
+- `teams`: mỗi team một phần tử `DeptLine & { team: Team }` (`team` gồm `shortName`; `DeptLine` = `{ total, money, active, people, prevTotal, change }`), theo `sort_order`.
   - `active`: số người có ít nhất 1 dòng của team.
   - `people`: số người trong bảng team (cùng quy tắc với `report`).
   - `change`: `round((total - prevTotal) * 100 / prevTotal)`, null khi `prevTotal = 0`.
@@ -242,6 +242,6 @@ Các kiểu trả về có team (`TeamKpi.team`, `DeptOverview.teams`) kèm `sho
 Tên hàm repository, cách chia component giao diện, bố cục CSS.
 
 Người viết tự chốt:
-- `member` trả rỗng thay vì 404.
+- `member` ngoài tập người của bảng team kỳ đó (kể cả id không tồn tại) trả 404 "Không tìm thấy thành viên", không trả rỗng.
 - Trưởng phòng xem tab team giống Quản lý xem team mình.
 - Xu hướng một team nằm trong tab team, xu hướng cả phòng nằm trong tab tổng quan.
