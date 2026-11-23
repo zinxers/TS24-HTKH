@@ -1,4 +1,4 @@
-import type { CurrentUser, Role } from '@ts24-htkh/shared';
+import type { CurrentUser, ReportScope, Role } from '@ts24-htkh/shared';
 
 export type AccountAction =
   | 'account.list'
@@ -81,4 +81,12 @@ export type TeamKpiAction = 'team.kpi.view' | 'dept.kpi.view';
 export function canTeamKpi(actor: CurrentUser, action: TeamKpiAction, teamId?: string): boolean {
   if (actor.role === 'head') return true;
   return action === 'team.kpi.view' && actor.role === 'manager' && actor.teamId !== null && actor.teamId === teamId;
+}
+
+export type ReportAction = 'report.view' | 'report.note.edit';
+
+/** `scope` = 'dept' hoặc teamId. Trưởng phòng mọi phạm vi; Quản lý chỉ team mình; Nhân viên không. */
+export function canReport(actor: CurrentUser, _action: ReportAction, scope: ReportScope): boolean {
+  if (actor.role === 'head') return true;
+  return actor.role === 'manager' && actor.teamId !== null && actor.teamId === scope;
 }
