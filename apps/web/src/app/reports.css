@@ -1,0 +1,23 @@
+/* Trang /reports (mẫu duyệt 2026-11-23). Dùng lại .chip, .stat, .tabs, .scroll-x, .kin, .num, .muted từ kpi.css, team.css. */
+.pick { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 8px; }
+.pick label { display: grid; gap: 4px; color: var(--secondary); font-size: 13px; }
+.pick select { height: 40px; min-width: 220px; max-width: 100%; }
+.rep-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.rep-table th, .rep-table td { padding: 10px 12px; border-top: 0.5px solid var(--separator); }
+.rep-table thead th { border-top: 0; color: var(--secondary); font-size: 13px; font-weight: 600; text-align: right; }
+.rep-table thead th:first-child, .rep-table td:first-child { text-align: left; }
+.rep-table tr.sum td { font-weight: 600; background: var(--fill); }
+.dl { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 16px 0 8px; }
+.dl a.btn { text-decoration: none; }
+.notes { background: var(--group); border-radius: 12px; padding: 16px; }
+.notes h3 { margin: 16px 0 8px; font-size: 15px; color: var(--secondary); }
+.notes section:first-child h3 { margin-top: 0; }
+.nf { display: grid; gap: 4px; margin-bottom: 12px; }
+.nf label { font-size: 13px; color: var(--secondary); }
+.nf input, .nf textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--separator); background: var(--bg); color: var(--label); }
+.nf input:focus-visible, .nf textarea:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); border-color: var(--accent); }
+.nf textarea { min-height: 72px; resize: vertical; }
+.nf .cnt { justify-self: end; font-size: 12px; color: var(--secondary); }
+.nf .cnt.warn { color: var(--danger); }
+.row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0 12px; }
+.notes-foot { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-top: 8px; }
