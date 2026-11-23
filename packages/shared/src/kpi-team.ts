@@ -22,7 +22,8 @@ export interface TeamKpiRow {
 export interface TeamKpi {
   team: Team;
   rows: TeamKpiRow[];
-  totals: { byKenh: KenhCounts; byPhanLoai: PhanLoaiCounts; total: number; money: number };
+  /** `active` = số người trong `rows` có ít nhất một dòng trong kỳ. */
+  totals: { byKenh: KenhCounts; byPhanLoai: PhanLoaiCounts; total: number; money: number; active: number };
 }
 
 export interface TeamMemberKpi {
@@ -56,6 +57,9 @@ export interface KpiTrend {
     from: IsoDate;
     to: IsoDate;
     running: boolean;
+    /** Cộng mọi phần tử của `teams`. */
+    total: number;
+    money: number;
     teams: { teamId: string | null; total: number; money: number }[];
   }[];
 }

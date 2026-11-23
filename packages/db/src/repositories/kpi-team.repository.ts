@@ -76,9 +76,7 @@ export class KpiTeamRepository {
     const rows = await this.sql<{ i: string; team_id: string | null; count: string; money: string }[]>`
       select p.i, v.team_id, count(*) as count, sum(v.amount) as money
       from unnest(${froms}::date[], ${tos}::date[]) with ordinality as p(f, t, i)
-      join kpi_report_priced v
-        on v.created_at >= (p.f::timestamp at time zone 'Asia/Ho_Chi_Minh')
-       and v.created_at < ((p.t + 1)::timestamp at time zone 'Asia/Ho_Chi_Minh')
+      join kpi_report_priced v on ${createdAtInRange(this.sql, { from: this.sql`p.f`, to: this.sql`p.t` })}
       where ${teamFilter}
       group by p.i, v.team_id`;
     return rows.map((r) => ({ index: Number(r.i) - 1, teamId: r.team_id, count: Number(r.count), money: Number(r.money) }));

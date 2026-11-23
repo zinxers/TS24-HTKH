@@ -30,6 +30,7 @@ export const teamKpi = (rows: TeamKpiRow[], team: Team = TEAMS[0]!): TeamKpi => 
     byPhanLoai: phanLoai(0),
     total: rows.reduce((s, r) => s + r.total, 0),
     money: rows.reduce((s, r) => s + r.money, 0),
+    active: rows.filter((r) => r.total > 0).length,
   },
 });
 
@@ -50,6 +51,8 @@ export const trend = (unit: 'week' | 'month', totals: number[]): KpiTrend => ({
     from: (unit === 'week' ? ['2026-08-28', '2026-09-04'][i] : `2026-${String(5 + i).padStart(2, '0')}-16`) as never,
     to: (unit === 'week' ? ['2026-09-03', '2026-09-10'][i] : `2026-${String(6 + i).padStart(2, '0')}-15`) as never,
     running: i === totals.length - 1,
+    total: t,
+    money: t * 1000,
     teams: [{ teamId: 't1', total: t, money: t * 1000 }],
   })),
 });

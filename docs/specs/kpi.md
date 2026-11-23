@@ -138,9 +138,12 @@ Mã lỗi 400/401/403/404. `from`, `to` dùng lại luật `kpiRangeSchema` ở 
 - Tổng quan (`teamOverview_`, `deptOverview`): `prev = previousPeriod(range)`. Mỗi team là `DeptLine & { team: Team }` (`team` gồm `shortName`), theo `sort_order`;
   `DeptLine` = `total, money, active, people, prevTotal, change`. `change = round((total - prevTotal) * 100 / prevTotal)`, `null` khi `prevTotal = 0`.
   `noTeam` là hàng "Không thuộc team", `active = people` = số người có dòng `team_id` rỗng trong kỳ.
-  `totals` = cộng `teams` và `noTeam`; `prevTotal` (tổng ticket kỳ trước cả phòng) và `change` do service tính. Người chuyển team được đếm ở mỗi team có dòng của họ (như cũ), nên `active ≤ people`.
+  `totals.total`, `totals.money` = cộng `teams` và `noTeam`; `prevTotal` (tổng ticket kỳ trước cả phòng) và `change` do service tính.
+  Người chuyển team giữa kỳ được đếm ở mỗi hàng team có dòng của họ (như cũ), nhưng `totals.active`, `totals.people` của "Cả phòng" đếm theo `userId` khác nhau,
+  nên tổng các hàng có thể lớn hơn hàng "Cả phòng". Khác bản cũ: cũ cộng số người từng hàng.
+- Bảng team: `totals.active` = số người trong `rows` có dòng trong kỳ (service tính, giao diện không tự đếm).
   `groups`: 6 nhóm `KENH_GROUPS` `{ name, byTeam, noTeam, total }`.
-- Xu hướng (`teamTrend_`): `periods = trendPeriods(unit, hôm nay VN)`, cũ trước, kỳ đang chạy `running`. Không cache. Một câu SQL `unnest` + `group by` kỳ và team.
+- Xu hướng (`teamTrend_`): `periods = trendPeriods(unit, hôm nay VN)`, cũ trước, kỳ đang chạy `running`; mỗi kỳ có `total`, `money` = cộng mọi phần tử `teams`. Không cache. Một câu SQL `unnest` + `group by` kỳ và team.
   `team=all`: `teams` theo `sort_order` cộng `teamId: null` (Không thuộc team). Khác bản cũ: cũ luôn trả đúng 3 team, các giá trị khác là null.
 - `team.short_name` (not null, 1..20 ký tự, unique): TaxOnline (Thuế, Kế toán và Hệ thống quản lý), iBHXH (Bảo hiểm xã hội và Quản lý nhân sự),
   iXHD (Hóa đơn điện tử, Hải quan và Chuyển đổi số). Migration `20261120020136_kpi_team.sql` điền theo `name` và báo lỗi nếu còn team rỗng.

@@ -9,8 +9,8 @@ import { TrendCard } from './TrendCard';
 
 const pct = (change: number | null) => {
   if (change === null) return { text: '—', cls: 'num' };
-  if (change > 0) return { text: `+${change}%`, cls: 'num up' };
-  if (change < 0) return { text: `−${-change}%`, cls: 'num down' };
+  if (change > 0) return { text: `+${change}%`, cls: 'num team-up' };
+  if (change < 0) return { text: `−${-change}%`, cls: 'num team-down' };
   return { text: '0%', cls: 'num' };
 };
 
@@ -33,14 +33,19 @@ function LineCells({ l }: { l: DeptLine }) {
 export function DeptOverviewPanel({ range }: { range: Period }) {
   const [data, setData] = useState<DeptOverview | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let stale = false;
     setError(null);
-    apiClient.kpi.overview({ from: range.start, to: range.end }).then(
-      (d) => !stale && setData(d),
-      (e: unknown) => !stale && (setData(null), setError(errorMessage(e))),
-    );
+    setLoading(true);
+    apiClient.kpi
+      .overview({ from: range.start, to: range.end })
+      .then(
+        (d) => !stale && setData(d),
+        (e: unknown) => !stale && (setData(null), setError(errorMessage(e))),
+      )
+      .finally(() => !stale && setLoading(false));
     return () => {
       stale = true;
     };
@@ -52,11 +57,16 @@ export function DeptOverviewPanel({ range }: { range: Period }) {
         {error}
       </p>
     );
-  if (!data) return null;
+  if (!data) return loading ? <p role="status" aria-busy="true">Đang tải…</p> : null;
   const { teams, noTeam, totals, groups, prev } = data;
 
   return (
-    <section>
+    <section aria-busy={loading}>
+      {loading && (
+        <p className="muted" role="status">
+          Đang tải…
+        </p>
+      )}
       <div className="stat-row">
         <div className="stat">
           <span className="v">{fmtNumber(totals.total)}</span>

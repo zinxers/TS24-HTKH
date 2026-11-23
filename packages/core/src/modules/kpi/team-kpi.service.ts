@@ -91,8 +91,7 @@ export class TeamKpiService {
 
     const teamLines = teams.map((team, i) => {
       const { rows, totals } = tables[i]!;
-      const active = rows.filter((r) => r.total > 0).length;
-      return { team, ...lineOf(team.id, totals.total, totals.money, active, rows.length) };
+      return { team, ...lineOf(team.id, totals.total, totals.money, totals.active, rows.length) };
     });
     const noTeamKenh = zeroKenh();
     for (const c of noTeamCells) noTeamKenh[c.kenh as Kenh] += c.count;
@@ -107,7 +106,15 @@ export class TeamKpiService {
 
     const all = [...teamLines, noTeam];
     const deptPrev = prevCounts.reduce((n, c) => n + c.count, 0);
-    const sum = (k: 'total' | 'money' | 'active' | 'people') => all.reduce((n, l) => n + l[k], 0);
+    const sum = (k: 'total' | 'money') => all.reduce((n, l) => n + l[k], 0);
+    // Cả phòng đếm người khác nhau: người chuyển team giữa kỳ chỉ tính một lần.
+    const rowsAll = tables.flatMap((t) => t.rows);
+    // teamCells đến từ group by nên mọi ô đều có count > 0: người có ô không team là người có BC.
+    const people = new Set([...rowsAll.map((r) => r.userId), ...noTeamCells.map((c) => c.userId)]).size;
+    const active = new Set([
+      ...rowsAll.filter((r) => r.total > 0).map((r) => r.userId),
+      ...noTeamCells.map((c) => c.userId),
+    ]).size;
     const groups = KENH_GROUPS.map((g) => {
       const count = (byKenh: KenhCounts) => g.kenh.reduce((n, k) => n + byKenh[k], 0);
       const byTeam = tables.map((t) => count(t.totals.byKenh));
@@ -120,8 +127,8 @@ export class TeamKpiService {
       totals: {
         total: sum('total'),
         money: sum('money'),
-        active: sum('active'),
-        people: sum('people'),
+        active,
+        people,
         prevTotal: deptPrev,
         change: change(sum('total'), deptPrev),
       },
@@ -144,14 +151,19 @@ export class TeamKpiService {
     const cells = await this.deps.kpiTeam.trend(periods, team);
     return {
       unit,
-      periods: periods.map((p, index) => ({
-        ...p,
-        running: p.from <= today && today <= p.to,
-        teams: teamIds.map((teamId) => {
+      periods: periods.map((p, index) => {
+        const teams = teamIds.map((teamId) => {
           const c = cells.find((x) => x.index === index && x.teamId === teamId);
           return { teamId, total: c?.count ?? 0, money: c?.money ?? 0 };
-        }),
-      })),
+        });
+        return {
+          ...p,
+          running: p.from <= today && today <= p.to,
+          total: teams.reduce((n, t) => n + t.total, 0),
+          money: teams.reduce((n, t) => n + t.money, 0),
+          teams,
+        };
+      }),
     };
   }
 
@@ -178,13 +190,14 @@ export class TeamKpiService {
     ]);
     const ids = [...new Set([...current.map((u) => u.id), ...cells.map((c) => c.userId)])];
     const days = await k.daysByUser(ids, range);
-    const totals = { byKenh: zeroKenh(), byPhanLoai: zeroPhanLoai(), total: 0, money: 0 };
+    const totals = { byKenh: zeroKenh(), byPhanLoai: zeroPhanLoai(), total: 0, money: 0, active: 0 };
     const rows = ids.map((userId): TeamKpiRow => {
       const u = current.find((x) => x.id === userId);
       const row: TeamKpiRow = {
         userId,
         fullName: u?.full_name ?? names.find((n) => n.userId === userId)?.fullName ?? '',
         role: (u?.role as Role | undefined) ?? null,
+        // `u` chỉ có khi người đó còn thuộc team; đã rời team hoặc bị khóa đều tính là không hoạt động.
         active: u?.status === 'active',
         byKenh: zeroKenh(),
         byPhanLoai: zeroPhanLoai(),
@@ -205,6 +218,7 @@ export class TeamKpiService {
       for (const p of PHAN_LOAI) totals.byPhanLoai[p] += r.byPhanLoai[p];
       totals.total += r.total;
       totals.money += r.money;
+      if (r.total > 0) totals.active += 1;
     }
     rows.sort((a, b) => a.fullName.localeCompare(b.fullName, 'vi') || a.userId.localeCompare(b.userId));
     return { rows, totals };
