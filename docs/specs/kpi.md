@@ -96,3 +96,51 @@ vì `handle()` chỉ trả thông báo chung cho `ZodError`.
 - `/kpi/mine`: KPI của tôi, có hai ô tổng hợp ở đầu trang; chọn kỳ nhanh hoặc từ ngày – đến ngày; bảng 11 kênh gom 6 nhóm; danh sách dòng đã gửi.
 - `/kpi/rates`: đơn giá, **trang riêng**. Mọi người xem lịch sử, mỗi phiên bản là một cột; chỉ Trưởng phòng thấy nút "Đổi đơn giá".
   (Design ban đầu để phần đơn giá trong `/kpi` hoặc `/kpi/mine` và chỉ Trưởng phòng thấy; người dùng đổi sang trang riêng, mọi người xem.)
+
+## KPI theo team (mốc 5)
+
+Thiết kế: `docs/superpowers/specs/2026-11-20-moc-5-kpi-theo-team-design.md`. Chỉ đọc, không ghi `audit_log`, không qua `ConfirmDialog`.
+
+Nguồn cũ (chỉ đọc): `app/src/Stats.js` `teamReport_`, `teamMember_`, `teamOverview_`, `teamTrend_`;
+`app/src/Pure.js` `buildTeamMatrix`, `deptOverview`, `trendPeriods`, `previousPeriod`.
+
+Mã mới: `packages/shared/src/kpi-team.ts`, `packages/core/src/modules/kpi/team-kpi.service.ts` và `team-kpi.policy.ts`,
+`packages/core/src/policies/permissions.ts` (`canTeamKpi`), `packages/db/src/repositories/kpi-team.repository.ts`,
+`apps/web/src/app/api/v1/teams/[id]/kpi`, `kpi-reports/overview`, `kpi-reports/trend`, `apps/web/src/features/team`.
+
+### Quyền và thứ tự kiểm
+
+- `team.kpi.view` (báo cáo team, chi tiết thành viên, xu hướng một team): Trưởng phòng mọi team; Quản lý chỉ `actor.teamId`; Nhân viên không.
+  Thông báo: "Bạn không có quyền xem báo cáo team". Quản lý không có `teamId` bị chặn với mọi team.
+- `dept.kpi.view` (tổng quan phòng, xu hướng `team=all`): chỉ Trưởng phòng. Thông báo: "Chỉ Trưởng phòng được xem tổng quan phòng".
+- Thứ tự kiểm: (1) Nhân viên 403; (2) team không tồn tại 400 "Team không hợp lệ"; (3) team ngoài phạm vi 403.
+- Khác bản cũ: route kiểm query bằng `parseVi` trước khi vào service, nên Nhân viên gửi query sai nhận 400, không phải 403.
+
+### API
+
+| Route | Trả về |
+|---|---|
+| `GET /api/v1/teams/{id}/kpi?from&to` | `{ report }` |
+| `GET /api/v1/teams/{id}/kpi/members/{userId}?from&to` | `{ member }` |
+| `GET /api/v1/kpi-reports/overview?from&to` (Trưởng phòng) | `{ overview }` |
+| `GET /api/v1/kpi-reports/trend?team=<uuid\|all>&unit=week\|month` | `{ trend }` |
+
+Mã lỗi 400/401/403/404. `from`, `to` dùng lại luật `kpiRangeSchema` ở trên. Thông báo: "Team không hợp lệ", "Kỳ không hợp lệ" (`unit` sai), "Không tìm thấy thành viên".
+
+### Quy tắc tính
+
+- Dòng tính cho team theo `kpi_report.team_id` chụp lúc gửi (như `buildTeamMatrix`). Dòng `team_id` rỗng là "Không thuộc team".
+- Lọc ngày bằng biên `created_at` đổi từ ngày VN (như `KpiReportRepository.inRange`), không lọc `report_date`, để dùng index `ix_kpi_report_team_created`, `ix_kpi_report_created`.
+- Người trong bảng team = tài khoản chưa xóa có `team_id` = team ∪ người có dòng của team trong kỳ. `active` = chưa xóa, `status = 'active'`, `team_id` = team.
+  Sắp xếp `fullName.localeCompare(…, 'vi')`, rồi `userId`. Team luôn theo `sort_order`. `days` đếm theo mọi dòng của người đó (cả dòng team khác, như cũ).
+- Chi tiết thành viên (`teamMember_`): `userId` ngoài tập người của bảng team kỳ đó, hoặc không tồn tại, cùng trả 404 "Không tìm thấy thành viên", không lộ tên. `userId` không phải uuid: 400 cùng thông báo.
+  Khác bản cũ: cũ trả tên theo email bất kỳ.
+- Tổng quan (`teamOverview_`, `deptOverview`): `prev = previousPeriod(range)`. Mỗi team là `DeptLine & { team: Team }` (`team` gồm `shortName`), theo `sort_order`;
+  `DeptLine` = `total, money, active, people, prevTotal, change`. `change = round((total - prevTotal) * 100 / prevTotal)`, `null` khi `prevTotal = 0`.
+  `noTeam` là hàng "Không thuộc team", `active = people` = số người có dòng `team_id` rỗng trong kỳ.
+  `totals` = cộng `teams` và `noTeam`; `prevTotal` (tổng ticket kỳ trước cả phòng) và `change` do service tính. Người chuyển team được đếm ở mỗi team có dòng của họ (như cũ), nên `active ≤ people`.
+  `groups`: 6 nhóm `KENH_GROUPS` `{ name, byTeam, noTeam, total }`.
+- Xu hướng (`teamTrend_`): `periods = trendPeriods(unit, hôm nay VN)`, cũ trước, kỳ đang chạy `running`. Không cache. Một câu SQL `unnest` + `group by` kỳ và team.
+  `team=all`: `teams` theo `sort_order` cộng `teamId: null` (Không thuộc team). Khác bản cũ: cũ luôn trả đúng 3 team, các giá trị khác là null.
+- `team.short_name` (not null, 1..20 ký tự, unique): TaxOnline (Thuế, Kế toán và Hệ thống quản lý), iBHXH (Bảo hiểm xã hội và Quản lý nhân sự),
+  iXHD (Hóa đơn điện tử, Hải quan và Chuyển đổi số). Migration `20261120020136_kpi_team.sql` điền theo `name` và báo lỗi nếu còn team rỗng.

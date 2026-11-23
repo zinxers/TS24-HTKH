@@ -44,7 +44,7 @@ export class AccountService {
   }
 
   async listTeams(): Promise<Team[]> {
-    return (await this.deps.teams.list()).map((t) => ({ id: t.id, name: t.name }));
+    return (await this.deps.teams.list()).map((t) => ({ id: t.id, name: t.name, shortName: t.short_name }));
   }
 
   async create(actor: CurrentUser, input: AccountCreateInput): Promise<AccountView> {

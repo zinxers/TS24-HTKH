@@ -96,3 +96,12 @@ const rates = z.strictObject(
 
 export const rateSetSchema = z.object({ from: isoDateField, rates }, { error: 'Dữ liệu đơn giá không hợp lệ' });
 export type RateSetInput = z.infer<typeof rateSetSchema>;
+
+export const teamIdSchema = z.uuid({ error: 'Team không hợp lệ' });
+export const userIdSchema = z.uuid({ error: 'Không tìm thấy thành viên' });
+
+export const trendQuerySchema = z.object({
+  team: z.union([z.literal('all'), teamIdSchema], { error: 'Team không hợp lệ' }),
+  unit: z.enum(['week', 'month'], { error: 'Kỳ không hợp lệ' }),
+});
+export type TrendQuery = z.infer<typeof trendQuerySchema>;

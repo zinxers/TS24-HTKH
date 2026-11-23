@@ -2,14 +2,7 @@
 
 import {
   KENH_GROUPS,
-  MAX_RANGE_DAYS,
-  isIsoDate,
-  previousPeriod,
-  quarterPeriod,
-  runningMonthPeriod,
   toVnDate,
-  weekPeriod,
-  type IsoDate,
   type KpiLine,
   type MyKpi,
   type Period,
@@ -19,23 +12,13 @@ import { useEffect, useState } from 'react';
 import { apiClient } from '../../lib/api-client';
 import { errorMessage } from '../accounts/labels';
 import { KpiShell, fmtDate, fmtNumber, useKpiUser } from './KpiShell';
-
-const PRESETS: { label: string; of: (today: IsoDate) => Period }[] = [
-  { label: 'Tuần này', of: weekPeriod },
-  { label: 'Tuần trước', of: (t) => previousPeriod(weekPeriod(t)) },
-  { label: 'Tháng này', of: runningMonthPeriod },
-  { label: 'Tháng trước', of: (t) => previousPeriod(runningMonthPeriod(t)) },
-  { label: 'Quý này', of: (t) => quarterPeriod(t) },
-  { label: 'Quý trước', of: (t) => quarterPeriod(t, -1) },
-];
-const DEFAULT_PRESET = 'Tháng này';
+import { PeriodPicker, defaultPeriod } from './PeriodPicker';
 
 /** KPI của chính người đăng nhập theo khoảng ngày; mặc định kỳ tháng đang chạy. */
 export function MyKpiScreen() {
   const { me, notice, setNotice } = useKpiUser();
   const [teamName, setTeamName] = useState<string | null>(null);
-  const [preset, setPreset] = useState<string | null>(DEFAULT_PRESET);
-  const [range, setRange] = useState<Period>(() => PRESETS[2]!.of(toVnDate(new Date())));
+  const [range, setRange] = useState<Period>(defaultPeriod);
   const [kpi, setKpi] = useState<MyKpi | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,15 +44,6 @@ export function MyKpiScreen() {
     };
   }, [me, range]);
 
-  const pick = (p: (typeof PRESETS)[number]) => {
-    setPreset(p.label);
-    setRange(p.of(toVnDate(new Date())));
-  };
-  const edit = (key: keyof Period, value: string) => {
-    setPreset(null);
-    if (isIsoDate(value)) setRange((r) => ({ ...r, [key]: value }));
-  };
-
   return (
     <KpiShell me={me} notice={notice} onNotice={setNotice}>
       <div className="page-head">
@@ -87,24 +61,7 @@ export function MyKpiScreen() {
         </div>
       </div>
 
-      <div className="chips" role="group" aria-label="Chọn kỳ nhanh">
-        {PRESETS.map((p) => (
-          <button key={p.label} className="chip" type="button" aria-pressed={preset === p.label} onClick={() => pick(p)}>
-            {p.label}
-          </button>
-        ))}
-      </div>
-      <div className="range">
-        <label>
-          Từ ngày
-          <input className="kin" type="date" value={range.start} onChange={(e) => edit('start', e.target.value)} />
-        </label>
-        <label>
-          Đến ngày
-          <input className="kin" type="date" value={range.end} onChange={(e) => edit('end', e.target.value)} />
-        </label>
-        <p className="range-note">Chọn tay từ ngày – đến ngày thì chip kỳ nhanh bỏ chọn. Tối đa {MAX_RANGE_DAYS} ngày.</p>
-      </div>
+      <PeriodPicker value={range} onChange={setRange} />
 
       {error && (
         <p role="alert" className="banner-error">

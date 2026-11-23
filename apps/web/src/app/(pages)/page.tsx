@@ -75,6 +75,14 @@ export default function Page() {
                 </span>
               </Link>
               {user.role !== 'staff' && (
+                <Link className="menu-row" href="/team">
+                  KPI theo team{' '}
+                  <span className="chev" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
+              )}
+              {user.role !== 'staff' && (
                 <Link className="menu-row" href="/accounts">
                   Quản lý tài khoản{' '}
                   <span className="chev" aria-hidden="true">

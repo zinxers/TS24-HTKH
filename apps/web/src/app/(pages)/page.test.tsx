@@ -35,6 +35,19 @@ describe('trang /: tài khoản', () => {
     else expect(link).not.toBeInTheDocument();
   });
 
+  it.each([
+    ['head', true],
+    ['manager', true],
+    ['staff', false],
+  ] as const)('%s: liên kết KPI theo team hiện = %s', async (role, shown) => {
+    vi.spyOn(apiClient.auth, 'me').mockResolvedValue({ ...USER, role, teamId: role === 'head' ? null : 't1' });
+    render(<Page />);
+    await screen.findByRole('heading', { level: 1 });
+    const link = screen.queryByRole('link', { name: /KPI theo team/ });
+    if (shown) expect(link).toHaveAttribute('href', '/team');
+    else expect(link).not.toBeInTheDocument();
+  });
+
   it('mọi vai trò có liên kết tới Nhập KPI, KPI của tôi, Đơn giá KPI', async () => {
     vi.spyOn(apiClient.auth, 'me').mockResolvedValue({ ...USER, role: 'staff' });
     render(<Page />);

@@ -36,7 +36,7 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(new Date('2026-11-19T05:00:00Z'));
   vi.spyOn(apiClient.auth, 'me').mockResolvedValue(USER);
-  vi.spyOn(apiClient.teams, 'list').mockResolvedValue([{ id: 't1', name: 'Team Hỗ trợ 1A' }]);
+  vi.spyOn(apiClient.teams, 'list').mockResolvedValue([{ id: 't1', name: 'Team Hỗ trợ 1A', shortName: 'T1A' }]);
   mine = vi.spyOn(apiClient.kpi, 'mine').mockResolvedValue(kpi());
 });
 afterEach(() => vi.useRealTimers());

@@ -2,7 +2,16 @@
 // và quy tắc spec Mốc 4 mục 5, 7.
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_KPI_RATES, KENH, KENH_GROUPS, PHAN_LOAI } from '../kpi';
-import { checkKpiRow, kpiRangeSchema, kpiRowSchema, kpiSubmitSchema, rateSetSchema } from './kpi';
+import {
+  checkKpiRow,
+  kpiRangeSchema,
+  kpiRowSchema,
+  kpiSubmitSchema,
+  rateSetSchema,
+  teamIdSchema,
+  trendQuerySchema,
+  userIdSchema,
+} from './kpi';
 
 const row = (over: Record<string, unknown> = {}) => ({
   rowId: 'row-0001',
@@ -179,5 +188,27 @@ describe('rateSetSchema', () => {
   });
   it('biên 0 và 1000000 hợp lệ', () => {
     expect(rateSetSchema.safeParse({ from: '2026-11-20', rates: { ...rates(), 'Chăm sóc KH': 0, 'Chat Hoàn Thành': 1_000_000 } }).success).toBe(true);
+  });
+});
+
+describe('schema KPI theo team', () => {
+  const uuid = '3f2504e0-4f89-41d3-9a0c-0305e82c3301';
+  const msg = (r: { success: boolean; error?: { issues: { message: string }[] } }) => r.error?.issues[0]?.message;
+
+  it('teamIdSchema', () => {
+    expect(teamIdSchema.safeParse(uuid).success).toBe(true);
+    expect(msg(teamIdSchema.safeParse('abc'))).toBe('Team không hợp lệ');
+  });
+
+  it('userIdSchema', () => {
+    expect(userIdSchema.safeParse(uuid).success).toBe(true);
+    expect(msg(userIdSchema.safeParse('abc'))).toBe('Không tìm thấy thành viên');
+  });
+
+  it('trendQuerySchema', () => {
+    expect(trendQuerySchema.safeParse({ team: 'all', unit: 'week' }).success).toBe(true);
+    expect(trendQuerySchema.safeParse({ team: uuid, unit: 'month' }).success).toBe(true);
+    expect(msg(trendQuerySchema.safeParse({ team: 'all', unit: 'day' }))).toBe('Kỳ không hợp lệ');
+    expect(msg(trendQuerySchema.safeParse({ team: 'x', unit: 'week' }))).toBe('Team không hợp lệ');
   });
 });

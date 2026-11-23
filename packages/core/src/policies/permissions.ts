@@ -74,3 +74,11 @@ export type KpiAction = 'kpi.submit' | 'rate.set';
 export function canKpi(actor: CurrentUser, action: KpiAction): boolean {
   return action === 'kpi.submit' || actor.role === 'head';
 }
+
+export type TeamKpiAction = 'team.kpi.view' | 'dept.kpi.view';
+
+/** Trưởng phòng xem mọi team và tổng quan phòng; Quản lý chỉ xem team mình; Nhân viên không xem. */
+export function canTeamKpi(actor: CurrentUser, action: TeamKpiAction, teamId?: string): boolean {
+  if (actor.role === 'head') return true;
+  return action === 'team.kpi.view' && actor.role === 'manager' && actor.teamId !== null && actor.teamId === teamId;
+}

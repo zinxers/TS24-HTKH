@@ -175,6 +175,41 @@ describe('kpi_report_priced', () => {
   });
 });
 
+describe('kpi_team', () => {
+  it('team.short_name đủ 3 team đúng giá trị', async () => {
+    const rows = await appSql()<{ name: string; short_name: string }[]>`select name, short_name from team`;
+    expect(Object.fromEntries(rows.map((r) => [r.name, r.short_name]))).toEqual({
+      'Thuế, Kế toán và Hệ thống quản lý': 'TaxOnline',
+      'Bảo hiểm xã hội và Quản lý nhân sự': 'iBHXH',
+      'Hóa đơn điện tử, Hải quan và Chuyển đổi số': 'iXHD',
+    });
+  });
+
+  it('short_name trùng bị từ chối', async () => {
+    await inRollback(adminSql(), async (tx) => {
+      await expect(tx`update team set short_name = 'iBHXH' where short_name = 'TaxOnline'`).rejects.toMatchObject({
+        code: '23505',
+      });
+    });
+  });
+
+  it('short_name rỗng bị từ chối', async () => {
+    await inRollback(adminSql(), async (tx) => {
+      await expect(tx`update team set short_name = '' where short_name = 'TaxOnline'`).rejects.toMatchObject({
+        code: '23514',
+      });
+    });
+  });
+
+  it('có index ix_kpi_report_team_created và ix_kpi_report_created', async () => {
+    const rows = await appSql()<{ indexname: string }[]>`
+      select indexname from pg_indexes where tablename = 'kpi_report'`;
+    const names = rows.map((r) => r.indexname);
+    expect(names).toContain('ix_kpi_report_team_created');
+    expect(names).toContain('ix_kpi_report_created');
+  });
+});
+
 describe('check:rls với kpi', () => {
   it('bảng có RLS và không cấp quyền cho anon/authenticated', async () => {
     const noRls = await tablesWithoutRls(adminSql());

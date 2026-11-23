@@ -1,6 +1,6 @@
 import type { CurrentUser } from '@ts24-htkh/shared';
 import { describe, expect, it } from 'vitest';
-import { can, canKpi, canSee, type AccountAction } from './permissions';
+import { can, canKpi, canSee, canTeamKpi, type AccountAction } from './permissions';
 
 const A = 'team-a';
 const B = 'team-b';
@@ -126,5 +126,26 @@ describe('canKpi', () => {
     expect(canKpi(H, 'rate.set')).toBe(true);
     expect(canKpi(M, 'rate.set')).toBe(false);
     expect(canKpi(S, 'rate.set')).toBe(false);
+  });
+});
+
+describe('canTeamKpi', () => {
+  it('team.kpi.view: Trưởng phòng mọi team, Quản lý chỉ team mình', () => {
+    expect(canTeamKpi(H, 'team.kpi.view', A)).toBe(true);
+    expect(canTeamKpi(H, 'team.kpi.view', B)).toBe(true);
+    expect(canTeamKpi(M, 'team.kpi.view', A)).toBe(true);
+    expect(canTeamKpi(M, 'team.kpi.view', B)).toBe(false);
+    expect(canTeamKpi(M, 'team.kpi.view')).toBe(false);
+  });
+
+  it('team.kpi.view: Quản lý không có team, Nhân viên bị chặn', () => {
+    expect(canTeamKpi(user('M0', 'manager', null), 'team.kpi.view', A)).toBe(false);
+    expect(canTeamKpi(S, 'team.kpi.view', A)).toBe(false);
+  });
+
+  it('dept.kpi.view: chỉ Trưởng phòng', () => {
+    expect(canTeamKpi(H, 'dept.kpi.view')).toBe(true);
+    expect(canTeamKpi(M, 'dept.kpi.view')).toBe(false);
+    expect(canTeamKpi(S, 'dept.kpi.view')).toBe(false);
   });
 });

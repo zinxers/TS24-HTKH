@@ -68,7 +68,7 @@ ts24-htkh/
 │  │  │  └─ _lib/                  handle() (lỗi → JSON), parseVi() (thông báo zod tiếng Việt), requireUser(), cookie phiên
 │  │  ├─ src/proxy.ts              gợi ý điều hướng theo cookie có/không (lớp giao diện, không phải luật)
 │  │  ├─ src/components/           ConfirmDialog, DateRange, Chart
-│  │  ├─ src/features/<nghiệp vụ>/ màn hình + hook
+│  │  ├─ src/features/<nghiệp vụ>/ màn hình + hook (vd team: TeamKpiScreen)
 │  │  ├─ src/lib/api-client.ts     nơi duy nhất giao diện gọi API
 │  │  └─ tests/e2e/
 │  └─ desktop/                    @ts24-htkh/desktop — Tauri 2 vỏ mỏng
@@ -76,7 +76,7 @@ ts24-htkh/
 │     ├─ src-tauri/  (src/lib.rs, tauri.conf.json, tauri.store.conf.json, capabilities/remote.json, icons/)
 │     └─ packaging/msix/
 ├─ packages/
-│  ├─ core/                       src/policies/ (ma trận quyền), src/modules/ (auth, accounts, kpi), container.ts
+│  ├─ core/                       src/policies/ (ma trận quyền), src/modules/ (auth, accounts, kpi: gồm team-kpi.service.ts), container.ts
 │  ├─ db/  storage/  xlsx-report/  shared/  platform/  config/
 ├─ tools/
 │  ├─ sheets-migration/           ETL một lần Google Sheet → PostgreSQL (chỉ đọc Sheet)
@@ -96,7 +96,7 @@ Bên trong một module nghiệp vụ (ví dụ `accounts`):
 ```
 packages/core/src/policies/            permissions.ts (ma trận quyền dùng chung, ADR-0009) · *.test.ts
 packages/core/src/modules/accounts/   account.service.ts · account.policy.ts · account.dto.ts · *.test.ts
-packages/db/src/repositories/          user.repository.ts · team.repository.ts · audit-log.repository.ts · *.db.test.ts
+packages/db/src/repositories/          user.repository.ts · team.repository.ts · kpi-team.repository.ts · audit-log.repository.ts · *.db.test.ts
 apps/web/src/app/api/v1/accounts/      route.ts · [id]/route.ts · [id]/status · [id]/password · transfer-head
 apps/web/src/features/accounts/        AccountsScreen.tsx · AccountDialogs.tsx · RowMenu.tsx · useConfirmAction.ts
 ```

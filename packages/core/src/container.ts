@@ -4,6 +4,7 @@ import {
   Database,
   KpiRateRepository,
   KpiReportRepository,
+  KpiTeamRepository,
   SessionRepository,
   TeamRepository,
   UserRepository,
@@ -14,6 +15,7 @@ import { AuthService } from './modules/auth/auth.service';
 import { Argon2PasswordHasher } from './modules/auth/password-hasher';
 import { KpiRateService } from './modules/kpi/kpi-rate.service';
 import { KpiReportService } from './modules/kpi/kpi-report.service';
+import { TeamKpiService } from './modules/kpi/team-kpi.service';
 import type { UnitOfWork } from './unit-of-work';
 
 export interface Container {
@@ -21,6 +23,7 @@ export interface Container {
   accountService: AccountService;
   kpiReportService: KpiReportService;
   kpiRateService: KpiRateService;
+  teamKpiService: TeamKpiService;
 }
 
 let container: Container | undefined;
@@ -46,6 +49,7 @@ export function getContainer(): Container {
   const users = new UserRepository(sql);
   const hasher = new Argon2PasswordHasher();
   const kpiRates = new KpiRateRepository(sql);
+  const teams = new TeamRepository(sql);
   container = {
     authService: new AuthService({
       users,
@@ -54,9 +58,10 @@ export function getContainer(): Container {
       hasher,
       sessionSecret: env.sessionSecret,
     }),
-    accountService: new AccountService({ users, teams: new TeamRepository(sql), hasher, uow }),
+    accountService: new AccountService({ users, teams, hasher, uow }),
     kpiReportService: new KpiReportService({ kpiReports: new KpiReportRepository(sql), kpiRates, uow }),
     kpiRateService: new KpiRateService({ kpiRates, uow }),
+    teamKpiService: new TeamKpiService({ teams, users, kpiTeam: new KpiTeamRepository(sql) }),
   };
   return container;
 }

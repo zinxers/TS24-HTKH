@@ -2,6 +2,7 @@ import type {
   AuditLogRepository,
   KpiRateRepository,
   KpiReportRepository,
+  KpiTeamRepository,
   SessionRepository,
   TeamRepository,
   UserRepository,
@@ -41,6 +42,11 @@ export type KpiReportStore = Methods<
 >;
 
 export type KpiRateStore = Methods<KpiRateRepository, 'listVersions' | 'findVersion' | 'upsertVersion' | 'todayRates'>;
+
+export type KpiTeamStore = Methods<
+  KpiTeamRepository,
+  'teamCells' | 'latestNames' | 'daysByUser' | 'teamItems' | 'countByTeam' | 'trend'
+>;
 
 export interface Repos {
   users: UserStore;
