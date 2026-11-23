@@ -133,7 +133,7 @@ Mã lỗi 400/401/403/404. `from`, `to` dùng lại luật `kpiRangeSchema` ở 
 - Lọc ngày bằng biên `created_at` đổi từ ngày VN (như `KpiReportRepository.inRange`), không lọc `report_date`, để dùng index `ix_kpi_report_team_created`, `ix_kpi_report_created`.
 - Người trong bảng team = tài khoản chưa xóa có `team_id` = team ∪ người có dòng của team trong kỳ. `active` = chưa xóa, `status = 'active'`, `team_id` = team.
   Sắp xếp `fullName.localeCompare(…, 'vi')`, rồi `userId`. Team luôn theo `sort_order`. `days` đếm theo mọi dòng của người đó (cả dòng team khác, như cũ).
-- Chi tiết thành viên (`teamMember_`): `userId` ngoài tập người của bảng team kỳ đó, hoặc không tồn tại, cùng trả 404 "Không tìm thấy thành viên", không lộ tên.
+- Chi tiết thành viên (`teamMember_`): `userId` ngoài tập người của bảng team kỳ đó, hoặc không tồn tại, cùng trả 404 "Không tìm thấy thành viên", không lộ tên. `userId` không phải uuid: 400 cùng thông báo.
   Khác bản cũ: cũ trả tên theo email bất kỳ.
 - Tổng quan (`teamOverview_`, `deptOverview`): `prev = previousPeriod(range)`. Mỗi team là `DeptLine & { team: Team }` (`team` gồm `shortName`), theo `sort_order`;
   `DeptLine` = `total, money, active, people, prevTotal, change`. `change = round((total - prevTotal) * 100 / prevTotal)`, `null` khi `prevTotal = 0`.
