@@ -127,6 +127,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"report_note": {
+                  Row: {
+                    "fields": NonNullable<Json>,"id": string,"period_start": string,"report_type": string,"team_id": string | null,"updated_at": string,"updated_by": string,"updated_by_name": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "fields"?: NonNullable<Json>,"id"?: string,"period_start": string,"report_type": string,"team_id"?: string | null,"updated_at"?: string,"updated_by": string,"updated_by_name": string,"version"?: number
+                  }
+                  Update: {
+                    "fields"?: NonNullable<Json>,"id"?: string,"period_start"?: string,"report_type"?: string,"team_id"?: string | null,"updated_at"?: string,"updated_by"?: string,"updated_by_name"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "report_note_team_id_fkey"
+      columns: ["team_id"]
+isOneToOne: false
+      referencedRelation: "team"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "report_note_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "app_user"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"team": {
                   Row: {
                     "created_at": string,"id": string,"name": string,"short_name": string,"sort_order": number,"updated_at": string

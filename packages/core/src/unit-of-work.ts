@@ -3,6 +3,7 @@ import type {
   KpiRateRepository,
   KpiReportRepository,
   KpiTeamRepository,
+  ReportNoteRepository,
   SessionRepository,
   TeamRepository,
   UserRepository,
@@ -48,12 +49,15 @@ export type KpiTeamStore = Methods<
   'teamCells' | 'latestNames' | 'daysByUser' | 'teamItems' | 'countByTeam' | 'trend'
 >;
 
+export type ReportNoteStore = Methods<ReportNoteRepository, 'list' | 'findForUpdate' | 'upsert'>;
+
 export interface Repos {
   users: UserStore;
   sessions: SessionStore;
   audit: AuditStore;
   kpiReports: KpiReportStore;
   kpiRates: KpiRateStore;
+  reportNotes: ReportNoteStore;
 }
 
 /** Chạy nhiều repository trong một transaction; fn ném lỗi thì rollback. */

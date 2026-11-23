@@ -5,6 +5,7 @@ import {
   KpiRateRepository,
   KpiReportRepository,
   KpiTeamRepository,
+  ReportNoteRepository,
   SessionRepository,
   TeamRepository,
   UserRepository,
@@ -43,6 +44,7 @@ export function getContainer(): Container {
           audit: new AuditLogRepository(tx),
           kpiReports: new KpiReportRepository(tx),
           kpiRates: new KpiRateRepository(tx),
+          reportNotes: new ReportNoteRepository(tx),
         }),
       ),
   };
