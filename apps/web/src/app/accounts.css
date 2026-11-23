@@ -1,8 +1,5 @@
 /* Trang /accounts và danh sách thao tác ở trang chủ (Mốc 3). Token --fill, --elevated ở controls.css. */
 /* ---------- Trang /accounts ---------- */
-.content.wide {
-  max-width: 1200px;
-}
 .back {
   display: inline-block;
   margin-bottom: 8px;
