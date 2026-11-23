@@ -95,7 +95,7 @@ export class ReportService {
     this.findPeriod(type, dto.start);
     const allowed = new Set(reportFieldsFor(type, dto.scope).map((f) => f.key));
     if (Object.keys(dto.fields).some((k) => !allowed.has(k))) throw new ValidationError(MSG_TEXT);
-    const fields = Object.fromEntries(Object.entries(dto.fields).filter(([, v]) => v !== ''));
+    const fields = Object.fromEntries(Object.entries(dto.fields).filter(([, v]) => v.trim() !== ''));
     const teamId = dto.scope === DEPT_SCOPE ? null : dto.scope;
 
     await this.deps.uow.transaction(async ({ reportNotes, audit }) => {
