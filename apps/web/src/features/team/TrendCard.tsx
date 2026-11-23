@@ -33,8 +33,8 @@ export function TrendCard({ team, title, initialUnit = 'week' }: { team: string;
   const cols = (data?.periods ?? []).map((p) => ({
     label: unit === 'week' ? `T${tsWeekNumber(p.from)}` : `T${Number(p.to.slice(5, 7))}`,
     running: p.running,
-    total: p.teams.reduce((s, t) => s + t.total, 0),
-    money: p.teams.reduce((s, t) => s + t.money, 0),
+    total: p.total,
+    money: p.money,
   }));
   const max = Math.max(0, ...cols.map((c) => c.total));
   const name = `Ticket ${UNITS.find((u) => u.unit === unit)!.label} TS24 gần nhất`;

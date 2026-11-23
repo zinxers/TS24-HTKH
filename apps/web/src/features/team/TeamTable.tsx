@@ -15,15 +15,20 @@ export function TeamTable({ teamId, range }: { teamId: string; range: Period }) 
   const [data, setData] = useState<TeamKpi | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [picked, setPicked] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let stale = false;
     setError(null);
     setPicked(null);
-    apiClient.kpi.team(teamId, { from: range.start, to: range.end }).then(
-      (d) => !stale && setData(d),
-      (e: unknown) => !stale && (setData(null), setError(errorMessage(e))),
-    );
+    setLoading(true);
+    apiClient.kpi
+      .team(teamId, { from: range.start, to: range.end })
+      .then(
+        (d) => !stale && setData(d),
+        (e: unknown) => !stale && (setData(null), setError(errorMessage(e))),
+      )
+      .finally(() => !stale && setLoading(false));
     return () => {
       stale = true;
     };
@@ -35,11 +40,16 @@ export function TeamTable({ teamId, range }: { teamId: string; range: Period }) 
         {error}
       </p>
     );
-  if (!data) return null;
+  if (!data) return loading ? <p role="status" aria-busy="true">Đang tải…</p> : null;
   const { rows, totals } = data;
 
   return (
-    <section>
+    <section aria-busy={loading}>
+      {loading && (
+        <p className="muted" role="status">
+          Đang tải…
+        </p>
+      )}
       <div className="stat-row">
         <div className="stat">
           <span className="v">{fmtNumber(totals.total)}</span>
@@ -51,7 +61,7 @@ export function TeamTable({ teamId, range }: { teamId: string; range: Period }) 
         </div>
         <div className="stat">
           <span className="v">
-            {rows.filter((r) => r.total > 0).length} / {rows.length}
+            {totals.active} / {rows.length}
           </span>
           <span className="l">Người có báo cáo</span>
         </div>
@@ -82,8 +92,8 @@ export function TeamTable({ teamId, range }: { teamId: string; range: Period }) 
                       <button type="button" aria-expanded={picked === r.userId} onClick={() => setPicked(r.userId)}>
                         {r.fullName}
                       </button>
-                      {r.role === 'manager' && <span className="tag">Quản lý</span>}
-                      {!r.active && <span className="tag">Không hoạt động</span>}
+                      {r.role === 'manager' && <span className="team-tag">Quản lý</span>}
+                      {!r.active && <span className="team-tag">Không hoạt động</span>}
                     </th>
                     {KENH_GROUPS.map((g) => (
                       <td key={g.name} className="num">

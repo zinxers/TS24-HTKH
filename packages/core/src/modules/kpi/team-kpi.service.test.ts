@@ -200,7 +200,7 @@ describe('report', () => {
     expect(bao!.byKenh['PI Hoàn Thành']).toBe(1);
     expect(bao!.byPhanLoai['Hỗ trợ sử dụng']).toBe(2);
     expect(dat).toMatchObject({ userId: DAT, role: 'staff', active: false, total: 1, money: 1000, days: 2 });
-    expect(r.totals).toMatchObject({ total: 3, money: 3500 });
+    expect(r.totals).toMatchObject({ total: 3, money: 3500, active: 2 });
     expect(r.totals.byKenh['PI Hoàn Thành']).toBe(2);
     expect(r.totals.byKenh['Email Hoàn Thành']).toBe(1);
   });
@@ -242,10 +242,22 @@ describe('overview', () => {
     expect(o.teams[1]).toMatchObject({ total: 2, money: 3800, active: 2, people: 3, prevTotal: 0, change: null });
     expect(o.noTeam).toEqual({ total: 1, money: 500, active: 1, people: 1, prevTotal: 0, change: null });
     // Cả phòng: prevTotal cộng mọi team kể cả null (1), change = (6-1)/1 = 500%.
-    expect(o.totals).toEqual({ total: 6, money: 7800, active: 5, people: 7, prevTotal: 1, change: 500 });
-    expect(o.totals.active).toBeLessThanOrEqual(o.totals.people);
+    // Người đếm theo userId khác nhau: Bảo, Đạt có dòng ở cả A và B chỉ tính một lần (5 người, 3 có BC).
+    expect(o.totals).toEqual({ total: 6, money: 7800, active: 3, people: 5, prevTotal: 1, change: 500 });
     expect(o.groups.find((g) => g.name === 'PI / PO')).toEqual({ name: 'PI / PO', byTeam: [2, 0], noTeam: 0, total: 2 });
     expect(o.groups.find((g) => g.name === 'Chăm sóc KH')).toEqual({ name: 'Chăm sóc KH', byTeam: [0, 0], noTeam: 1, total: 1 });
+  });
+
+  it('kỳ trước có dòng không thuộc team → noTeam.prevTotal và change tính riêng, cộng vào Cả phòng', async () => {
+    fake.lines.push(
+      line('H', 'Trưởng Phòng H', null, 'Chăm sóc KH', 500, '2026-10-02'),
+      line('H', 'Trưởng Phòng H', null, 'Chăm sóc KH', 500, '2026-10-03'),
+    );
+    const o = await service.overview(H, RANGE);
+    // noTeam: 1 dòng kỳ này, 2 dòng kỳ trước → (1-2)/2 = -50%.
+    expect(o.noTeam).toMatchObject({ total: 1, prevTotal: 2, change: -50 });
+    expect(o.teams[0]).toMatchObject({ prevTotal: 1, change: 200 });
+    expect(o.totals).toMatchObject({ prevTotal: 3, change: 100 });
   });
 
   it('kỳ so sánh: tháng TS24 về tháng trước, khoảng khác lùi cùng số ngày', async () => {
@@ -269,6 +281,7 @@ describe('trend', () => {
       { teamId: B, total: 1, money: 3000 },
       { teamId: null, total: 1, money: 500 },
     ]);
+    expect(w).toMatchObject({ total: 5, money: 7000 });
   });
 
   it('một team: chỉ team đó, kỳ không có dòng = 0', async () => {

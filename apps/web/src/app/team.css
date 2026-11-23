@@ -15,10 +15,9 @@
 .team-table .name button:focus-visible { outline: 2px solid var(--accent); border-radius: 4px; }
 .team-table tr.off td, .team-table tr.off .name, .team-table tr.off .name button { color: var(--secondary); }
 .team-table tfoot th, .team-table tfoot td { font-weight: 600; border-bottom: 0; }
-.tag { display: inline-block; font-size: 12px; border: 1px solid var(--secondary); border-radius: 999px; padding: 0 6px; margin-left: 6px; color: var(--secondary); }
-.up { color: #1a7f37; }
-.down { color: var(--danger); }
-@media (prefers-color-scheme: dark) { .up { color: #32d74b; } }
+.team-tag { display: inline-block; font-size: 12px; border: 1px solid var(--secondary); border-radius: 999px; padding: 0 6px; margin-left: 6px; color: var(--secondary); }
+.team-up { color: var(--success); }
+.team-down { color: var(--danger); }
 
 .member { margin-top: 16px; background: var(--group); border-radius: 12px; padding: 16px; }
 .member h3 { margin: 0 0 4px; font-size: 17px; }

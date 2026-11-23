@@ -54,6 +54,31 @@ describe('TeamKpiScreen', () => {
     expect(ov).toHaveBeenCalled();
   });
 
+  it('Trưởng phòng: phím ←/→/Home/End chuyển tab, tab chọn giữ tabIndex 0, panel gắn aria-controls', async () => {
+    vi.spyOn(apiClient.auth, 'me').mockResolvedValue(HEAD);
+    render(<TeamKpiScreen />);
+    const tabs = await screen.findAllByRole('tab');
+    expect(tabs.map((t) => t.tabIndex)).toEqual([0, -1, -1, -1]);
+    const panel = screen.getByRole('tabpanel');
+    expect(tabs[0]).toHaveAttribute('aria-controls', panel.id);
+    expect(panel).toHaveAttribute('aria-labelledby', tabs[0]!.id);
+
+    fireEvent.keyDown(tabs[0]!, { key: 'ArrowRight' });
+    expect(tabs[1]).toHaveAttribute('aria-selected', 'true');
+    expect(tabs[1]).toHaveFocus();
+    expect(tabs.map((t) => t.tabIndex)).toEqual([-1, 0, -1, -1]);
+    expect(tabs[0]).not.toHaveAttribute('aria-controls');
+    fireEvent.keyDown(tabs[1]!, { key: 'End' });
+    expect(tabs[3]).toHaveAttribute('aria-selected', 'true');
+    fireEvent.keyDown(tabs[3]!, { key: 'ArrowRight' });
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
+    fireEvent.keyDown(tabs[0]!, { key: 'ArrowLeft' });
+    expect(tabs[3]).toHaveAttribute('aria-selected', 'true');
+    fireEvent.keyDown(tabs[3]!, { key: 'Home' });
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
+    expect(tabs[0]).toHaveFocus();
+  });
+
   it('đổi kỳ nhanh gọi lại kpi.team', async () => {
     vi.spyOn(apiClient.auth, 'me').mockResolvedValue(MANAGER);
     render(<TeamKpiScreen />);

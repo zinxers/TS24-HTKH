@@ -10,6 +10,7 @@
   --accent-hover: #0077ed;
   --danger: #d70015; /* 5.6:1 */
   --danger-bg: #fff0f1;
+  --success: #1a7f37; /* 5.1:1 */
   --bar: rgba(245, 245, 247, 0.72);
   --ring: rgba(0, 113, 227, 0.35);
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
@@ -26,6 +27,7 @@
     --accent-hover: #409cff;
     --danger: #ff6961; /* 6.4:1 */
     --danger-bg: #3a1d1d;
+    --success: #32d74b; /* 9.4:1 */
     --bar: rgba(28, 28, 30, 0.72);
     --ring: rgba(10, 132, 255, 0.5);
   }
