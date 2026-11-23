@@ -8,7 +8,7 @@ export type Cells = Record<string, CellValue>;
 function xmlText(v: string): string {
   return v
     // eslint-disable-next-line no-control-regex -- cố ý: loại ký tự điều khiển XML cấm
-    .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f￾￿]/g, '')
+    .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\ufffe\uffff]/g, '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
