@@ -31,6 +31,7 @@
 
 /* Bảng: độ rộng cột cố định, min-width = tổng (960); hẹp hơn thì cuộn ngang trong khung. */
 .table-wrap {
+  position: relative;
   overflow-x: auto;
   background: var(--group);
   border-radius: 12px;
