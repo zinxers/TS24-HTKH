@@ -11,7 +11,8 @@ const expected: Record<string, string[]> = {
   platform: [],
   db: ['@ts24-htkh/shared', 'postgres', 'server-only'],
   storage: ['@ts24-htkh/shared', 'server-only'],
-  'xlsx-report': ['@ts24-htkh/shared'],
+  // fflate mở/đóng zip xlsx (Mốc 6a).
+  'xlsx-report': ['@ts24-htkh/shared', 'fflate'],
   core: [
     '@ts24-htkh/db',
     '@ts24-htkh/shared',
