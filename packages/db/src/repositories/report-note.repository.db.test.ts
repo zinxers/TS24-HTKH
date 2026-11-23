@@ -22,11 +22,11 @@ describe('ReportNoteRepository', () => {
       const { actorId, teamId } = await fixture(tx);
       const repo = new ReportNoteRepository(tx);
       const base = { type: 'WR' as const, periodStart: P, teamId, actorId, actorName: 'Tên' };
-      const a = await repo.upsert({ ...base, fields: { a: 'x' } });
-      const b = await repo.upsert({ ...base, fields: { a: 'y' } });
-      expect([a.version, b.version]).toEqual([1, 2]);
-      expect(b.fields).toEqual({ a: 'y' });
-      expect(b.updatedByName).toBe('Tên');
+      const a = await repo.upsert({ ...base, fields: { a: 'x' }, expectedVersion: null });
+      const b = await repo.upsert({ ...base, fields: { a: 'y' }, expectedVersion: 1 });
+      expect([a!.version, b!.version]).toEqual([1, 2]);
+      expect(b!.fields).toEqual({ a: 'y' });
+      expect(b!.updatedByName).toBe('Tên');
       expect(await repo.findForUpdate('WR', P, teamId)).toMatchObject({ version: 2 });
       expect(await repo.findForUpdate('MR', P, teamId)).toBeNull();
       const [c] = await tx<{ n: number }[]>`select count(*)::int as n from report_note`;
@@ -39,9 +39,9 @@ describe('ReportNoteRepository', () => {
       const { actorId } = await fixture(tx);
       const repo = new ReportNoteRepository(tx);
       const base = { type: 'MR' as const, periodStart: P, teamId: null, actorId, actorName: 'Tên' };
-      await repo.upsert({ ...base, fields: {} });
-      const second = await repo.upsert({ ...base, fields: { k: 'v' } });
-      expect(second.version).toBe(2);
+      await repo.upsert({ ...base, fields: {}, expectedVersion: null });
+      const second = await repo.upsert({ ...base, fields: { k: 'v' }, expectedVersion: 1 });
+      expect(second!.version).toBe(2);
       await expect(
         tx`insert into report_note (report_type, period_start, team_id, updated_by, updated_by_name)
            values ('MR', ${P}::date, null, ${actorId}::uuid, 'x')`,
@@ -53,7 +53,7 @@ describe('ReportNoteRepository', () => {
     await inRollback(adminSql(), async (tx) => {
       const { actorId, teamId } = await fixture(tx);
       const repo = new ReportNoteRepository(tx);
-      const b = { periodStart: P, actorId, actorName: 'Tên', fields: { k: 'v' } };
+      const b = { periodStart: P, actorId, actorName: 'Tên', fields: { k: 'v' }, expectedVersion: null };
       await repo.upsert({ ...b, type: 'QR', teamId: null });
       await repo.upsert({ ...b, type: 'QR', teamId });
       await repo.upsert({ ...b, type: 'WR', teamId });
@@ -62,6 +62,22 @@ describe('ReportNoteRepository', () => {
       expect(rows.map((r) => r.teamId).sort()).toEqual([null, teamId].sort());
     });
   });
+
+  for (const scope of ['team', 'dept'] as const) {
+    it(`xung đột trả null và giữ nguyên dòng (${scope})`, async () => {
+      await inRollback(adminSql(), async (tx) => {
+        const f = await fixture(tx);
+        const repo = new ReportNoteRepository(tx);
+        const teamId = scope === 'team' ? f.teamId : null;
+        const base = { type: 'WR' as const, periodStart: P, teamId, actorId: f.actorId, actorName: 'Tên' };
+        await repo.upsert({ ...base, fields: { a: '1' }, expectedVersion: null });
+        expect(await repo.upsert({ ...base, fields: { a: '2' }, expectedVersion: null })).toBeNull();
+        expect(await repo.upsert({ ...base, fields: { a: '3' }, expectedVersion: 5 })).toBeNull();
+        expect(await repo.findForUpdate('WR', P, teamId)).toMatchObject({ version: 1, fields: { a: '1' } });
+        expect(await repo.upsert({ ...base, type: 'MR', fields: { a: '5' }, expectedVersion: 1 })).toBeNull();
+      });
+    });
+  }
 
   it("report_type 'XR' bị từ chối", async () => {
     await inRollback(adminSql(), async (tx) => {

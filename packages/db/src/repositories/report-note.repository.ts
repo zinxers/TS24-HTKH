@@ -16,6 +16,7 @@ export interface ReportNoteInput {
   fields: Record<string, string>;
   actorId: string;
   actorName: string;
+  expectedVersion: number | null;
 }
 
 type Raw = {
@@ -55,16 +56,23 @@ export class ReportNoteRepository {
     return rows[0] ? toRow(rows[0]) : null;
   }
 
-  async upsert(i: ReportNoteInput): Promise<ReportNoteRow> {
-    const rows = await this.sql<Raw[]>`
-      insert into report_note (report_type, period_start, team_id, fields, updated_by, updated_by_name)
-      values (${i.type}, ${i.periodStart}::date, ${i.teamId}::uuid, ${this.sql.json(i.fields as never)},
-              ${i.actorId}::uuid, ${i.actorName})
-      on conflict (report_type, period_start, team_id) do update
-        set fields = excluded.fields, updated_by = excluded.updated_by,
-            updated_by_name = excluded.updated_by_name, updated_at = now(),
-            version = report_note.version + 1
-      returning team_id, fields, version, updated_at, updated_by_name`;
-    return toRow(rows[0]!);
+  /** Ghi có điều kiện: expectedVersion null = chỉ tạo mới; số = chỉ sửa khi version khớp. Trả null = xung đột. */
+  async upsert(i: ReportNoteInput): Promise<ReportNoteRow | null> {
+    const rows =
+      i.expectedVersion === null
+        ? await this.sql<Raw[]>`
+          insert into report_note (report_type, period_start, team_id, fields, updated_by, updated_by_name)
+          values (${i.type}, ${i.periodStart}::date, ${i.teamId}::uuid, ${this.sql.json(i.fields as never)},
+                  ${i.actorId}::uuid, ${i.actorName})
+          on conflict (report_type, period_start, team_id) do nothing
+          returning team_id, fields, version, updated_at, updated_by_name`
+        : await this.sql<Raw[]>`
+          update report_note
+            set fields = ${this.sql.json(i.fields as never)}, updated_by = ${i.actorId}::uuid,
+                updated_by_name = ${i.actorName}, updated_at = now(), version = version + 1
+          where report_type = ${i.type} and period_start = ${i.periodStart}::date
+            and team_id is not distinct from ${i.teamId}::uuid and version = ${i.expectedVersion}
+          returning team_id, fields, version, updated_at, updated_by_name`;
+    return rows[0] ? toRow(rows[0]) : null;
   }
 }
