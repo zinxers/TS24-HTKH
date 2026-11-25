@@ -26,10 +26,9 @@ export class ReconcileRepository {
 
   /** kpi_report chưa xóa mềm trong khoảng ngày VN, theo thời gian tạo. */
   async lines(range: KpiRange): Promise<ReconcileLine[]> {
-    // Client trả timestamptz dạng chuỗi nên định dạng ISO UTC ngay trong SQL.
     return this.sql<ReconcileLine[]>`
       select user_id as "userId", full_name as "fullName", team_id as "teamId", ticket, kenh,
-             to_char(created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as "createdAt"
+             created_at as "createdAt"
       from kpi_report
       where deleted_at is null and ${createdAtInRange(this.sql, range)}
       order by created_at, id`;
