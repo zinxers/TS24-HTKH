@@ -34,17 +34,19 @@ export class ApiError extends Error {
   }
 }
 
+async function throwApiError(res: Response): Promise<never> {
+  const body: unknown = await res.json().catch(() => null);
+  const error = (body as { error?: { code?: string; message?: string } } | null)?.error;
+  throw error?.code && error.message
+    ? new ApiError(error.code, res.status, error.message)
+    : new ApiError('INTERNAL', res.status, 'Lỗi hệ thống, vui lòng thử lại');
+}
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`/api/v1${path}`, { ...init, credentials: 'same-origin' });
   if (res.status === 204) return undefined as T;
-  const body: unknown = await res.json().catch(() => null);
-  if (!res.ok) {
-    const error = (body as { error?: { code?: string; message?: string } } | null)?.error;
-    throw error?.code && error.message
-      ? new ApiError(error.code, res.status, error.message)
-      : new ApiError('INTERNAL', res.status, 'Lỗi hệ thống, vui lòng thử lại');
-  }
-  return body as T;
+  if (!res.ok) return throwApiError(res);
+  return (await res.json().catch(() => null)) as T;
 }
 
 const sendJson = (method: 'POST' | 'PATCH' | 'PUT', body: unknown): RequestInit => ({
@@ -106,8 +108,13 @@ export const apiClient = {
       (await request<{ preview: ReportPreview }>(`/reports/${type}?start=${start}`)).preview,
     saveNotes: async (type: ReportType, input: ReportNoteSaveInput) =>
       (await request<{ notes: ReportNotes }>(`/reports/${type}/notes`, putJson(input))).notes,
-    /** URL tải .xlsx; dùng cho thẻ tải/Platform, không qua request(). */
-    fileUrl: (type: ReportType, start: IsoDate) => `/api/v1/reports/${type}/file?start=${start}`,
+    /** Tải .xlsx; lỗi ném ApiError thay vì để trình duyệt lưu JSON lỗi thành file. Tên file lấy từ server. */
+    file: async (type: ReportType, start: IsoDate) => {
+      const res = await fetch(`/api/v1/reports/${type}/file?start=${start}`, { credentials: 'same-origin' });
+      if (!res.ok) return throwApiError(res);
+      const fileName = /filename="([^"]+)"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ?? `${type}.xlsx`;
+      return { blob: await res.blob(), fileName };
+    },
   },
   me: {
     updateProfile: async (fullName: string) =>

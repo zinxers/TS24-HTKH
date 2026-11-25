@@ -1,16 +1,14 @@
 import { z } from 'zod';
-import { isIsoDate, type IsoDate } from '../date';
 import type { ReportPeriod, ReportType } from '../period';
 import { DEPT_SCOPE, MAX_NOTE_TEXT, type ReportScope } from '../report';
 import type { Team } from './accounts';
+import { isoDateField } from './kpi';
 
 const MSG = {
   type: 'Loại báo cáo không hợp lệ',
   text: 'Nội dung không hợp lệ',
   textMax: 'Mỗi ô tối đa 2.000 ký tự',
 };
-
-const isoDateField = z.custom<IsoDate>((v) => typeof v === 'string' && isIsoDate(v), 'Ngày không hợp lệ');
 
 export const reportTypeSchema = z.enum(['WR', 'MR', 'QR'], { error: MSG.type });
 

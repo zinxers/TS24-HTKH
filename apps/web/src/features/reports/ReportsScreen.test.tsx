@@ -185,27 +185,38 @@ describe('ReportsScreen', () => {
 
   it('có chữ chưa lưu mà bấm "Tải file xlsx": hỏi trước; không có thì tải ngay', async () => {
     await asHead();
-    const link = screen.getByRole('link', { name: 'Tải file xlsx' });
-    expect(link).toHaveAttribute('href', apiClient.reports.fileUrl('WR', periods('WR')[1]!.start));
-    expect(link).toHaveAttribute('download');
-    // Đếm lần trình duyệt được phép tải (jsdom không điều hướng được nên chặn ở đây).
-    let downloads = 0;
-    // Nghe ở document để chạy sau handler của React (gắn ở root).
-    const count = (e: Event) => {
-      if (e.target === link && !e.defaultPrevented) downloads++;
-      e.preventDefault();
-    };
-    document.addEventListener('click', count);
-    onTestFinished(() => document.removeEventListener('click', count));
-    fireEvent.click(link);
+    const file = vi.spyOn(apiClient.reports, 'file').mockResolvedValue({ blob: new Blob(['x']), fileName: 'WR-TEC-261123.xlsx' });
+    // jsdom không có createObjectURL và không tải được: đếm lần bấm thẻ <a download> ẩn.
+    const { createObjectURL, revokeObjectURL } = URL;
+    URL.createObjectURL = vi.fn(() => 'blob:x');
+    URL.revokeObjectURL = vi.fn();
+    onTestFinished(() => {
+      Object.assign(URL, { createObjectURL, revokeObjectURL });
+    });
+    const saved: string[] = [];
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+      saved.push(this.download);
+    });
+    const button = screen.getByRole('button', { name: 'Tải file xlsx' });
+    fireEvent.click(button);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(downloads).toBe(1);
+    await waitFor(() => expect(saved).toEqual(['WR-TEC-261123.xlsx']));
+    expect(file).toHaveBeenCalledWith('WR', periods('WR')[1]!.start);
     fireEvent.change(screen.getByLabelText('SLA đạt'), { target: { value: 'x' } });
-    fireEvent.click(link);
+    fireEvent.click(button);
     expect(screen.getByRole('dialog', { name: 'Tải file khi chưa lưu?' })).toBeInTheDocument();
-    expect(downloads).toBe(1);
+    expect(saved).toHaveLength(1);
     fireEvent.click(within(confirmDialog()).getByRole('button', { name: 'Tải file' }));
-    await waitFor(() => expect(downloads).toBe(2));
+    await waitFor(() => expect(saved).toHaveLength(2));
     expect(screen.getByLabelText('SLA đạt')).toHaveValue('x');
+  });
+
+  it('tải file lỗi (403): báo lỗi trên màn hình, không lưu file', async () => {
+    await asHead();
+    vi.spyOn(apiClient.reports, 'file').mockRejectedValue(new ApiError('FORBIDDEN', 403, 'Bạn không có quyền'));
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click');
+    fireEvent.click(screen.getByRole('button', { name: 'Tải file xlsx' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Bạn không có quyền');
+    expect(click).not.toHaveBeenCalled();
   });
 });

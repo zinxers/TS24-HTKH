@@ -120,3 +120,5 @@ Bố cục web dùng token trong `apps/web/src/app/globals.css`: `--page-max: 14
 | Preview | Vercel Preview (mỗi PR) | — | Supabase staging |
 | Staging | Vercel (`main`) | bản beta trỏ staging | Supabase staging |
 | Production | Vercel Production | bản stable trỏ production | Supabase production |
+
+Cấu hình và cách vận hành staging: `docs/runbooks/staging.md`.
