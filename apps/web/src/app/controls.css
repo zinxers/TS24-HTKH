@@ -203,3 +203,36 @@
     animation: fade-in 120ms linear !important;
   }
 }
+
+/* ---------- Chọn giao diện (ThemeMenu) ---------- */
+.theme-btn {
+  color: var(--secondary);
+}
+.theme-btn svg {
+  display: block;
+}
+.popover.theme {
+  position: fixed;
+}
+.popover.theme button {
+  gap: 8px;
+  align-items: center;
+}
+.popover.theme .tick {
+  width: 16px;
+  text-align: center;
+}
+.popover.theme button[aria-checked='false'] .tick {
+  visibility: hidden;
+}
+@media (max-width: 640px) {
+  .popover.theme button {
+    gap: 10px;
+  }
+  .popover.theme .tick {
+    display: none;
+  }
+  .popover.theme button[aria-checked='true'] {
+    font-weight: 600;
+  }
+}

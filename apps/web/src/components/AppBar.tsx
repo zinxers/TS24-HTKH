@@ -1,6 +1,7 @@
 import type { CurrentUser } from '@ts24-htkh/shared';
 import { LogoutButton } from '../features/auth/LogoutButton';
 import { Logo } from './Logo';
+import { ThemeMenu } from './ThemeMenu';
 
 function initials(fullName: string): string {
   const words = fullName.trim().split(/\s+/);
@@ -11,15 +12,18 @@ export function AppBar({ user, onLogoutError }: { user: CurrentUser | null; onLo
   return (
     <header className="bar">
       <Logo className="logo" />
-      {user && (
-        <div className="who">
-          <span className="avatar" aria-hidden="true">
-            {initials(user.fullName)}
-          </span>
-          <span className="name">{user.fullName}</span>
-          <LogoutButton onError={onLogoutError} />
-        </div>
-      )}
+      <div className="who">
+        <ThemeMenu />
+        {user && (
+          <>
+            <span className="avatar" aria-hidden="true">
+              {initials(user.fullName)}
+            </span>
+            <span className="name">{user.fullName}</span>
+            <LogoutButton onError={onLogoutError} />
+          </>
+        )}
+      </div>
     </header>
   );
 }
