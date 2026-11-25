@@ -1,7 +1,7 @@
 'use client';
 
 import type { CurrentUser } from '@ts24-htkh/shared';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { usePopover } from '../../components/usePopover';
@@ -32,6 +32,8 @@ export function UserMenu({
   const [editing, setEditing] = useState(false);
   // Màn hình không truyền onUserChange vẫn thấy tên mới trên thanh trên.
   const [renamed, setRenamed] = useState<CurrentUser | null>(null);
+  // Màn hình đưa user mới (vd sau onUserChange) thì dùng cái đó, bỏ bản tạm.
+  useEffect(() => setRenamed(null), [given]);
   const user = renamed?.id === given.id ? renamed : given;
   // Hết phiên khi sửa: tải lại trang để màn hình chạy luồng 401 của nó.
   const action = useConfirmAction(() => window.location.reload());
