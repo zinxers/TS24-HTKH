@@ -47,3 +47,6 @@ graphify-out/
 
 # MCP cấu hình cục bộ
 .mcp.json
+
+# Cấu hình impeccable trên máy
+.impeccable/
