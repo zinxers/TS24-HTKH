@@ -5,7 +5,15 @@ import { useState } from 'react';
 import { ApiError, apiClient } from '../../lib/api-client';
 
 // Không qua ConfirmDialog: đăng xuất không đổi dữ liệu nghiệp vụ.
-export function LogoutButton({ onError }: { onError: (message: string | null) => void }) {
+export function LogoutButton({
+  onError,
+  className = 'text-btn',
+  role,
+}: {
+  onError: (message: string | null) => void;
+  className?: string;
+  role?: 'menuitem';
+}) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
 
@@ -24,7 +32,7 @@ export function LogoutButton({ onError }: { onError: (message: string | null) =>
   }
 
   return (
-    <button className="text-btn" type="button" onClick={onClick} disabled={pending}>
+    <button className={className} role={role} type="button" onClick={onClick} disabled={pending}>
       Đăng xuất
     </button>
   );

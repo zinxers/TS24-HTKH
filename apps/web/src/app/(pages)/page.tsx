@@ -3,13 +3,37 @@
 import type { CurrentUser } from '@ts24-htkh/shared';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { AppBar } from '../../components/AppBar';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
-import { ProfileDialog } from '../../features/accounts/AccountDialogs';
 import { ROLE_LABEL } from '../../features/accounts/labels';
-import { useConfirmAction } from '../../features/accounts/useConfirmAction';
+import { HOME_ART, type HomeArtKey } from '../../features/home/HomeArt';
 import { ApiError, apiClient } from '../../lib/api-client';
+
+interface Tile {
+  href: string;
+  title: string;
+  desc: string;
+  art: HomeArtKey;
+  /** Chỉ Quản lý và Trưởng phòng (giao diện chỉ gợi ý; API mới là luật). */
+  lead?: boolean;
+  size?: 'wide' | 'full';
+}
+
+const TILES: Tile[] = [
+  { href: '/kpi', title: 'Báo cáo KPI', desc: 'Nhập số ticket theo kênh và loại việc cho kỳ đang chạy.', art: 'kpi', size: 'wide' },
+  { href: '/kpi/mine', title: 'KPI của tôi', desc: 'Xem lại các kỳ đã gửi và kết quả KPI của bạn.', art: 'mine' },
+  { href: '/kpi/rates', title: 'Đơn giá KPI', desc: 'Đơn giá theo loại việc đang áp dụng cho từng team.', art: 'rates' },
+  { href: '/team', title: 'KPI theo team', desc: 'So sánh kết quả các team và xem chi tiết từng người.', art: 'team', lead: true },
+  { href: '/reports', title: 'Báo cáo tổng hợp', desc: 'Báo cáo tuần, tháng, quý và tải file xlsx đã ký.', art: 'reports', lead: true },
+  {
+    href: '/accounts',
+    title: 'Quản lý tài khoản',
+    desc: 'Thêm, khoá tài khoản, phân team, đặt lại mật khẩu và sửa họ tên.',
+    art: 'accounts',
+    lead: true,
+    size: 'full',
+  },
+];
 
 export default function Page() {
   const router = useRouter();
@@ -17,9 +41,6 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [logoutError, setLogoutError] = useState<string | null>(null);
-  const [editing, setEditing] = useState(false);
-  // Hết phiên khi sửa: tải lại `me` để chạy đúng luồng 401 bên dưới.
-  const action = useConfirmAction(() => setAttempt((n) => n + 1));
 
   useEffect(() => {
     const fail = (e: unknown) => setError(e instanceof ApiError ? e.message : 'Lỗi hệ thống, vui lòng thử lại');
@@ -42,7 +63,7 @@ export default function Page() {
 
   return (
     <>
-      <AppBar user={user} onLogoutError={setLogoutError} />
+      <AppBar user={user} onUserChange={setUser} onLogoutError={setLogoutError} />
       <main className="content">
         {user ? (
           <>
@@ -51,80 +72,28 @@ export default function Page() {
                 {logoutError}
               </p>
             )}
-            <h1>Xin chào, {user.fullName}</h1>
-            <p>
-              {ROLE_LABEL[user.role]} · {user.email}
-            </p>
-            <nav className="group menu" aria-label="Thao tác">
-              <Link className="menu-row" href="/kpi">
-                Nhập KPI{' '}
-                <span className="chev" aria-hidden="true">
-                  ›
-                </span>
-              </Link>
-              <Link className="menu-row" href="/kpi/mine">
-                KPI của tôi{' '}
-                <span className="chev" aria-hidden="true">
-                  ›
-                </span>
-              </Link>
-              <Link className="menu-row" href="/kpi/rates">
-                Đơn giá KPI{' '}
-                <span className="chev" aria-hidden="true">
-                  ›
-                </span>
-              </Link>
-              {user.role !== 'staff' && (
-                <Link className="menu-row" href="/team">
-                  KPI theo team{' '}
-                  <span className="chev" aria-hidden="true">
+            <section className="home-hero">
+              <h1>Xin chào, {user.fullName}</h1>
+              <p>
+                {ROLE_LABEL[user.role]} · {user.email}
+              </p>
+            </section>
+            <nav className={user.role === 'staff' ? 'tiles two' : 'tiles'} aria-label="Thao tác">
+              {TILES.filter((t) => !t.lead || user.role !== 'staff').map((t, i) => (
+                <Link key={t.href} className={`tile ${t.size ?? ''}`} href={t.href} style={{ '--i': i } as CSSProperties}>
+                  <div className="text">
+                    <h2>{t.title}</h2>
+                    <p>{t.desc}</p>
+                  </div>
+                  <div className="art" aria-hidden="true">
+                    {HOME_ART[t.art]}
+                  </div>
+                  <span className="go" aria-hidden="true">
                     ›
                   </span>
                 </Link>
-              )}
-              {user.role !== 'staff' && (
-                <Link className="menu-row" href="/reports">
-                  Báo cáo tổng hợp{' '}
-                  <span className="chev" aria-hidden="true">
-                    ›
-                  </span>
-                </Link>
-              )}
-              {user.role !== 'staff' && (
-                <Link className="menu-row" href="/accounts">
-                  Quản lý tài khoản{' '}
-                  <span className="chev" aria-hidden="true">
-                    ›
-                  </span>
-                </Link>
-              )}
-              <button className="menu-row" type="button" onClick={() => setEditing(true)}>
-                Sửa họ tên{' '}
-                <span className="chev" aria-hidden="true">
-                  ›
-                </span>
-              </button>
+              ))}
             </nav>
-            {editing && (
-              <ProfileDialog
-                fullName={user.fullName}
-                error={action.error}
-                busy={action.busy}
-                onCancel={() => setEditing(false)}
-                onSubmit={(fullName) =>
-                  action.ask({
-                    title: 'Sửa họ tên',
-                    message: `Đổi họ tên thành “${fullName.trim()}”?`,
-                    confirmLabel: 'Lưu',
-                    run: async () => {
-                      setUser(await apiClient.me.updateProfile(fullName));
-                      setEditing(false);
-                    },
-                  })
-                }
-              />
-            )}
-            <ConfirmDialog {...action.dialogProps} />
           </>
         ) : error ? (
           <div className="load-error">

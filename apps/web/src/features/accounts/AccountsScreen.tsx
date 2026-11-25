@@ -93,7 +93,7 @@ export function AccountsScreen() {
 
   return (
     <>
-      <AppBar user={me} onLogoutError={setNotice} />
+      <AppBar user={me} onUserChange={setMe} onLogoutError={setNotice} />
       <main className="content wide">
         <Link className="back" href="/">
           ‹ Trang chủ

@@ -1,38 +1,37 @@
-/* Token màu theo mẫu Mốc 2b đã duyệt. Tương phản ghi trong comment là so với --group. */
+/* Token màu thương hiệu TS24 (navy/teal). Mỗi token khai báo một lần bằng light-dark(sáng, tối); data-theme ép chế độ. */
 :root {
   color-scheme: light dark;
-  --bg: #f5f5f7;
-  --group: #ffffff;
-  --label: #1d1d1f; /* 16.8:1 */
-  --secondary: #6e6e73; /* 5.1:1 */
-  --separator: rgba(60, 60, 67, 0.18);
-  --accent: #0071e3; /* chữ trắng 4.6:1 */
-  --accent-hover: #0077ed;
-  --danger: #d70015; /* 5.6:1 */
-  --danger-bg: #fff0f1;
-  --success: #1a7f37; /* 5.1:1 */
-  --bar: rgba(245, 245, 247, 0.72);
-  --ring: rgba(0, 113, 227, 0.35);
+  --bg: light-dark(#f3f6fa, #0a1626);
+  --group: light-dark(#ffffff, #11233a);
+  --label: light-dark(#1a2433, #eaf0f7); /* 14.4:1 · 13.8:1 */
+  --secondary: light-dark(#5b6b7f, #9aabc0); /* 5.0:1 trên --bg · 6.8:1 trên --group */
+  --separator: light-dark(rgba(11, 58, 111, 0.14), rgba(150, 175, 205, 0.22));
+  --accent: light-dark(#0b3a6f, #3dd6c0); /* nền nút, chip/tab đang chọn, viền ô đang nhập */
+  --accent-hover: light-dark(#0e4a8c, #6be3d1);
+  --on-accent: light-dark(#ffffff, #0b2a4a); /* chữ trên nền nhấn: 11.4:1 · 8.0:1 */
+  --link: light-dark(#0e7c70, #3dd6c0); /* link chữ: 4.7:1 · 8.7:1 */
+  --danger: light-dark(#d70015, #ff6961);
+  --on-danger: light-dark(#fff, #3a0a0f); /* chữ trắng trên #ff6961 chỉ 2.82:1; #3a0a0f đạt 6.05:1 */
+  --danger-bg: light-dark(#fff0f1, #3a1d26);
+  --success: light-dark(#1a7f37, #32d74b);
+  --bar: light-dark(rgba(243, 246, 250, 0.8), rgba(10, 22, 38, 0.8));
+  --ring: light-dark(rgba(18, 165, 148, 0.45), rgba(61, 214, 192, 0.45));
+  --shadow-color: light-dark(rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.6));
+  --shadow-edge: light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.12));
+  --logo-shield-l: light-dark(#0b3a6f, #ffffff);
+  --logo-shield-r: light-dark(#12a594, #3dd6c0);
+  --logo-check: light-dark(#ffffff, #0b2a4a);
+  --logo-word: light-dark(#0b3a6f, #ffffff);
+  --logo-sub: light-dark(#0e7c70, #9fe7dc);
   --page-max: 1440px;
   --gutter: clamp(16px, 3vw, 48px);
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #000000;
-    --group: #1c1c1e;
-    --label: #f5f5f7; /* 16.1:1 */
-    --secondary: #98989d; /* 6.1:1 */
-    --separator: rgba(84, 84, 88, 0.6);
-    --accent: #0a84ff; /* chữ trắng đậm 3.6:1 */
-    --accent-hover: #409cff;
-    --danger: #ff6961; /* 6.4:1 */
-    --danger-bg: #3a1d1d;
-    --success: #32d74b; /* 9.4:1 */
-    --bar: rgba(28, 28, 30, 0.72);
-    --ring: rgba(10, 132, 255, 0.5);
-  }
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 * {
@@ -59,15 +58,11 @@ body {
 .mark {
   width: 64px;
   height: 64px;
-  border-radius: 15px;
-  background: var(--accent);
-  color: #fff;
-  display: grid;
-  place-items: center;
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
   margin-bottom: 20px;
+}
+.mark svg {
+  width: 64px;
+  height: 64px;
 }
 .signin h1,
 .content h1 {
@@ -143,7 +138,7 @@ body {
   border: 0;
   border-radius: 12px;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -163,8 +158,8 @@ body {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  border-top-color: #fff;
+  border: 2px solid color-mix(in srgb, var(--on-accent) 35%, transparent);
+  border-top-color: var(--on-accent);
   animation: spin 0.8s linear infinite;
 }
 @keyframes spin {
@@ -195,9 +190,10 @@ body {
   backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 0.5px solid var(--separator);
 }
-.bar .app {
-  font-weight: 600;
-  white-space: nowrap;
+.bar .logo {
+  display: block;
+  height: 44px;
+  width: auto;
 }
 .bar .who {
   display: flex;
@@ -232,7 +228,7 @@ body {
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: var(--accent);
+  color: var(--link);
   font: inherit;
   font-size: 15px;
   cursor: pointer;
@@ -275,6 +271,9 @@ body {
 }
 
 @media (max-width: 480px) {
+  .bar .logo {
+    height: 40px;
+  }
   .signin {
     padding-top: 8vh;
   }

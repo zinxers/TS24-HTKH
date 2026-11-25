@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
+import { ShieldMark } from '../../components/Logo';
 import { ApiError, apiClient } from '../../lib/api-client';
 
 export function LoginForm() {
@@ -27,7 +28,7 @@ export function LoginForm() {
   return (
     <form className="signin" onSubmit={onSubmit} noValidate>
       <div className="mark" aria-hidden="true">
-        HT
+        <ShieldMark />
       </div>
       <h1>Đăng nhập</h1>
       <p className="sub">Hệ thống báo cáo Phòng Hỗ trợ khách hàng TS24</p>

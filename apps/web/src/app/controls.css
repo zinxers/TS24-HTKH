@@ -1,18 +1,10 @@
 /* Điều khiển dùng chung: nút, menu ⋯, sheet, alert và chuyển động (mẫu v2 theo Apple HIG, Mốc 3). */
 :root {
-  --fill: rgba(120, 120, 128, 0.12); /* nền hover/nhấn, như systemFill */
-  --fill-strong: rgba(120, 120, 128, 0.2);
-  --elevated: #ffffff; /* lớp nổi: menu, alert */
-  --shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.18), 0 0 0 0.5px rgba(0, 0, 0, 0.08);
+  --fill: light-dark(rgba(11, 58, 111, 0.07), rgba(140, 170, 210, 0.14)); /* nền hover/nhấn */
+  --fill-strong: light-dark(rgba(11, 58, 111, 0.13), rgba(140, 170, 210, 0.24));
+  --elevated: light-dark(#ffffff, #182d47); /* lớp nổi: menu, alert */
+  --shadow-pop: 0 10px 30px var(--shadow-color), 0 0 0 0.5px var(--shadow-edge);
   --ease-out: cubic-bezier(0.32, 0.72, 0, 1); /* gần đường cong sheet của iOS */
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fill: rgba(120, 120, 128, 0.24);
-    --fill-strong: rgba(120, 120, 128, 0.36);
-    --elevated: #2c2c2e;
-    --shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 0 0.5px rgba(255, 255, 255, 0.12);
-  }
 }
 
 .visually-hidden {
@@ -54,7 +46,7 @@
 }
 .btn-primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 .btn-primary:hover:not([disabled]) {
   background: var(--accent-hover);
@@ -65,7 +57,7 @@
 }
 .btn-danger {
   background: var(--danger);
-  color: #fff;
+  color: var(--on-danger);
 }
 
 /* Nút ⋯: 32×32 trên desktop (HIG tối thiểu 28), 44×44 trên màn hẹp. */
@@ -124,7 +116,7 @@
 .popover button:focus-visible {
   outline: none;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 .popover .destructive {
   margin-top: 11px;
@@ -141,7 +133,7 @@
 .popover .destructive:hover,
 .popover .destructive:focus-visible {
   background: var(--danger);
-  color: #fff;
+  color: var(--on-danger);
 }
 .popover .cancel {
   display: none;
@@ -209,5 +201,94 @@
 @media (prefers-reduced-motion: reduce) {
   .popover {
     animation: fade-in 120ms linear !important;
+  }
+}
+
+/* ---------- Chọn giao diện (ThemeMenu) ---------- */
+.theme-btn {
+  color: var(--secondary);
+}
+.theme-btn svg {
+  display: block;
+}
+.popover.theme {
+  position: fixed;
+}
+.popover.theme button {
+  gap: 8px;
+  align-items: center;
+}
+.popover.theme .tick {
+  width: 16px;
+  text-align: center;
+}
+.popover.theme button[aria-checked='false'] .tick {
+  visibility: hidden;
+}
+@media (max-width: 640px) {
+  .popover.theme button {
+    gap: 10px;
+  }
+  .popover.theme .tick {
+    display: none;
+  }
+  .popover.theme button[aria-checked='true'] {
+    font-weight: 600;
+  }
+}
+
+/* ---------- Menu tài khoản (UserMenu): avatar + họ tên mở Sửa họ tên / Đăng xuất ---------- */
+.who-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 2px 10px 2px 3px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.who-btn:hover,
+.who-btn[aria-expanded='true'] {
+  background: var(--fill);
+}
+.who-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+.who-btn .caret {
+  color: var(--secondary);
+  font-size: 11px;
+}
+.popover.user {
+  width: 260px;
+}
+.popover.user .meta {
+  padding: 8px 10px 10px;
+  margin-bottom: 5px;
+  border-bottom: 0.5px solid var(--separator);
+  color: var(--secondary);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.popover.user .meta b {
+  display: block;
+  color: var(--label);
+  font-size: 15px;
+}
+@media (max-width: 640px) {
+  .popover.user {
+    width: auto;
+  }
+  .popover.user .meta {
+    margin: 0;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .popover.user .meta + button {
+    border-top: 0;
   }
 }

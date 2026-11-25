@@ -56,7 +56,7 @@ export function MyKpiScreen() {
             Đơn giá
           </Link>
           <Link className="btn btn-secondary" href="/kpi">
-            Nhập KPI
+            Báo cáo KPI
           </Link>
         </div>
       </div>
