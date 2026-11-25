@@ -6,7 +6,7 @@ import { ratesOn, type ReconcileInput, type ReconcileLine } from './reconcile';
 const HIGH_TEXT = RECONCILE_HIGH.join(' / ');
 const isHigh = (l: ReconcileLine): boolean => RECONCILE_HIGH.includes(l.kenh);
 const isHt = (l: ReconcileLine): boolean => l.kenh.endsWith(' Hoàn Thành');
-const ticketKey = (l: ReconcileLine): string => l.ticket.trim().toUpperCase();
+const ticketKey = (l: ReconcileLine): string => l.ticket;
 
 function group<T>(rows: T[], keyFn: (r: T) => string | null): { key: string; rows: T[] }[] {
   const g = new Map<string, T[]>();
