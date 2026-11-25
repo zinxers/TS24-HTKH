@@ -26,13 +26,13 @@ export class ReconcileRepository {
 
   /** kpi_report chưa xóa mềm trong khoảng ngày VN, theo thời gian tạo. */
   async lines(range: KpiRange): Promise<ReconcileLine[]> {
-    const rows = await this.sql<(Omit<ReconcileLine, 'createdAt'> & { createdAt: Date })[]>`
+    // Client trả timestamptz dạng chuỗi nên định dạng ISO UTC ngay trong SQL.
+    return this.sql<ReconcileLine[]>`
       select user_id as "userId", full_name as "fullName", team_id as "teamId", ticket, kenh,
-             created_at as "createdAt"
+             to_char(created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as "createdAt"
       from kpi_report
       where deleted_at is null and ${createdAtInRange(this.sql, range)}
       order by created_at, id`;
-    return rows.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() }));
   }
 
   /** Mọi app_user; inactive = bị khóa hoặc xóa mềm. */
