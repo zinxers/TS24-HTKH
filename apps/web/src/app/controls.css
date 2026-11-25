@@ -1,18 +1,10 @@
 /* Điều khiển dùng chung: nút, menu ⋯, sheet, alert và chuyển động (mẫu v2 theo Apple HIG, Mốc 3). */
 :root {
-  --fill: rgba(120, 120, 128, 0.12); /* nền hover/nhấn, như systemFill */
-  --fill-strong: rgba(120, 120, 128, 0.2);
-  --elevated: #ffffff; /* lớp nổi: menu, alert */
-  --shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.18), 0 0 0 0.5px rgba(0, 0, 0, 0.08);
+  --fill: light-dark(rgba(11, 58, 111, 0.07), rgba(140, 170, 210, 0.14)); /* nền hover/nhấn */
+  --fill-strong: light-dark(rgba(11, 58, 111, 0.13), rgba(140, 170, 210, 0.24));
+  --elevated: light-dark(#ffffff, #182d47); /* lớp nổi: menu, alert */
+  --shadow-pop: 0 10px 30px var(--shadow-color), 0 0 0 0.5px var(--shadow-edge);
   --ease-out: cubic-bezier(0.32, 0.72, 0, 1); /* gần đường cong sheet của iOS */
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fill: rgba(120, 120, 128, 0.24);
-    --fill-strong: rgba(120, 120, 128, 0.36);
-    --elevated: #2c2c2e;
-    --shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 0 0.5px rgba(255, 255, 255, 0.12);
-  }
 }
 
 .visually-hidden {
@@ -54,7 +46,7 @@
 }
 .btn-primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 .btn-primary:hover:not([disabled]) {
   background: var(--accent-hover);
@@ -65,7 +57,7 @@
 }
 .btn-danger {
   background: var(--danger);
-  color: #fff;
+  color: var(--on-danger);
 }
 
 /* Nút ⋯: 32×32 trên desktop (HIG tối thiểu 28), 44×44 trên màn hẹp. */
@@ -124,7 +116,7 @@
 .popover button:focus-visible {
   outline: none;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 .popover .destructive {
   margin-top: 11px;
@@ -141,7 +133,7 @@
 .popover .destructive:hover,
 .popover .destructive:focus-visible {
   background: var(--danger);
-  color: #fff;
+  color: var(--on-danger);
 }
 .popover .cancel {
   display: none;

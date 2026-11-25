@@ -3,7 +3,7 @@
 .back {
   display: inline-block;
   margin-bottom: 8px;
-  color: var(--accent);
+  color: var(--link);
   font-size: 15px;
   text-decoration: none;
 }
@@ -120,7 +120,7 @@ tr.flash {
   padding: 0 16px;
   border: 0;
   background: transparent;
-  color: var(--accent);
+  color: var(--link);
   font: inherit;
   text-align: left;
   text-decoration: none;
