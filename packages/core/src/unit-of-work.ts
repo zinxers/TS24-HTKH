@@ -3,6 +3,7 @@ import type {
   KpiRateRepository,
   KpiReportRepository,
   KpiTeamRepository,
+  ReconcileRepository,
   ReportNoteRepository,
   SessionRepository,
   TeamRepository,
@@ -48,6 +49,8 @@ export type KpiTeamStore = Methods<
   KpiTeamRepository,
   'teamCells' | 'latestNames' | 'daysByUser' | 'teamItems' | 'countByTeam' | 'trend'
 >;
+
+export type ReconcileStore = Methods<ReconcileRepository, 'lines' | 'users'>;
 
 export type ReportNoteStore = Methods<ReportNoteRepository, 'list' | 'findForUpdate' | 'upsert'>;
 
