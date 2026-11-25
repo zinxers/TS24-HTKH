@@ -47,3 +47,7 @@ graphify-out/
 
 # MCP cấu hình cục bộ
 .mcp.json
+
+# Cấu hình công cụ trên máy (preview server, impeccable)
+.claude/launch.json
+.impeccable/
