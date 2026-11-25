@@ -1,6 +1,6 @@
 import type { CurrentUser, ReportScope } from '@ts24-htkh/shared';
 import { ForbiddenError } from '../../errors';
-import { canReport, type ReportAction } from '../../policies/permissions';
+import { canReconcile, canReport, type ReportAction } from '../../policies/permissions';
 
 const MSG: Record<ReportAction, string> = {
   'report.view': 'Bạn không có quyền xem báo cáo',
@@ -14,5 +14,11 @@ export const ReportPolicy = {
   },
   assert(actor: CurrentUser, action: ReportAction, scope: ReportScope): void {
     if (!canReport(actor, action, scope)) throw new ForbiddenError(MSG[action]);
+  },
+};
+
+export const ReconcilePolicy = {
+  assert(actor: CurrentUser): void {
+    if (!canReconcile(actor)) throw new ForbiddenError('Chỉ Trưởng phòng được xem đối soát KPI');
   },
 };

@@ -1,6 +1,6 @@
 import type { CurrentUser } from '@ts24-htkh/shared';
 import { describe, expect, it } from 'vitest';
-import { can, canKpi, canReport, canSee, canTeamKpi, type AccountAction, type ReportAction } from './permissions';
+import { can, canKpi, canReconcile, canReport, canSee, canTeamKpi, type AccountAction, type ReportAction } from './permissions';
 
 const A = 'team-a';
 const B = 'team-b';
@@ -171,5 +171,13 @@ describe('canReport', () => {
 
   it('Trưởng phòng mọi phạm vi', () => {
     for (const a of ACTIONS) for (const scope of ['dept', A, B]) expect(canReport(H, a, scope)).toBe(true);
+  });
+});
+
+describe('canReconcile', () => {
+  it('chỉ Trưởng phòng', () => {
+    expect(canReconcile(H)).toBe(true);
+    expect(canReconcile(M)).toBe(false);
+    expect(canReconcile(S)).toBe(false);
   });
 });
