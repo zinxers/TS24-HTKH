@@ -61,7 +61,7 @@ function EntryBody({ userId, onAuthLost }: { userId: string; onAuthLost: () => v
     <>
       <div className="page-head">
         <div>
-          <h1>Nhập KPI</h1>
+          <h1>Báo cáo KPI</h1>
           <p className="count">{n} dòng nháp · tự lưu trên máy này</p>
         </div>
         <div className="page-actions">

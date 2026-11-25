@@ -158,7 +158,7 @@ App Tauri (`tauri dev`). Mốc này không sửa `apps/desktop`. Chỉ kiểm tr
 
 Người dùng yêu cầu (25/11/2026), mẫu đã duyệt: `2026-11-25-moc-7-home-mockup.html`.
 
-- Trang chủ: các mục thành ô (tiêu đề, dòng diễn giải, minh hoạ SVG theo token logo), tham khảo cách trình bày trang iPad của Apple, không sao chép. "Nhập KPI" đổi thành "Báo cáo KPI"; tên mục khác giữ nguyên. Nhân viên thấy 3 ô, Quản lý/Trưởng phòng thấy 6 ô (giao diện chỉ gợi ý quyền).
+- Trang chủ: các mục thành ô (tiêu đề, dòng diễn giải, minh hoạ SVG theo token logo), tham khảo cách trình bày trang iPad của Apple, không sao chép. "Nhập KPI" đổi thành "Báo cáo KPI" toàn web (ô trang chủ, tiêu đề và tab trang `/kpi`, liên kết ở KPI của tôi); tên mục khác giữ nguyên. Nhân viên thấy 3 ô, Quản lý/Trưởng phòng thấy 6 ô (giao diện chỉ gợi ý quyền).
 - "Sửa họ tên" rời trang chủ, vào menu tài khoản trên thanh trên (bấm avatar/họ tên) cho mọi vai trò; "Đăng xuất" vào cùng menu. Không đổi phân quyền `/accounts`.
 - Chuyển động chung (`motion.css`): nội dung trang hiện dần từ dưới lên, lệch nhịp; nút đổi màu mượt khi rê chuột, nhấn vẫn tức thì. Ô trang chủ nhấc lên và minh hoạ cử động khi rê chuột. `prefers-reduced-motion` tắt hết.
 - Menu bật lên (chọn giao diện, tài khoản) render qua portal vào `body`: `.bar` có `backdrop-filter` làm khối chứa cho `position: fixed`, khiến action sheet ở màn hẹp nằm sai chỗ.
