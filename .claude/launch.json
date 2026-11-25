@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "mockup",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "-e",
+        "const h=require(\"http\"),fs=require(\"fs\"),p=require(\"path\");const T={\".html\":\"text/html; charset=utf-8\",\".css\":\"text/css\",\".svg\":\"image/svg+xml\",\".png\":\"image/png\"};h.createServer((q,r)=>{const f=p.join(process.cwd(),decodeURIComponent(q.url.split(\"?\")[0]));if(!f.startsWith(process.cwd()))return r.writeHead(403).end();fs.readFile(f,(e,b)=>e?r.writeHead(404).end():r.writeHead(200,{\"content-type\":T[p.extname(f)]||\"application/octet-stream\"}).end(b))}).listen(5180,\"127.0.0.1\")"
+      ],
+      "port": 5180
+    }
+  ]
+}
