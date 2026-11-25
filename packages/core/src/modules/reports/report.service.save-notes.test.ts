@@ -80,7 +80,7 @@ describe('ReportService.saveNotes', () => {
       {
         actorId: 'M',
         action: 'report.note.save',
-        targetId: T1,
+        targetId: null,
         detail: { type: 'WR', periodStart: WEEK, scope: T1, keys: ['keHoach', 'repeat', 'sla'] },
       },
     ]);

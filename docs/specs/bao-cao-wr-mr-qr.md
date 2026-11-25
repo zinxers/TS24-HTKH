@@ -13,7 +13,7 @@ Ngoài Mốc 6a: đối soát (6b), lịch làm việc, gửi email, lưu file q
 - **WR:** mỗi team ghi dòng 27 tổng đài, 28 chat, 29 email, 30 hoàn thành (= 27+28+29), 33 lỗi, 34 cấu hình, 35 hỗ trợ. `B10` = max(tổng tiếp nhận, tổng phân loại).
 - **MR:** `B9` = `B23` = tổng; `C23` = mũi tên so với tháng trước cùng phạm vi (`null` khi kỳ đang chạy); xóa trống `C24`-`C28`.
 - **QR:** `B9` = tổng; dòng 34 mỗi team = làm tròn(total / people, 1 chữ số) khi people > 0.
-- **Chiều cao dòng:** tự giãn theo độ dài chữ, 15,75 pt mỗi dòng chữ, tối đa 409 pt.
+- **Chiều cao dòng:** tự giãn theo độ dài chữ, 15,75 pt mỗi dòng + 3 pt, tối đa 409 pt.
 - **Xem trước và file** cùng tính từ một tập ô, nên luôn khớp.
 
 ## Quyền

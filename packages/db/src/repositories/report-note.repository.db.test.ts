@@ -2,6 +2,7 @@ import type { IsoDate } from '@ts24-htkh/shared';
 import { afterAll, describe, expect, it } from 'vitest';
 import type { Sql } from '../client';
 import { adminSql, inRollback } from '../test/db';
+import { AuditLogRepository } from './audit-log.repository';
 import { ReportNoteRepository } from './report-note.repository';
 
 afterAll(async () => {
@@ -93,5 +94,20 @@ describe('ReportNoteRepository', () => {
     const [r] = await adminSql()<{ rls: boolean }[]>`
       select relrowsecurity as rls from pg_class where oid = 'public.report_note'::regclass`;
     expect(r!.rls).toBe(true);
+  });
+
+  it('lưu chữ team + ghi audit (target_id null) trong một transaction', async () => {
+    await inRollback(adminSql(), async (tx) => {
+      const { actorId, teamId } = await fixture(tx);
+      await new ReportNoteRepository(tx).upsert({
+        type: 'WR', periodStart: P, teamId, actorId, actorName: 'Tên', fields: { a: 'x' }, expectedVersion: null,
+      });
+      await new AuditLogRepository(tx).record({
+        actorId, action: 'report.note.save', targetId: null, detail: { scope: teamId, keys: ['a'] },
+      });
+      const [n] = await tx<{ n: number }[]>`select count(*)::int as n from report_note where team_id = ${teamId}::uuid`;
+      const [a] = await tx<{ n: number }[]>`select count(*)::int as n from audit_log where action = 'report.note.save' and target_id is null`;
+      expect([n!.n, a!.n]).toEqual([1, 1]);
+    });
   });
 });

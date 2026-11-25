@@ -120,7 +120,7 @@ export class ReportService {
       await audit.record({
         actorId: actor.id,
         action: 'report.note.save',
-        targetId: teamId,
+        targetId: null,
         detail: { type, periodStart: dto.start, scope: dto.scope, keys },
       });
     });
