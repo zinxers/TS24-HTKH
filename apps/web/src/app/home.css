@@ -1,0 +1,232 @@
+/* Trang chủ dạng ô (Mốc 7): tiêu đề, dòng diễn giải, minh hoạ; nhấc ô và cử động minh hoạ khi rê chuột. */
+.content .home-hero {
+  padding: 16px 0 28px;
+}
+.content .home-hero h1 {
+  margin: 0 0 10px;
+  font-size: clamp(32px, 5vw, 56px);
+  line-height: 1.07;
+  letter-spacing: -0.02em;
+}
+.content .home-hero p {
+  font-size: clamp(17px, 1.6vw, 21px);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.tiles.two {
+  grid-template-columns: repeat(2, 1fr);
+}
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 380px;
+  overflow: hidden;
+  padding: 32px 32px 0;
+  border-radius: 28px;
+  background: var(--group);
+  color: var(--label);
+  text-decoration: none;
+  transition:
+    transform 0.5s var(--ease-reveal),
+    box-shadow 0.5s var(--ease-reveal);
+}
+.tile.wide {
+  grid-column: span 2;
+}
+.tiles.two .tile.wide,
+.tile.full {
+  grid-column: 1 / -1;
+}
+.tile.full {
+  flex-direction: row;
+  align-items: center;
+  gap: 32px;
+  min-height: 300px;
+  padding: 32px 40px;
+}
+.tile h2 {
+  margin: 0 0 8px;
+  font-size: clamp(22px, 2vw, 28px);
+  line-height: 1.14;
+  letter-spacing: -0.01em;
+}
+.content .tile p {
+  max-width: 34ch;
+  font-size: 17px;
+  line-height: 1.47;
+}
+.tile .art {
+  flex: 1;
+  display: grid;
+  place-items: end center;
+  margin: 20px -8px 0;
+}
+.tile.full .art {
+  max-width: 420px;
+  margin: 0;
+}
+.tile .art svg {
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  transform-origin: 50% 100%;
+  transition: transform 0.6s var(--ease-reveal);
+}
+.tile .go {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--fill-strong);
+  color: var(--label);
+  font-size: 22px;
+  line-height: 1;
+  transition:
+    background-color 0.3s,
+    color 0.3s,
+    transform 0.4s var(--ease-reveal);
+}
+.tile:hover,
+.tile:focus-visible {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 18px 40px var(--shadow-color, rgba(11, 58, 111, 0.16));
+}
+.tile:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
+}
+.tile:active {
+  transform: scale(0.985);
+}
+.tile:hover .art svg,
+.tile:focus-visible .art svg {
+  transform: scale(1.05);
+}
+.tile:hover .go,
+.tile:focus-visible .go {
+  background: var(--accent);
+  color: var(--on-accent);
+  transform: translateX(3px);
+}
+
+/* Cử động riêng từng minh hoạ (HomeArt.tsx). */
+.art .m {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transition: transform 0.7s var(--ease-reveal);
+}
+.art .spin {
+  transform-origin: 50% 50%;
+}
+.art .swing {
+  transform-origin: 85% 15%;
+}
+.art .d1 {
+  transition-delay: 0.05s;
+}
+.art .d2 {
+  transition-delay: 0.1s;
+}
+.art .d3 {
+  transition-delay: 0.15s;
+}
+.art .write {
+  stroke-dasharray: 160;
+  stroke-dashoffset: 160;
+  transition: stroke-dashoffset 0.8s ease;
+}
+.art .write.d2 {
+  transition-delay: 0.15s;
+}
+.art .write.d3 {
+  transition-delay: 0.3s;
+}
+.tile:hover .grow,
+.tile:focus-visible .grow {
+  transform: scaleY(1.25);
+}
+.tile:hover .lift,
+.tile:focus-visible .lift {
+  transform: translateY(-14px);
+}
+.tile:hover .spin,
+.tile:focus-visible .spin {
+  transform: rotate(120deg);
+}
+.tile:hover .swing,
+.tile:focus-visible .swing {
+  transform: rotate(-10deg);
+}
+.tile:hover .bob,
+.tile:focus-visible .bob {
+  transform: translateY(-8px);
+}
+.tile:hover .write,
+.tile:focus-visible .write {
+  stroke-dashoffset: 0;
+}
+
+@media (max-width: 900px) {
+  .tiles,
+  .tiles.two {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .tile.wide {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 600px) {
+  .tiles,
+  .tiles.two {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .tile,
+  .tile.wide,
+  .tile.full {
+    grid-column: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    min-height: 330px;
+    padding: 26px 24px 0;
+    border-radius: 24px;
+  }
+  .tile.full .art {
+    max-width: none;
+    margin: 20px -8px 0;
+  }
+  .content .home-hero {
+    padding: 4px 0 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .tile .art svg,
+  .tile .go,
+  .art .m,
+  .art .write {
+    transition: none;
+  }
+  .tile:hover,
+  .tile:focus-visible,
+  .tile:active,
+  .tile:hover .art svg,
+  .tile:focus-visible .art svg,
+  .tile:hover .m,
+  .tile:focus-visible .m {
+    transform: none;
+  }
+  .art .write {
+    stroke-dashoffset: 0;
+  }
+}

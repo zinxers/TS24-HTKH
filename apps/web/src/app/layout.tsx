@@ -9,6 +9,8 @@ import './accounts.css';
 import './kpi.css';
 import './team.css';
 import './reports.css';
+import './home.css';
+import './motion.css';
 
 export const metadata: Metadata = {
   title: 'TS24-HTKH',

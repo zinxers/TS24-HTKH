@@ -236,3 +236,59 @@
     font-weight: 600;
   }
 }
+
+/* ---------- Menu tài khoản (UserMenu): avatar + họ tên mở Sửa họ tên / Đăng xuất ---------- */
+.who-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 2px 10px 2px 3px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.who-btn:hover,
+.who-btn[aria-expanded='true'] {
+  background: var(--fill);
+}
+.who-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+.who-btn .caret {
+  color: var(--secondary);
+  font-size: 11px;
+}
+.popover.user {
+  width: 260px;
+}
+.popover.user .meta {
+  padding: 8px 10px 10px;
+  margin-bottom: 5px;
+  border-bottom: 0.5px solid var(--separator);
+  color: var(--secondary);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.popover.user .meta b {
+  display: block;
+  color: var(--label);
+  font-size: 15px;
+}
+@media (max-width: 640px) {
+  .popover.user {
+    width: auto;
+  }
+  .popover.user .meta {
+    margin: 0;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .popover.user .meta + button {
+    border-top: 0;
+  }
+}

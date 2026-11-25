@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, type ReactElement } from 'react';
+import { createPortal } from 'react-dom';
 import { applyTheme, currentTheme, type ThemeChoice } from '../lib/theme';
 import { usePopover } from './usePopover';
 
@@ -57,33 +58,35 @@ export function ThemeMenu() {
       >
         {ICON[choice]}
       </button>
-      {pos && (
-        <div ref={menuRef} className="popover theme" role="menu" aria-label="Giao diện" style={pos} onKeyDown={onKeyDown}>
-          <div className="items">
-            {OPTIONS.map((o) => (
-              <button
-                key={o.value}
-                role="menuitemradio"
-                type="button"
-                aria-checked={o.value === choice}
-                onClick={() => {
-                  applyTheme(o.value);
-                  setChoice(o.value);
-                  close();
-                }}
-              >
-                <span className="tick" aria-hidden="true">
-                  ✓
-                </span>
-                {o.label}
-              </button>
-            ))}
-          </div>
-          <button type="button" className="cancel" onClick={close}>
-            Hủy
-          </button>
-        </div>
-      )}
+      {pos &&
+        createPortal(
+          <div ref={menuRef} className="popover theme" role="menu" aria-label="Giao diện" style={pos} onKeyDown={onKeyDown}>
+            <div className="items">
+              {OPTIONS.map((o) => (
+                <button
+                  key={o.value}
+                  role="menuitemradio"
+                  type="button"
+                  aria-checked={o.value === choice}
+                  onClick={() => {
+                    applyTheme(o.value);
+                    setChoice(o.value);
+                    close();
+                  }}
+                >
+                  <span className="tick" aria-hidden="true">
+                    ✓
+                  </span>
+                  {o.label}
+                </button>
+              ))}
+            </div>
+            <button type="button" className="cancel" onClick={close}>
+              Hủy
+            </button>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

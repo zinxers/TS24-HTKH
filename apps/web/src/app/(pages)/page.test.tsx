@@ -16,6 +16,11 @@ const USER = {
   teamId: 't1',
 };
 
+/** Mở menu tài khoản trên thanh trên (Sửa họ tên, Đăng xuất nằm trong đó). */
+async function openUserMenu() {
+  fireEvent.click(await screen.findByRole('button', { name: /^Tài khoản / }));
+}
+
 beforeEach(() => {
   vi.restoreAllMocks();
   replace.mockReset();
@@ -48,13 +53,20 @@ describe('trang /: tài khoản', () => {
     else expect(link).not.toBeInTheDocument();
   });
 
-  it('mọi vai trò có liên kết tới Nhập KPI, KPI của tôi, Đơn giá KPI', async () => {
+  it('mọi vai trò có ô Báo cáo KPI, KPI của tôi, Đơn giá KPI', async () => {
     vi.spyOn(apiClient.auth, 'me').mockResolvedValue({ ...USER, role: 'staff' });
     render(<Page />);
     await screen.findByRole('heading', { level: 1 });
-    expect(screen.getByRole('link', { name: /Nhập KPI/ })).toHaveAttribute('href', '/kpi');
+    expect(screen.getByRole('link', { name: /^Báo cáo KPI/ })).toHaveAttribute('href', '/kpi');
     expect(screen.getByRole('link', { name: /KPI của tôi/ })).toHaveAttribute('href', '/kpi/mine');
     expect(screen.getByRole('link', { name: /Đơn giá KPI/ })).toHaveAttribute('href', '/kpi/rates');
+  });
+
+  it('nhân viên chỉ thấy 3 ô', async () => {
+    vi.spyOn(apiClient.auth, 'me').mockResolvedValue({ ...USER, role: 'staff' });
+    render(<Page />);
+    const nav = await screen.findByRole('navigation', { name: 'Thao tác' });
+    expect(within(nav).getAllByRole('link').map((a) => a.getAttribute('href'))).toEqual(['/kpi', '/kpi/mine', '/kpi/rates']);
   });
 
   it('nhãn vai trò Nhân Viên', async () => {
@@ -67,7 +79,8 @@ describe('trang /: tài khoản', () => {
     vi.spyOn(apiClient.auth, 'me').mockResolvedValue(USER);
     const update = vi.spyOn(apiClient.me, 'updateProfile').mockResolvedValue({ ...USER, fullName: 'Tên Mới' });
     render(<Page />);
-    fireEvent.click(await screen.findByRole('button', { name: /Sửa họ tên/ }));
+    await openUserMenu();
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Sửa họ tên' }));
     const form = screen.getByRole('dialog', { name: 'Sửa họ tên' });
     fireEvent.change(screen.getByLabelText('Họ tên'), { target: { value: 'Tên Mới' } });
     fireEvent.submit(form.querySelector('form')!);
@@ -76,17 +89,21 @@ describe('trang /: tài khoản', () => {
     fireEvent.click(within(confirm).getByRole('button', { name: 'Lưu' }));
     await waitFor(() => expect(update).toHaveBeenCalledWith('Tên Mới'));
     expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Xin chào, Tên Mới');
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tài khoản Tên Mới' })).toBeInTheDocument();
+    // Hộp xác nhận đóng trong finally của useConfirmAction, sau khi tên đã đổi.
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
 });
 
 describe('trang /', () => {
-  it('me trả user → hiện họ tên, vai trò và nút Đăng xuất', async () => {
+  it('me trả user → hiện họ tên, vai trò; menu tài khoản có Sửa họ tên và Đăng xuất', async () => {
     vi.spyOn(apiClient.auth, 'me').mockResolvedValue(USER);
     render(<Page />);
     expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Xin chào, Trần Thị Quản Lý Một');
-    expect(screen.getByText(/Quản lý · quan.ly.1@example.com/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Đăng xuất' })).toBeInTheDocument();
+    expect(screen.getAllByText(/Quản lý · quan.ly.1@example.com/)).toHaveLength(1);
+    await openUserMenu();
+    expect(screen.getByRole('menuitem', { name: 'Sửa họ tên' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Đăng xuất' })).toBeInTheDocument();
   });
 
   it('me 401 → xóa cookie qua logout rồi về /login', async () => {
@@ -128,17 +145,19 @@ describe('trang /', () => {
     vi.spyOn(apiClient.auth, 'me').mockResolvedValue(USER);
     vi.spyOn(apiClient.auth, 'logout').mockRejectedValue(new ApiError('INTERNAL', 500, 'Lỗi hệ thống, vui lòng thử lại'));
     render(<Page />);
-    fireEvent.click(await screen.findByRole('button', { name: 'Đăng xuất' }));
+    await openUserMenu();
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Đăng xuất' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Đăng xuất không thành công: Lỗi hệ thống, vui lòng thử lại');
     expect(replace).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Đăng xuất' })).toBeEnabled();
+    expect(screen.getByRole('menuitem', { name: 'Đăng xuất' })).toBeEnabled();
   });
 
   it('Đăng xuất → gọi logout rồi về /login', async () => {
     vi.spyOn(apiClient.auth, 'me').mockResolvedValue(USER);
     const logout = vi.spyOn(apiClient.auth, 'logout').mockResolvedValue();
     render(<Page />);
-    fireEvent.click(await screen.findByRole('button', { name: 'Đăng xuất' }));
+    await openUserMenu();
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Đăng xuất' }));
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
     expect(logout).toHaveBeenCalled();
   });

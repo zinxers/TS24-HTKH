@@ -1,28 +1,23 @@
 import type { CurrentUser } from '@ts24-htkh/shared';
-import { LogoutButton } from '../features/auth/LogoutButton';
+import { UserMenu } from '../features/accounts/UserMenu';
 import { Logo } from './Logo';
 import { ThemeMenu } from './ThemeMenu';
 
-function initials(fullName: string): string {
-  const words = fullName.trim().split(/\s+/);
-  return ((words[0]?.[0] ?? '') + (words.length > 1 ? (words.at(-1)?.[0] ?? '') : '')).toUpperCase();
-}
-
-export function AppBar({ user, onLogoutError }: { user: CurrentUser | null; onLogoutError: (m: string | null) => void }) {
+export function AppBar({
+  user,
+  onUserChange,
+  onLogoutError,
+}: {
+  user: CurrentUser | null;
+  onUserChange?: (user: CurrentUser) => void;
+  onLogoutError: (m: string | null) => void;
+}) {
   return (
     <header className="bar">
       <Logo className="logo" />
       <div className="who">
         <ThemeMenu />
-        {user && (
-          <>
-            <span className="avatar" aria-hidden="true">
-              {initials(user.fullName)}
-            </span>
-            <span className="name">{user.fullName}</span>
-            <LogoutButton onError={onLogoutError} />
-          </>
-        )}
+        {user && <UserMenu user={user} onUserChange={onUserChange} onLogoutError={onLogoutError} />}
       </div>
     </header>
   );
