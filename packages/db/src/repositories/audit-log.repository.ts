@@ -9,7 +9,8 @@ export type AuditAction =
   | 'account.set_password'
   | 'account.transfer_head'
   | 'profile.update'
-  | 'rate.set';
+  | 'rate.set'
+  | 'report.note.save';
 
 export interface AuditEntry {
   actorId: string;

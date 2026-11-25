@@ -83,6 +83,14 @@ export default function Page() {
                 </Link>
               )}
               {user.role !== 'staff' && (
+                <Link className="menu-row" href="/reports">
+                  Báo cáo tổng hợp{' '}
+                  <span className="chev" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
+              )}
+              {user.role !== 'staff' && (
                 <Link className="menu-row" href="/accounts">
                   Quản lý tài khoản{' '}
                   <span className="chev" aria-hidden="true">

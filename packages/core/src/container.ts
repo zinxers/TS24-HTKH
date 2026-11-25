@@ -5,10 +5,12 @@ import {
   KpiRateRepository,
   KpiReportRepository,
   KpiTeamRepository,
+  ReportNoteRepository,
   SessionRepository,
   TeamRepository,
   UserRepository,
 } from '@ts24-htkh/db';
+import path from 'node:path';
 import { getEnv } from './config/env';
 import { AccountService } from './modules/accounts/account.service';
 import { AuthService } from './modules/auth/auth.service';
@@ -16,6 +18,8 @@ import { Argon2PasswordHasher } from './modules/auth/password-hasher';
 import { KpiRateService } from './modules/kpi/kpi-rate.service';
 import { KpiReportService } from './modules/kpi/kpi-report.service';
 import { TeamKpiService } from './modules/kpi/team-kpi.service';
+import { ReportService } from './modules/reports/report.service';
+import { FsTemplateStore } from './modules/reports/template-store';
 import type { UnitOfWork } from './unit-of-work';
 
 export interface Container {
@@ -24,6 +28,7 @@ export interface Container {
   kpiReportService: KpiReportService;
   kpiRateService: KpiRateService;
   teamKpiService: TeamKpiService;
+  reportService: ReportService;
 }
 
 let container: Container | undefined;
@@ -43,6 +48,7 @@ export function getContainer(): Container {
           audit: new AuditLogRepository(tx),
           kpiReports: new KpiReportRepository(tx),
           kpiRates: new KpiRateRepository(tx),
+          reportNotes: new ReportNoteRepository(tx),
         }),
       ),
   };
@@ -50,6 +56,7 @@ export function getContainer(): Container {
   const hasher = new Argon2PasswordHasher();
   const kpiRates = new KpiRateRepository(sql);
   const teams = new TeamRepository(sql);
+  const kpiTeam = new KpiTeamRepository(sql);
   container = {
     authService: new AuthService({
       users,
@@ -61,7 +68,15 @@ export function getContainer(): Container {
     accountService: new AccountService({ users, teams, hasher, uow }),
     kpiReportService: new KpiReportService({ kpiReports: new KpiReportRepository(sql), kpiRates, uow }),
     kpiRateService: new KpiRateService({ kpiRates, uow }),
-    teamKpiService: new TeamKpiService({ teams, users, kpiTeam: new KpiTeamRepository(sql) }),
+    teamKpiService: new TeamKpiService({ teams, users, kpiTeam }),
+    reportService: new ReportService({
+      teams,
+      kpiTeam,
+      reportNotes: new ReportNoteRepository(sql),
+      uow,
+      // cwd của Next.js là apps/web; mẫu nằm ở templates/ gốc repo.
+      templates: new FsTemplateStore(path.resolve(process.cwd(), '..', '..', 'templates')),
+    }),
   };
   return container;
 }

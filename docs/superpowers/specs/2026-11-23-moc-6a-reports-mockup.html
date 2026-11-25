@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mẫu báo cáo tổng hợp</title>
+<link rel="stylesheet" href="../../../apps/web/src/app/globals.css">
+<link rel="stylesheet" href="../../../apps/web/src/app/controls.css">
+<link rel="stylesheet" href="../../../apps/web/src/app/dialogs.css">
+<link rel="stylesheet" href="../../../apps/web/src/app/accounts.css">
+<link rel="stylesheet" href="../../../apps/web/src/app/kpi.css">
+<link rel="stylesheet" href="../../../apps/web/src/app/team.css">
+<style>
+  /* Bố cục chung mới (spec mục 10a, sẽ vào globals.css) */
+  :root { --page-max: 1440px; --gutter: clamp(16px, 3vw, 48px); }
+  .content, .content.wide { max-width: var(--page-max); padding-inline: var(--gutter); }
+  .bar { padding: 0 max(var(--gutter), calc((100% - var(--page-max)) / 2 + var(--gutter))); }
+  @media (max-width: 480px) { .content { padding-inline: var(--gutter); } .bar { padding: 0 var(--gutter); } }
+  /* Phần mới của mẫu (sẽ vào reports.css) */
+  .mock-note { font-size: 13px; color: var(--secondary); border: 1px dashed var(--secondary); border-radius: 8px; padding: 8px 12px; margin: 0 0 16px; }
+  .mock-switch { margin: 0 0 16px; }
+  .pick { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 8px; }
+  .pick label { display: grid; gap: 4px; color: var(--secondary); font-size: 13px; }
+  .pick select { height: 40px; min-width: 220px; max-width: 100%; }
+  .rep-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .rep-table th, .rep-table td { padding: 10px 12px; border-top: 0.5px solid var(--separator); }
+  .rep-table thead th { border-top: 0; color: var(--secondary); font-size: 13px; font-weight: 600; text-align: right; }
+  .rep-table thead th:first-child, .rep-table td:first-child { text-align: left; }
+  .rep-table tr.sum td { font-weight: 600; background: var(--fill); }
+  .dl { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 16px 0 8px; }
+  .notes { background: var(--group); border-radius: 12px; padding: 16px; }
+  .notes h3 { margin: 16px 0 8px; font-size: 15px; color: var(--secondary); }
+  .notes h3:first-child { margin-top: 0; }
+  .nf { display: grid; gap: 4px; margin-bottom: 12px; }
+  .nf label { font-size: 13px; color: var(--secondary); }
+  .nf input, .nf textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--separator); background: var(--bg); color: var(--label); }
+  .nf textarea { min-height: 72px; resize: vertical; }
+  .nf .cnt { justify-self: end; font-size: 12px; color: var(--secondary); }
+  .nf .cnt.warn { color: var(--danger); }
+  .row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0 12px; }
+  .notes-foot { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<header class="bar"><span class="app">TS24-HTKH</span>
+  <div class="who"><span class="avatar" id="av">NH</span><span class="name" id="who">Nguyễn Văn Hùng (Trưởng phòng)</span></div>
+</header>
+<main class="content wide">
+  <a class="back" href="#">‹ Trang chủ</a>
+  <p class="mock-note">MẪU – dữ liệu giả. Bấm nút dưới để xem màn hình của Quản lý (chỉ một cột team mình, không có Cả phòng).</p>
+  <div class="mock-switch chips"><button class="chip" aria-pressed="true" data-role="head">Trưởng phòng</button><button class="chip" aria-pressed="false" data-role="manager">Quản lý iBHXH</button></div>
+
+  <div class="head-row"><h1>Báo cáo tổng hợp</h1><span class="muted" id="scopeLabel">Cả phòng</span></div>
+
+  <div class="pick">
+    <div class="chips" role="group" aria-label="Loại báo cáo">
+      <button class="chip" aria-pressed="true" data-type="WR">Tuần (WR)</button>
+      <button class="chip" aria-pressed="false" data-type="MR">Tháng (MR)</button>
+      <button class="chip" aria-pressed="false" data-type="QR">Quý (QR)</button>
+    </div>
+    <label>Kỳ
+      <select id="period" class="kin"></select>
+    </label>
+  </div>
+  <p class="muted" id="range"></p>
+
+  <div class="stat-row">
+    <div class="stat"><span class="v" id="total"></span><span class="l">Tổng ticket</span></div>
+    <div class="stat hidden" id="trendStat"><span class="v team-up">↑</span><span class="l">So với tháng trước (3.480)</span></div>
+  </div>
+
+  <div class="scroll-x">
+    <table class="rep-table" aria-label="Số liệu theo team">
+      <thead id="head"></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <div class="dl">
+    <button class="btn btn-primary">Tải file xlsx</button>
+    <span class="muted" id="dlNote"></span>
+  </div>
+
+  <h2 class="sec-title">Nội dung chữ</h2>
+  <div class="tabs" role="tablist" aria-label="Phạm vi" id="scopes">
+    <button class="chip dept" role="tab" aria-pressed="true">Cả phòng</button>
+    <button class="chip" role="tab" aria-pressed="false">TaxOnline</button>
+    <button class="chip" role="tab" aria-pressed="false">iBHXH</button>
+    <button class="chip" role="tab" aria-pressed="false">iXHD</button>
+  </div>
+  <div class="notes">
+    <h3>I. Tóm tắt</h3>
+    <div class="row2">
+      <div class="nf"><label for="f1">SLA đạt</label><input id="f1" value="96%"></div>
+      <div class="nf"><label for="f2">MTTR</label><input id="f2" value="4,2 giờ"></div>
+      <div class="nf"><label for="f3">Backlog cuối tuần</label><input id="f3" value="12"></div>
+    </div>
+    <div class="nf"><label for="f4">Vấn đề nổi bật</label><textarea id="f4">Lỗi đồng bộ hóa đơn điện tử ngày 15/11 làm tăng ticket nhóm iXHD.</textarea><span class="cnt">68 / 2.000</span></div>
+    <div class="nf"><label for="f5">Hỗ trợ cần từ CEO (nếu có)</label><textarea id="f5"></textarea></div>
+    <div id="teamFields" class="hidden">
+      <h3>III. Chỉ số team</h3>
+      <div class="nf"><label for="t1">SLA Compliance</label><textarea id="t1">98% ticket xử lý trong hạn.</textarea></div>
+      <div class="nf"><label for="t2">MTTR</label><textarea id="t2"></textarea></div>
+      <div class="nf"><label for="t3">Repeat Rate</label><textarea id="t3"></textarea></div>
+      <h3>IV. Vấn đề nổi bật</h3>
+      <div class="nf"><textarea aria-label="Vấn đề nổi bật của team"></textarea></div>
+      <h3>V. Kế hoạch tuần tới</h3>
+      <div class="nf"><textarea aria-label="Kế hoạch tuần tới">Đào tạo lại quy trình khai báo tăng lao động.</textarea><span class="cnt warn">1.986 / 2.000</span></div>
+    </div>
+    <div class="notes-foot">
+      <span class="muted">Sửa lần cuối: Nguyễn Văn Hùng, 10:32 22/11/2026</span>
+      <button class="btn btn-primary">Lưu</button>
+    </div>
+  </div>
+</main>
+<script>
+  const TEAMS = ['TaxOnline', 'iBHXH', 'iXHD'];
+  const DATA = {
+    WR: [['Tổng đài (ĐT)', 120, 98, 77], ['Chat', 210, 185, 160], ['Email', 45, 38, 52], ['Hoàn thành', 375, 321, 289, 1], ['Lỗi hệ thống, lỗi tích hợp', 40, 22, 61], ['Cấu hình phần mềm', 150, 120, 95], ['Hỗ trợ sử dụng', 200, 190, 140]],
+    MR: [],
+    QR: [['Ticket xử lý / nhân sự', 412.3, 389.5, 401]],
+  };
+  const TOTAL = { WR: ['1.234', '411'], MR: ['3.620', '1.120'], QR: ['10.850', '3.505'] };
+  const PERIODS = { WR: ['Tuần 47 tháng 11/2026 (đang chạy)', 'Tuần 46 tháng 11/2026', 'Tuần 45 tháng 11/2026'], MR: ['Tháng 12/2026 (đang chạy)', 'Tháng 11/2026', 'Tháng 10/2026'], QR: ['Qúy 03/2027 (đang chạy)', 'Qúy 12/2026', 'Qúy 09/2026'] };
+  const RANGE = { WR: 'Từ 13/11/2026 đến 19/11/2026', MR: 'Từ 16/10/2026 đến 15/11/2026', QR: 'Từ 16/09/2026 đến 15/12/2026' };
+  const q = new URLSearchParams(location.search);
+  let role = q.get('role') || 'head', type = q.get('type') || 'WR';
+  function render() {
+    const mgr = role === 'manager';
+    const cols = mgr ? [2] : [1, 2, 3];
+    document.getElementById('head').innerHTML = '<tr><th>Mục</th>' + cols.map(i => `<th>${TEAMS[i - 1]}</th>`).join('') + '</tr>';
+    document.getElementById('rows').innerHTML = DATA[type].map(r =>
+      `<tr${r[4] ? ' class="sum"' : ''}><td>${r[0]}</td>` + cols.map(i => `<td class="num">${r[i].toLocaleString('vi-VN')}</td>`).join('') + '</tr>').join('')
+      || `<tr><td colspan="${cols.length + 1}" class="muted">Báo cáo tháng chỉ có tổng ticket và xu hướng.</td></tr>`;
+    document.getElementById('total').textContent = TOTAL[type][mgr ? 1 : 0];
+    document.getElementById('trendStat').classList.toggle('hidden', type !== 'MR');
+    document.getElementById('scopes').classList.toggle('hidden', mgr);
+    document.getElementById('teamFields').classList.toggle('hidden', !mgr);
+    document.getElementById('scopeLabel').textContent = mgr ? 'iBHXH' : 'Cả phòng';
+    document.getElementById('who').textContent = mgr ? 'Trần Thị Lan (Quản lý)' : 'Nguyễn Văn Hùng (Trưởng phòng)';
+    document.getElementById('av').textContent = mgr ? 'TL' : 'NH';
+    document.getElementById('dlNote').textContent = `${type}-TEC-261123.xlsx · ký ${mgr ? 'PP.' : 'TP.'} Hỗ Trợ Khách Hàng · dùng nội dung chữ đã lưu`;
+    document.getElementById('period').innerHTML = PERIODS[type].map((t, i) => `<option${i === 1 ? ' selected' : ''}>${t}</option>`).join('');
+    document.getElementById('range').textContent = RANGE[type];
+  }
+  const press = (sel, b) => document.querySelectorAll(sel).forEach(x => x.setAttribute('aria-pressed', x === b));
+  document.querySelectorAll('[data-role]').forEach(b => b.onclick = () => { role = b.dataset.role; press('[data-role]', b); render(); });
+  document.querySelectorAll('[data-type]').forEach(b => b.onclick = () => { type = b.dataset.type; press('[data-type]', b); render(); });
+  document.querySelectorAll('#scopes .chip').forEach((b, i) => b.onclick = () => { press('#scopes .chip', b); document.getElementById('teamFields').classList.toggle('hidden', i === 0); });
+  press('[data-role]', document.querySelector(`[data-role="${role}"]`));
+  press('[data-type]', document.querySelector(`[data-type="${type}"]`));
+  render();
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 import type { CurrentUser } from '@ts24-htkh/shared';
 import { describe, expect, it } from 'vitest';
-import { can, canKpi, canSee, canTeamKpi, type AccountAction } from './permissions';
+import { can, canKpi, canReport, canSee, canTeamKpi, type AccountAction, type ReportAction } from './permissions';
 
 const A = 'team-a';
 const B = 'team-b';
@@ -147,5 +147,29 @@ describe('canTeamKpi', () => {
     expect(canTeamKpi(H, 'dept.kpi.view')).toBe(true);
     expect(canTeamKpi(M, 'dept.kpi.view')).toBe(false);
     expect(canTeamKpi(S, 'dept.kpi.view')).toBe(false);
+  });
+});
+
+describe('canReport', () => {
+  const ACTIONS: ReportAction[] = ['report.view', 'report.note.edit'];
+
+  it('Nhân viên bị chặn mọi action, mọi phạm vi', () => {
+    for (const a of ACTIONS) for (const scope of ['dept', A, B]) expect(canReport(S, a, scope)).toBe(false);
+  });
+
+  it('Quản lý chỉ team mình, không Cả phòng', () => {
+    for (const a of ACTIONS) {
+      expect(canReport(M, a, A)).toBe(true);
+      expect(canReport(M, a, B)).toBe(false);
+      expect(canReport(M, a, 'dept')).toBe(false);
+    }
+  });
+
+  it('Quản lý không có team bị chặn', () => {
+    for (const a of ACTIONS) expect(canReport(user('M0', 'manager', null), a, A)).toBe(false);
+  });
+
+  it('Trưởng phòng mọi phạm vi', () => {
+    for (const a of ACTIONS) for (const scope of ['dept', A, B]) expect(canReport(H, a, scope)).toBe(true);
   });
 });

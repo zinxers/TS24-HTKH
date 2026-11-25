@@ -12,7 +12,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@ts24-htkh/shared": "workspace:*"
+    "@ts24-htkh/shared": "workspace:*",
+    "fflate": "^0.8.3"
   },
   "devDependencies": {
     "@ts24-htkh/config": "workspace:*",

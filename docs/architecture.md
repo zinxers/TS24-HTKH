@@ -76,14 +76,14 @@ ts24-htkh/
 │     ├─ src-tauri/  (src/lib.rs, tauri.conf.json, tauri.store.conf.json, capabilities/remote.json, icons/)
 │     └─ packaging/msix/
 ├─ packages/
-│  ├─ core/                       src/policies/ (ma trận quyền), src/modules/ (auth, accounts, kpi: gồm team-kpi.service.ts), container.ts
+│  ├─ core/                       src/policies/ (ma trận quyền), src/modules/ (auth, accounts, kpi: gồm team-kpi.service.ts, reports: ReportService + ReportPolicy), container.ts
 │  ├─ db/  storage/  xlsx-report/  shared/  platform/  config/
 ├─ tools/
 │  ├─ sheets-migration/           ETL một lần Google Sheet → PostgreSQL (chỉ đọc Sheet)
 │  ├─ set-password/               CLI đặt mật khẩu khẩn cấp; đường chính là trang /accounts (runbooks/dat-mat-khau.md)
 │  └─ backup-verify/
 ├─ supabase/                      migrations/ (team, app_user, user_session, audit_log, kpi_report, kpi_rate…), seed.sql, config.toml
-├─ templates/                     file mẫu .xlsx gốc
+├─ templates/                     file mẫu .xlsx gốc: report-WR.xlsx, report-MR.xlsx, report-QR.xlsx (đưa vào bản build Vercel qua outputFileTracingIncludes trong apps/web/next.config.ts)
 ├─ docs/                          architecture.md, adr/, specs/, plans/, runbooks/, GLOSSARY.md
 ├─ .claude/rules/                 quy tắc cho Claude Code theo vùng code
 ├─ .github/workflows/             ci.yml, deploy.yml, release-desktop.yml, backup.yml
@@ -100,6 +100,10 @@ packages/db/src/repositories/          user.repository.ts · team.repository.ts 
 apps/web/src/app/api/v1/accounts/      route.ts · [id]/route.ts · [id]/status · [id]/password · transfer-head
 apps/web/src/features/accounts/        AccountsScreen.tsx · AccountDialogs.tsx · RowMenu.tsx · useConfirmAction.ts
 ```
+
+Module `reports` (Mốc 6a, `docs/specs/bao-cao-wr-mr-qr.md`): `packages/core/src/modules/reports/` (`report.service.ts`, `report.policy.ts`, `report-cells.ts`), `packages/xlsx-report/src/`, route `apps/web/src/app/api/v1/reports/[type]/` (`route.ts`, `notes`, `file`), màn hình `apps/web/src/features/reports/` tại trang `/reports`.
+
+Bố cục web dùng token trong `apps/web/src/app/globals.css`: `--page-max: 1440px` (khổ desktop tối đa) và `--gutter: clamp(16px, 3vw, 48px)` (lề hai bên), áp cho toàn app.
 
 ## 4. Luồng một request: nhân viên gửi báo cáo KPI
 
