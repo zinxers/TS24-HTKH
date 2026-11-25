@@ -68,7 +68,7 @@ export function checkKpiRow(input: unknown): {
   };
 }
 
-const isoDateField = z.custom<IsoDate>((v) => typeof v === 'string' && isIsoDate(v), 'Ngày không hợp lệ');
+export const isoDateField = z.custom<IsoDate>((v) => typeof v === 'string' && isIsoDate(v), 'Ngày không hợp lệ');
 
 export const kpiRangeSchema = z
   .object({ from: isoDateField, to: isoDateField })

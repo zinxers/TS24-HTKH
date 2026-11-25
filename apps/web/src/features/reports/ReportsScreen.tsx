@@ -1,7 +1,7 @@
 'use client';
 
 import { DEPT_SCOPE, reportFieldsFor, reportPeriods, toVnDate, type ReportPreview, type ReportType } from '@ts24-htkh/shared';
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
+import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { ApiError, apiClient } from '../../lib/api-client';
 import { errorMessage } from '../accounts/labels';
@@ -33,8 +33,7 @@ export function ReportsScreen() {
   const [reloadKey, setReloadKey] = useState(0);
   // Chỉ các ô người dùng đã gõ của phạm vi hiện tại; ô khác lấy bản đã lưu mới nhất (sau 409 vẫn đúng).
   const [draft, setDraft] = useState<Record<string, string> | null>(null);
-  const link = useRef<HTMLAnchorElement>(null);
-  const allowDownload = useRef(false);
+  const [downloading, setDownloading] = useState(false);
   const actions = useConfirmAction(() => void leave());
 
   const isHead = me?.role === 'head';
@@ -121,19 +120,36 @@ export function ReportsScreen() {
     });
   };
 
-  const onDownload = (e: MouseEvent<HTMLAnchorElement>) => {
-    if (!dirty || allowDownload.current) return;
-    e.preventDefault();
-    actions.ask({
-      title: 'Tải file khi chưa lưu?',
-      message: 'File dùng nội dung chữ đã lưu; phần vừa gõ chưa lưu sẽ không có trong file.',
-      confirmLabel: 'Tải file',
-      run: async () => {
-        allowDownload.current = true;
-        link.current?.click();
-        allowDownload.current = false;
-      },
-    });
+  const saveFile = async () => {
+    const { blob, fileName } = await apiClient.reports.file(type, period.start);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    // Trình duyệt bắt đầu tải bất đồng bộ: thu hồi URL sau một lúc.
+    setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  };
+
+  const onDownload = () => {
+    if (dirty) {
+      actions.ask({
+        title: 'Tải file khi chưa lưu?',
+        message: 'File dùng nội dung chữ đã lưu; phần vừa gõ chưa lưu sẽ không có trong file.',
+        confirmLabel: 'Tải file',
+        run: saveFile,
+      });
+      return;
+    }
+    if (downloading) return;
+    actions.setError(null);
+    setDownloading(true);
+    saveFile()
+      .catch((e: unknown) => {
+        if (e instanceof ApiError && e.status === 401) void leave();
+        else actions.setError(errorMessage(e));
+      })
+      .finally(() => setDownloading(false));
   };
 
   const tabs = [DEPT_SCOPE, ...teams.map((t) => t.id)];
@@ -219,9 +235,9 @@ export function ReportsScreen() {
           <ReportTable preview={preview} />
 
           <div className="dl">
-            <a ref={link} className="btn btn-primary" href={apiClient.reports.fileUrl(type, period.start)} download onClick={onDownload}>
+            <button type="button" className="btn btn-primary" onClick={onDownload} disabled={downloading || actions.busy}>
               Tải file xlsx
-            </a>
+            </button>
             <span className="muted">
               {fileName} · ký {isHead ? 'TP.' : 'PP.'} Hỗ Trợ Khách Hàng · dùng nội dung chữ đã lưu
             </span>
