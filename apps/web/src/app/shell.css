@@ -44,6 +44,17 @@
 @media (prefers-reduced-transparency: reduce) {
   .appbar { background: var(--panel); backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
+/* khung: thanh bên | tấm nội dung (cuộn trong tấm) */
+.app { display: grid; grid-template-columns: auto minmax(0, 1fr); height: 100vh; height: 100dvh; overflow: hidden; background: var(--shell); }
+.panel { --pad: clamp(16px, 3vw, 40px); position: relative; min-width: 0; margin: 12px 12px 12px 0; border-radius: 20px; background: var(--panel); overflow-y: auto; overflow-x: hidden; box-shadow: inset 0 0 0 1px light-dark(transparent, rgba(150, 175, 205, 0.16)); }
+/* khung chờ: tiêu đề + 4 thẻ + 1 bảng */
+.sk { display: block; border-radius: 10px; background: linear-gradient(100deg, var(--skeleton) 30%, var(--skeleton-hi) 50%, var(--skeleton) 70%) 0 0 / 300% 100%; animation: shimmer 1.6s linear infinite; }
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: 0 0; } }
+.sk-title { width: 280px; max-width: 60%; height: 34px; margin-bottom: 24px; }
+.sk-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.sk-cards .sk { height: 96px; border-radius: 16px; }
+.sk-tbl { display: grid; gap: 14px; padding: 16px 20px; background: var(--card); border: 1px solid var(--separator); border-radius: 16px; }
+.sk-tbl .sk { height: 18px; }
 /* ngăn kéo 375px */
 .drawer { position: fixed; inset: 0 auto 0 0; width: 280px; max-width: 85vw; height: 100dvh; max-height: none; margin: 0; padding: 0; border: 0; overflow: hidden; background: var(--shell); color: var(--on-shell); transform: translateX(-100%); transition: transform 320ms var(--ease), overlay 320ms allow-discrete, display 320ms allow-discrete; }
 .drawer[open] { transform: none; box-shadow: 8px 0 32px rgba(0, 0, 0, 0.35); }
@@ -55,8 +66,10 @@
 @media (max-width: 767px) {
   .menu-btn { display: inline-flex; }
   .appbar { gap: 8px; }
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .panel { margin: 0; border-radius: 0; box-shadow: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after, .drawer::backdrop { transition: none !important; animation: none !important; }
+  *, *::before, *::after, .drawer::backdrop { transition: none !important; animation: none !important; } /* gồm shimmer */
   .nav a:hover .i { transform: none; }
 }
