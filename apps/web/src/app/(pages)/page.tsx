@@ -41,7 +41,7 @@ export default function Page() {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
-  const [logoutError, setLogoutError] = useState<string | null>(null);
+  const [logoutError] = useState<string | null>(null);
 
   useEffect(() => {
     const fail = (e: unknown) => setError(e instanceof ApiError ? e.message : 'Lỗi hệ thống, vui lòng thử lại');
@@ -64,7 +64,7 @@ export default function Page() {
 
   return (
     <>
-      <AppBar userMenu={user && <UserMenu user={user} onUserChange={setUser} onLogoutError={setLogoutError} />} />
+      <AppBar userMenu={user && <UserMenu />} />
       <main className="content">
         {user ? (
           <>

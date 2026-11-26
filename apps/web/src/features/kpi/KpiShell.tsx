@@ -40,7 +40,6 @@ export function useKpiUser() {
 export function KpiShell({
   me,
   notice,
-  onNotice,
   children,
 }: {
   me: CurrentUser | null;
@@ -50,7 +49,7 @@ export function KpiShell({
 }) {
   return (
     <>
-      <AppBar userMenu={me && <UserMenu user={me} onLogoutError={onNotice} />} />
+      <AppBar userMenu={me && <UserMenu />} />
       <main className="content wide">
         <Link className="back" href="/">
           ‹ Trang chủ

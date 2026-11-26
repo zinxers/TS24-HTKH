@@ -96,15 +96,7 @@ export function AccountsScreen() {
     <>
       <AppBar
         userMenu={
-          <UserMenu
-            user={me}
-            onUserChange={(u) => {
-              setMe(u);
-              // Dòng của mình trong bảng đổi tên ngay, không chờ tải lại danh sách.
-              setAccounts((list) => list.map((a) => (a.id === u.id ? { ...a, fullName: u.fullName } : a)));
-            }}
-            onLogoutError={setNotice}
-          />
+          <UserMenu />
         }
       />
       <main className="content wide">

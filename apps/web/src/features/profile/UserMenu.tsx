@@ -1,11 +1,11 @@
 'use client';
 
-import type { CurrentUser } from '@ts24-htkh/shared';
-import { useEffect, useId, useState } from 'react';
+import { useId, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { usePopover } from '../../components/usePopover';
 import { apiClient } from '../../lib/api-client';
+import { useCurrentUser } from '../../lib/current-user';
 import { LogoutButton } from './LogoutButton';
 import { ROLE_LABEL } from '../accounts/labels';
 import { useConfirmAction } from '../accounts/useConfirmAction';
@@ -18,24 +18,12 @@ function initials(fullName: string): string {
   return ((words[0]?.[0] ?? '') + (words.length > 1 ? (words.at(-1)?.[0] ?? '') : '')).toUpperCase();
 }
 
-/** Avatar + họ tên trên thanh trên; mở menu Sửa họ tên / Đăng xuất cho mọi vai trò. */
-export function UserMenu({
-  user: given,
-  onUserChange,
-  onLogoutError,
-}: {
-  user: CurrentUser;
-  onUserChange?: (user: CurrentUser) => void;
-  onLogoutError: (message: string | null) => void;
-}) {
+/** Avatar + họ tên (thu gọn: chỉ avatar) trong chân thanh bên; mở menu Sửa họ tên / Đăng xuất. Người dùng lấy từ context. */
+export function UserMenu() {
+  const { me: user, setMe, setNotice } = useCurrentUser();
   const { pos, triggerRef, menuRef, open, toggle, close, onKeyDown } = usePopover(WIDTH);
   const [editing, setEditing] = useState(false);
   const metaId = useId();
-  // Màn hình không truyền onUserChange vẫn thấy tên mới trên thanh trên.
-  const [renamed, setRenamed] = useState<CurrentUser | null>(null);
-  // Màn hình đưa user mới (vd sau onUserChange) thì dùng cái đó, bỏ bản tạm.
-  useEffect(() => setRenamed(null), [given]);
-  const user = renamed?.id === given.id ? renamed : given;
   // Hết phiên khi sửa: tải lại trang để màn hình chạy luồng 401 của nó.
   const action = useConfirmAction(() => window.location.reload());
 
@@ -53,7 +41,10 @@ export function UserMenu({
         <span className="avatar" aria-hidden="true">
           {initials(user.fullName)}
         </span>
-        <span className="name">{user.fullName}</span>
+        <span className="who-text">
+          <span className="name">{user.fullName}</span>
+          <span className="role">{ROLE_LABEL[user.role]}</span>
+        </span>
         <span className="caret" aria-hidden="true">
           ▾
         </span>
@@ -83,7 +74,7 @@ export function UserMenu({
                   onError={(message) => {
                     // Nút đang khóa mất focus: lỗi thì đóng menu, focus về nút avatar, thông báo hiện trên màn hình.
                     if (message) close();
-                    onLogoutError(message);
+                    setNotice(message);
                   }}
                 />
               </div>
@@ -107,8 +98,7 @@ export function UserMenu({
               confirmLabel: 'Lưu',
               run: async () => {
                 const updated = await apiClient.me.updateProfile(fullName);
-                setRenamed(updated);
-                onUserChange?.(updated);
+                setMe(updated);
                 setEditing(false);
               },
             })
