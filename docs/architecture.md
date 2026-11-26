@@ -64,12 +64,14 @@ ts24-htkh/
 ├─ apps/
 │  ├─ web/                        @ts24-htkh/web — Next.js, deploy Vercel (Root Directory = apps/web)
 │  │  ├─ src/app/(pages)/          login, kpi (kpi, kpi/mine, kpi/rates), team, reports, schedule, ts24, accounts
+│  │  │  └─ (app)/                 nhóm route có khung app (AppShell); login nằm ngoài nhóm
 │  │  ├─ src/app/api/v1/           route handler mỏng → @ts24-htkh/core
 │  │  │  └─ _lib/                  handle() (lỗi → JSON), parseVi() (thông báo zod tiếng Việt), requireUser(), cookie phiên
 │  │  ├─ src/proxy.ts              gợi ý điều hướng theo cookie có/không (lớp giao diện, không phải luật)
-│  │  ├─ src/components/           ConfirmDialog, DateRange, Chart
+│  │  ├─ src/components/           ConfirmDialog, FormDialog, shell/ (AppShell, Sidebar, TopBar, PageSkeleton)
 │  │  ├─ src/features/<nghiệp vụ>/ màn hình + hook (vd team: TeamKpiScreen)
 │  │  ├─ src/lib/api-client.ts     nơi duy nhất giao diện gọi API
+│  │  ├─ src/lib/current-user.tsx  context người dùng hiện tại cho khung app
 │  │  └─ tests/e2e/
 │  └─ desktop/                    @ts24-htkh/desktop — Tauri 2 vỏ mỏng
 │     ├─ src/offline.html
