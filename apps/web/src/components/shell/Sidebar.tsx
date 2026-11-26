@@ -57,7 +57,6 @@ export function Sidebar({ role, collapsed, onToggle, onNavigate, userMenu }: Sid
               key={item.href}
               href={item.href}
               title={item.label}
-              data-tip={item.label}
               aria-current={active ? 'page' : undefined}
               onClick={onNavigate}
             >
