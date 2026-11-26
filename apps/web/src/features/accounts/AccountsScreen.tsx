@@ -93,7 +93,15 @@ export function AccountsScreen() {
 
   return (
     <>
-      <AppBar user={me} onUserChange={setMe} onLogoutError={setNotice} />
+      <AppBar
+        user={me}
+        onUserChange={(u) => {
+          setMe(u);
+          // Dòng của mình trong bảng đổi tên ngay, không chờ tải lại danh sách.
+          setAccounts((list) => list.map((a) => (a.id === u.id ? { ...a, fullName: u.fullName } : a)));
+        }}
+        onLogoutError={setNotice}
+      />
       <main className="content wide">
         <Link className="back" href="/">
           ‹ Trang chủ
