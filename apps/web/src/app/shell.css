@@ -57,6 +57,6 @@
   .appbar { gap: 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition: none !important; animation: none !important; }
+  *, *::before, *::after, .drawer::backdrop { transition: none !important; animation: none !important; }
   .nav a:hover .i { transform: none; }
 }
