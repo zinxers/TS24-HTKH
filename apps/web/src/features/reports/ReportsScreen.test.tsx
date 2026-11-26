@@ -219,4 +219,13 @@ describe('ReportsScreen', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Bạn không có quyền');
     expect(click).not.toHaveBeenCalled();
   });
+
+  it('chip Đối soát KPI chỉ có với Trưởng phòng', async () => {
+    await asHead();
+    expect(screen.getByRole('button', { name: 'Đối soát KPI' })).toBeInTheDocument();
+    vi.spyOn(apiClient.auth, 'me').mockResolvedValue(MANAGER);
+    render(<ReportsScreen />);
+    await screen.findAllByRole('table', { name: 'Số liệu theo team' });
+    expect(screen.getAllByRole('button', { name: 'Đối soát KPI' })).toHaveLength(1);
+  });
 });

@@ -8,7 +8,9 @@ import { errorMessage } from '../accounts/labels';
 import { useConfirmAction } from '../accounts/useConfirmAction';
 import { KpiShell, fmtDate, useKpiUser } from '../kpi/KpiShell';
 import { NotesForm } from './NotesForm';
+import { ReconcilePanel } from './ReconcilePanel';
 import { ReportTable } from './ReportTable';
+import { saveBlob } from './saveBlob';
 
 const TYPES: { type: ReportType; label: string }[] = [
   { type: 'WR', label: 'Tuần (WR)' },
@@ -34,6 +36,7 @@ export function ReportsScreen() {
   // Chỉ các ô người dùng đã gõ của phạm vi hiện tại; ô khác lấy bản đã lưu mới nhất (sau 409 vẫn đúng).
   const [draft, setDraft] = useState<Record<string, string> | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [recon, setRecon] = useState(false);
   const actions = useConfirmAction(() => void leave());
 
   const isHead = me?.role === 'head';
@@ -42,7 +45,7 @@ export function ReportsScreen() {
   const period = periods.find((p) => p.start === start) ?? periods[1]!;
 
   useEffect(() => {
-    if (!me) return;
+    if (!me || recon) return;
     let stale = false;
     setLoadError(null);
     apiClient.reports.preview(type, start).then(
@@ -59,7 +62,7 @@ export function ReportsScreen() {
     return () => {
       stale = true;
     };
-  }, [me, type, start, reloadKey, leave]);
+  }, [me, type, start, reloadKey, leave, recon]);
 
   const meta = preview?.notes.scopes.find((s) => s.scope === curScope);
   const saved = meta?.fields ?? {};
@@ -85,12 +88,15 @@ export function ReportsScreen() {
     });
   };
   const pickType = (t: ReportType) =>
-    t !== type &&
+    (t !== type || recon) &&
     guard(() => {
+      setRecon(false);
+      if (t === type) return;
       setPreview(null);
       setType(t);
       setStart(reportPeriods(t, today)[1]!.start);
     });
+  const pickRecon = () => !recon && guard(() => setRecon(true));
   const pickStart = (s: string) =>
     guard(() => {
       setPreview(null);
@@ -122,13 +128,7 @@ export function ReportsScreen() {
 
   const saveFile = async () => {
     const { blob, fileName } = await apiClient.reports.file(type, period.start);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    // Trình duyệt bắt đầu tải bất đồng bộ: thu hồi URL sau một lúc.
-    setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    saveBlob(blob, fileName);
   };
 
   const onDownload = () => {
@@ -198,83 +198,96 @@ export function ReportsScreen() {
       <div className="pick">
         <div className="chips" role="group" aria-label="Loại báo cáo">
           {TYPES.map((t) => (
-            <button key={t.type} className="chip" type="button" aria-pressed={type === t.type} onClick={() => pickType(t.type)}>
+            <button key={t.type} className="chip" type="button" aria-pressed={!recon && type === t.type} onClick={() => pickType(t.type)}>
               {t.label}
             </button>
           ))}
-        </div>
-        <label>
-          Kỳ
-          <select className="kin" aria-label="Kỳ" value={period.start} onChange={(e) => pickStart(e.target.value)}>
-            {periods.map((p) => (
-              <option key={p.start} value={p.start}>
-                {p.label}
-                {p.running ? ' (đang chạy)' : ''}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <p className="muted">
-        Từ {fmtDate(period.start)} đến {fmtDate(period.end)}
-      </p>
-
-      {me && !isHead && !me.teamId && me.role === 'manager' && (
-        <p role="alert" className="banner-error">
-          Bạn chưa thuộc team nào
-        </p>
-      )}
-      {loadError && (
-        <p role="alert" className="banner-error">
-          {loadError}
-        </p>
-      )}
-
-      {preview && (
-        <>
-          <ReportTable preview={preview} />
-
-          <div className="dl">
-            <button type="button" className="btn btn-primary" onClick={onDownload} disabled={downloading || actions.busy}>
-              Tải file xlsx
+          {isHead && (
+            <button className="chip" type="button" aria-pressed={recon} onClick={pickRecon}>
+              Đối soát KPI
             </button>
-            <span className="muted">
-              {fileName} · ký {isHead ? 'TP.' : 'PP.'} Hỗ Trợ Khách Hàng · dùng nội dung chữ đã lưu
-            </span>
-          </div>
-
-          <h2 className="sec-title">Nội dung chữ</h2>
-          {showTabs && (
-            <div className="tabs" role="tablist" aria-label="Phạm vi" onKeyDown={onTabKey}>
-              {tabs.map((id) => (
-                <button
-                  key={id}
-                  id={`scope-${id}`}
-                  className={id === DEPT_SCOPE ? 'chip dept' : 'chip'}
-                  type="button"
-                  role="tab"
-                  aria-selected={scope === id}
-                  aria-controls={scope === id ? PANEL : undefined}
-                  tabIndex={scope === id ? 0 : -1}
-                  onClick={() => pickScope(id)}
-                >
-                  {scopeName(id)}
-                </button>
-              ))}
-            </div>
           )}
-          {actions.error && (
+        </div>
+        {!recon && (
+          <label>
+            Kỳ
+            <select className="kin" aria-label="Kỳ" value={period.start} onChange={(e) => pickStart(e.target.value)}>
+              {periods.map((p) => (
+                <option key={p.start} value={p.start}>
+                  {p.label}
+                  {p.running ? ' (đang chạy)' : ''}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+      </div>
+      {recon && isHead && <ReconcilePanel onUnauthorized={() => void leave()} />}
+      {!recon && (
+        <>
+          <p className="muted">
+            Từ {fmtDate(period.start)} đến {fmtDate(period.end)}
+          </p>
+
+          {me && !isHead && !me.teamId && me.role === 'manager' && (
             <p role="alert" className="banner-error">
-              {actions.error}
+              Bạn chưa thuộc team nào
             </p>
           )}
-          {showTabs ? (
-            <div role="tabpanel" id={PANEL} aria-labelledby={`scope-${scope}`}>
-              {form}
-            </div>
-          ) : (
-            form
+          {loadError && (
+            <p role="alert" className="banner-error">
+              {loadError}
+            </p>
           )}
+
+          {preview && (
+            <>
+              <ReportTable preview={preview} />
+
+              <div className="dl">
+                <button type="button" className="btn btn-primary" onClick={onDownload} disabled={downloading || actions.busy}>
+                  Tải file xlsx
+                </button>
+                <span className="muted">
+                  {fileName} · ký {isHead ? 'TP.' : 'PP.'} Hỗ Trợ Khách Hàng · dùng nội dung chữ đã lưu
+                </span>
+              </div>
+
+              <h2 className="sec-title">Nội dung chữ</h2>
+              {showTabs && (
+                <div className="tabs" role="tablist" aria-label="Phạm vi" onKeyDown={onTabKey}>
+                  {tabs.map((id) => (
+                    <button
+                      key={id}
+                      id={`scope-${id}`}
+                      className={id === DEPT_SCOPE ? 'chip dept' : 'chip'}
+                      type="button"
+                      role="tab"
+                      aria-selected={scope === id}
+                      aria-controls={scope === id ? PANEL : undefined}
+                      tabIndex={scope === id ? 0 : -1}
+                      onClick={() => pickScope(id)}
+                    >
+                      {scopeName(id)}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {actions.error && (
+                <p role="alert" className="banner-error">
+                  {actions.error}
+                </p>
+              )}
+              {showTabs ? (
+                <div role="tabpanel" id={PANEL} aria-labelledby={`scope-${scope}`}>
+                  {form}
+                </div>
+              ) : (
+                form
+              )}
+            </>
+          )}
+
         </>
       )}
 
