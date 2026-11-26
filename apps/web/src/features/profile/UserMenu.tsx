@@ -1,15 +1,15 @@
 'use client';
 
 import type { CurrentUser } from '@ts24-htkh/shared';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { usePopover } from '../../components/usePopover';
 import { apiClient } from '../../lib/api-client';
-import { LogoutButton } from '../auth/LogoutButton';
-import { ProfileDialog } from './AccountDialogs';
-import { ROLE_LABEL } from './labels';
-import { useConfirmAction } from './useConfirmAction';
+import { LogoutButton } from './LogoutButton';
+import { ROLE_LABEL } from '../accounts/labels';
+import { useConfirmAction } from '../accounts/useConfirmAction';
+import { ProfileDialog } from './ProfileDialog';
 
 const WIDTH = 260;
 
@@ -30,6 +30,7 @@ export function UserMenu({
 }) {
   const { pos, triggerRef, menuRef, open, toggle, close, onKeyDown } = usePopover(WIDTH);
   const [editing, setEditing] = useState(false);
+  const metaId = useId();
   // Màn hình không truyền onUserChange vẫn thấy tên mới trên thanh trên.
   const [renamed, setRenamed] = useState<CurrentUser | null>(null);
   // Màn hình đưa user mới (vd sau onUserChange) thì dùng cái đó, bỏ bản tạm.
@@ -59,23 +60,33 @@ export function UserMenu({
       </button>
       {pos &&
         createPortal(
-          <div ref={menuRef} className="popover user" role="menu" aria-label="Tài khoản" style={pos} onKeyDown={onKeyDown}>
+          <div ref={menuRef} className="popover user" style={pos} onKeyDown={onKeyDown}>
             <div className="items">
-              <div className="meta">
+              <div className="meta" id={metaId}>
                 <b>{user.fullName}</b>
                 {ROLE_LABEL[user.role]} · {user.email}
               </div>
-              <button
-                role="menuitem"
-                type="button"
-                onClick={() => {
-                  close();
-                  setEditing(true);
-                }}
-              >
-                Sửa họ tên
-              </button>
-              <LogoutButton role="menuitem" className="" onError={onLogoutError} />
+              <div role="menu" aria-label="Tài khoản" aria-describedby={metaId}>
+                <button
+                  role="menuitem"
+                  type="button"
+                  onClick={() => {
+                    close();
+                    setEditing(true);
+                  }}
+                >
+                  Sửa họ tên
+                </button>
+                <LogoutButton
+                  role="menuitem"
+                  className=""
+                  onError={(message) => {
+                    // Nút đang khóa mất focus: lỗi thì đóng menu, focus về nút avatar, thông báo hiện trên màn hình.
+                    if (message) close();
+                    onLogoutError(message);
+                  }}
+                />
+              </div>
             </div>
             <button type="button" className="cancel" onClick={close}>
               Hủy

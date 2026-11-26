@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { AppBar } from '../../components/AppBar';
 import { ApiError, apiClient } from '../../lib/api-client';
 import { errorMessage } from '../accounts/labels';
+import { UserMenu } from '../profile/UserMenu';
 
 /** Số nguyên dạng 1.234.567 (không phụ thuộc ICU của máy). */
 export const fmtNumber = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -54,7 +55,7 @@ export function KpiShell({
 }) {
   return (
     <>
-      <AppBar user={me} onLogoutError={onNotice} />
+      <AppBar userMenu={me && <UserMenu user={me} onLogoutError={onNotice} />} />
       <main className="content wide">
         <Link className="back" href="/">
           ‹ Trang chủ

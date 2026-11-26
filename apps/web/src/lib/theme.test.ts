@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { applyTheme, currentTheme, parseTheme } from './theme';
 
 afterEach(() => {
@@ -27,5 +27,34 @@ describe('applyTheme', () => {
     expect(document.documentElement.dataset.theme).toBeUndefined();
     expect(document.cookie).not.toContain('theme=');
     expect(currentTheme()).toBe('system');
+  });
+
+  describe('thuộc tính cookie', () => {
+    const realLocation = window.location;
+    afterEach(() => {
+      vi.restoreAllMocks();
+      Object.defineProperty(window, 'location', { value: realLocation, configurable: true });
+    });
+    const written = () => {
+      const set = vi.spyOn(document, 'cookie', 'set');
+      return () => set.mock.calls.map(([v]) => v);
+    };
+
+    it('http: Path=/, 1 năm, SameSite=Lax, không Secure', () => {
+      const calls = written();
+      applyTheme('light');
+      expect(calls()).toEqual(['theme=light; Path=/; Max-Age=31536000; SameSite=Lax']);
+    });
+    it('https: thêm Secure', () => {
+      Object.defineProperty(window, 'location', { value: { ...realLocation, protocol: 'https:' }, configurable: true });
+      const calls = written();
+      applyTheme('dark');
+      expect(calls()).toEqual(['theme=dark; Path=/; Max-Age=31536000; SameSite=Lax; Secure']);
+    });
+    it('Theo hệ thống: xóa bằng Max-Age=0 cùng Path', () => {
+      const calls = written();
+      applyTheme('system');
+      expect(calls()).toEqual(['theme=; Path=/; Max-Age=0; SameSite=Lax']);
+    });
   });
 });

@@ -178,3 +178,18 @@ describe('AccountsScreen: thao tác ghi qua ConfirmDialog', () => {
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
   });
 });
+
+describe('AccountsScreen: tự sửa họ tên', () => {
+  it('sửa họ tên ở thanh trên: dòng của mình trong bảng đổi ngay, không cần tải lại', async () => {
+    setup(H, [H, M]);
+    vi.spyOn(apiClient.me, 'updateProfile').mockResolvedValue({ ...asUser(H), fullName: 'Tên Mới' });
+    fireEvent.click(await screen.findByRole('button', { name: 'Tài khoản Trưởng Phòng' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Sửa họ tên' }));
+    fireEvent.change(screen.getByLabelText('Họ tên'), { target: { value: 'Tên Mới' } });
+    fireEvent.submit(screen.getByRole('dialog', { name: 'Sửa họ tên' }).querySelector('form')!);
+    fireEvent.click(within(confirmDialog()).getByRole('button', { name: 'Lưu' }));
+    const table = screen.getByRole('table');
+    expect(await within(table).findByText('Tên Mới')).toBeInTheDocument();
+    expect(within(table).queryByText('Trưởng Phòng')).not.toBeInTheDocument();
+  });
+});

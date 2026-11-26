@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, type CSSProperties } from 'react';
 import { AppBar } from '../../components/AppBar';
 import { ROLE_LABEL } from '../../features/accounts/labels';
+import { UserMenu } from '../../features/profile/UserMenu';
 import { HOME_ART, type HomeArtKey } from '../../features/home/HomeArt';
 import { ApiError, apiClient } from '../../lib/api-client';
 
@@ -63,7 +64,7 @@ export default function Page() {
 
   return (
     <>
-      <AppBar user={user} onUserChange={setUser} onLogoutError={setLogoutError} />
+      <AppBar userMenu={user && <UserMenu user={user} onUserChange={setUser} onLogoutError={setLogoutError} />} />
       <main className="content">
         {user ? (
           <>

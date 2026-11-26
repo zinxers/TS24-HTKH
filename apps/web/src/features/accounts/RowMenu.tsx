@@ -1,5 +1,6 @@
 'use client';
 
+import { createPortal } from 'react-dom';
 import { usePopover } from '../../components/usePopover';
 
 export interface RowMenuItem {
@@ -30,30 +31,33 @@ export function RowMenu({ label, items }: { label: string; items: RowMenuItem[] 
       >
         <span aria-hidden="true">⋯</span>
       </button>
-      {pos && (
-        <div ref={menuRef} className="popover" role="menu" aria-label={label} style={pos} onKeyDown={onKeyDown}>
-          <div className="items">
-            {items.map((item) => (
-              <button
-                key={item.label}
-                role="menuitem"
-                type="button"
-                className={item.destructive ? 'destructive' : undefined}
-                onClick={() => {
-                  // Focus về nút ⋯ trước khi mở hộp thoại để đóng hộp thoại thì focus quay lại đây.
-                  close();
-                  item.onSelect();
-                }}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-          <button type="button" className="cancel" onClick={close}>
-            Hủy
-          </button>
-        </div>
-      )}
+      {pos &&
+        // Portal ra body: phần tử cha đang chạy hiệu ứng `transform` (motion.css) làm lệch menu position:fixed.
+        createPortal(
+          <div ref={menuRef} className="popover" style={pos} onKeyDown={onKeyDown}>
+            <div className="items" role="menu" aria-label={label}>
+              {items.map((item) => (
+                <button
+                  key={item.label}
+                  role="menuitem"
+                  type="button"
+                  className={item.destructive ? 'destructive' : undefined}
+                  onClick={() => {
+                    // Focus về nút ⋯ trước khi mở hộp thoại để đóng hộp thoại thì focus quay lại đây.
+                    close();
+                    item.onSelect();
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+            <button type="button" className="cancel" onClick={close}>
+              Hủy
+            </button>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

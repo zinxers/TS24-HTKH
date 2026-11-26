@@ -35,4 +35,25 @@ describe('UserMenu', () => {
     rename('Tên Mới');
     await waitFor(() => expect(reload).toHaveBeenCalled());
   });
+
+  it('đăng xuất lỗi: đóng menu, trả focus về nút và báo lỗi', async () => {
+    vi.spyOn(apiClient.auth, 'logout').mockRejectedValue(new ApiError('INTERNAL', 500, 'Lỗi máy chủ'));
+    const onLogoutError = vi.fn();
+    render(<UserMenu user={USER} onLogoutError={onLogoutError} />);
+    const btn = screen.getByRole('button', { name: /^Tài khoản / });
+    fireEvent.click(btn);
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Đăng xuất' }));
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    expect(btn).toHaveFocus();
+    expect(onLogoutError).toHaveBeenLastCalledWith('Đăng xuất không thành công: Lỗi máy chủ');
+  });
+
+  it('menu chỉ chứa mục chọn; họ tên, email và nút Hủy nằm ngoài role=menu', () => {
+    render(<UserMenu user={USER} onLogoutError={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Tài khoản / }));
+    const menu = screen.getByRole('menu', { name: 'Tài khoản' });
+    expect(within(menu).queryByText(/nhan\.vien\.1a@example\.com/)).not.toBeInTheDocument();
+    expect(within(menu).queryByRole('button', { name: 'Hủy' })).not.toBeInTheDocument();
+    expect(menu).toHaveAccessibleDescription(/Lê Văn Một A.*nhan\.vien\.1a@example\.com/);
+  });
 });
