@@ -58,7 +58,7 @@ Hệ thống cũ phải **tiếp tục chạy bình thường** cho tới khi TS
 - OOP: Entity · Repository · Policy · Service · Route handler, mỗi class một vai trò (chi tiết trong `.claude/rules/`). Phụ thuộc truyền qua constructor, nối ở `packages/core/src/container.ts`. Logic thuần (tính kỳ, tuần lịch) là hàm thuần trong `@ts24-htkh/shared`.
 - Lỗi dùng class chung: `AuthError` (401), `ForbiddenError` (403), `ValidationError` (400), `NotFoundError` (404), `ConflictError` (409). Thông báo tiếng Việt, không lộ stack hay SQL.
 - Ngày giờ trả về client là chuỗi ISO 8601; hiển thị theo `Asia/Ho_Chi_Minh`.
-- Một file vượt khoảng 300 dòng thì tách theo nghiệp vụ.
+- Một file vượt khoảng 200 dòng thì tách theo nghiệp vụ.
 
 ## Bảo mật (luôn áp dụng)
 
