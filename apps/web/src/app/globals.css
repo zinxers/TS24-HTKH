@@ -23,6 +23,22 @@
   --logo-check: light-dark(#ffffff, #0b2a4a);
   --logo-word: light-dark(#0b3a6f, #ffffff);
   --logo-sub: light-dark(#0e7c70, #9fe7dc);
+  /* Token khung ứng dụng (Mốc 8a, đã duyệt mockup 2026-11-26). Tỉ lệ tương phản tính theo WCAG 2.x. */
+  --shell-a: light-dark(#0b2a4a, #050d18);
+  --shell-b: light-dark(#0b3a6f, #0a1626);
+  --shell: linear-gradient(160deg, var(--shell-a), var(--shell-b)); /* khung ngoài + thanh bên */
+  --on-shell: #eaf0f7; /* chữ thanh bên: 12.7:1 trên #0b2a4a · 9.9:1 trên #0b3a6f · 17.0:1 trên #050d18 · 15.8:1 trên #0a1626 */
+  --on-shell-muted: rgba(234, 240, 247, 0.72); /* nhãn phụ: sáng 7.3:1 · 5.9:1; tối 8.9:1 · 8.6:1; khi hover thấp nhất 5.0:1 */
+  --shell-hover: rgba(255, 255, 255, 0.08); /* chữ on-shell trên hover: thấp nhất 7.9:1 */
+  --shell-focus: #3dd6c0; /* vòng focus: 6.3:1 trên #0b3a6f · 10.0:1 trên #0a1626 (UI cần 3:1) */
+  --panel: light-dark(#f7f9fc, #0f1f33); /* tấm nội dung + tab đang chọn. Sáng tách khung 10.8:1; tối chỉ 1.1:1 nên tấm tối cần viền inset sáng nhẹ */
+  --card: light-dark(#ffffff, #132840); /* thẻ: trên --panel chỉ 1.05:1 · 1.11:1, tách bằng viền --separator + bóng */
+  --skeleton: light-dark(rgba(11, 58, 111, 0.08), rgba(150, 175, 205, 0.12)); /* 1.16:1 · 1.25:1: chỉ trang trí, không cần 3:1 */
+  --skeleton-hi: light-dark(rgba(11, 58, 111, 0.04), rgba(150, 175, 205, 0.06));
+  --avatar-bg: #3dd6c0;
+  --on-avatar: #0b2a4a; /* 8.0:1 */
+  --shadow-lift: light-dark(0 10px 24px rgba(11, 42, 74, 0.14), 0 10px 24px rgba(0, 0, 0, 0.5));
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --page-max: 1440px;
   --gutter: clamp(16px, 3vw, 48px);
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;

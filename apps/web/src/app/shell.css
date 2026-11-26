@@ -1,0 +1,40 @@
+/* Thanh bên (Mốc 8a). Giá trị theo mockup đã duyệt; token ở globals.css. */
+.side { position: relative; z-index: 30; flex: none; display: flex; flex-direction: column; overflow: visible; color: var(--on-shell); background: var(--shell); }
+.brand { position: relative; height: 72px; flex: none; display: flex; align-items: center; padding: 0 12px 0 20px; }
+.logo-wide { height: 44px; transition: opacity 200ms; }
+.logo-mark { position: absolute; left: 18px; top: 16px; width: 36px; height: 36px; opacity: 0; transition: opacity 200ms; }
+.logo-mark svg { width: 100%; height: 100%; }
+.is-collapsed .logo-wide { opacity: 0; }
+.is-collapsed .logo-mark { opacity: 1; }
+.toggle { margin-left: auto; width: 32px; height: 32px; border: 0; border-radius: 10px; background: transparent; color: var(--on-shell-muted); display: grid; place-items: center; cursor: pointer; transition: background 200ms, color 200ms; }
+.toggle:hover { background: var(--shell-hover); color: var(--on-shell); }
+.toggle:focus-visible { outline: 2px solid var(--shell-focus); }
+.toggle .i { transition: transform 320ms var(--ease); }
+.is-collapsed .toggle { position: absolute; left: 20px; top: 60px; margin: 0; }
+.is-collapsed .toggle .i { transform: rotate(180deg); }
+.nav { position: relative; flex: 1; padding: 28px 0 8px 12px; display: flex; flex-direction: column; gap: 4px; transition: padding 320ms var(--ease); }
+.is-collapsed .nav { padding-top: 56px; }
+.nav a { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 16px; border-radius: 22px 0 0 22px; color: var(--on-shell); font-size: 15px; text-decoration: none; white-space: nowrap; transition: background 200ms, color 200ms; }
+.nav a .i { flex: none; transition: transform 200ms var(--ease); }
+.nav a:hover:not([aria-current]) { background: var(--shell-hover); }
+.nav a:hover .i { transform: translateX(2px); }
+.nav a:focus-visible { outline: 2px solid var(--shell-focus); outline-offset: -2px; }
+.nav a[aria-current] { color: var(--label); font-weight: 600; }
+.nav .lbl { pointer-events: none; }
+/* tab trượt (layoutId): nền màu tấm + hai góc lõm nối vào tấm */
+.nav-active { position: absolute; z-index: -1; inset: 0; background: var(--panel); border-radius: 22px 0 0 22px; pointer-events: none; }
+.nav-active::before, .nav-active::after { content: ''; position: absolute; right: 0; width: 20px; height: 20px; }
+.nav-active::before { top: -20px; background: radial-gradient(circle at 0 0, transparent 19.5px, var(--panel) 20px); }
+.nav-active::after { bottom: -20px; background: radial-gradient(circle at 0 100%, transparent 19.5px, var(--panel) 20px); }
+/* tooltip khi thu gọn */
+.is-collapsed .nav a:hover::after, .is-collapsed .nav a:focus-visible::after { content: attr(data-tip); position: absolute; left: calc(100% + 14px); top: 50%; transform: translateY(-50%); padding: 6px 10px; border-radius: 8px; background: var(--shell-a); color: var(--on-shell); font-size: 14px; font-weight: 500; box-shadow: var(--shadow-lift); border: 1px solid rgba(255, 255, 255, 0.14); z-index: 50; }
+.side-foot { margin: 8px 12px 16px; border-radius: 14px; overflow: hidden; }
+@media (max-width: 767px) {
+  .nav-active { border-radius: 22px; }
+  .nav-active::before, .nav-active::after { display: none; }
+  .nav a { border-radius: 22px; margin-right: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav a:hover .i { transform: none; }
+  .nav a, .logo-wide, .logo-mark, .toggle, .toggle .i, .nav { transition-duration: 150ms; }
+}

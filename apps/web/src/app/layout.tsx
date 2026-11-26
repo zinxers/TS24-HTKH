@@ -10,6 +10,7 @@ import './kpi.css';
 import './team.css';
 import './reports.css';
 import './home.css';
+import './shell.css';
 import './motion.css';
 
 export const metadata: Metadata = {
