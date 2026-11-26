@@ -79,3 +79,8 @@ export function reconcileTitle(range: KpiRange): string {
 export function reconcileFileName(range: KpiRange): string {
   return `HTKH - Đối soát KPI ${fmt(range.from, '.')}-${fmt(range.to, '.')}.xlsx`;
 }
+
+/** Tên file ASCII cho `filename=` của Content-Disposition (bản UTF-8 đi kèm `filename*`). */
+export function reconcileFileNameAscii(range: KpiRange): string {
+  return `HTKH - Doi soat KPI ${fmt(range.from, '.')}-${fmt(range.to, '.')}.xlsx`;
+}

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { isoDate } from './date';
 import { KENH } from './kpi';
-import { RECONCILE_KENH, RECONCILE_TOTAL_KENH, reconcileFileName, reconcileTitle } from './reconcile';
+import { RECONCILE_KENH, RECONCILE_TOTAL_KENH, reconcileFileName, reconcileFileNameAscii, reconcileTitle } from './reconcile';
 
 const d = isoDate;
 
@@ -29,6 +29,11 @@ describe('tiêu đề và tên file', () => {
   it('tên file', () => {
     expect(reconcileFileName({ from: d('2026-10-16'), to: d('2026-11-15') })).toBe(
       'HTKH - Đối soát KPI 16.10.2026-15.11.2026.xlsx',
+    );
+  });
+  it('tên file ASCII', () => {
+    expect(reconcileFileNameAscii({ from: d('2026-10-16'), to: d('2026-11-15') })).toBe(
+      'HTKH - Doi soat KPI 16.10.2026-15.11.2026.xlsx',
     );
   });
 });
