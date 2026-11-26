@@ -22,6 +22,7 @@ export function ReconcilePanel({ onUnauthorized }: { onUnauthorized: () => void 
   useEffect(() => {
     let stale = false;
     setError(null);
+    setData(null);
     apiClient.reports.reconcile({ from: range.start, to: range.end }).then(
       (d) => !stale && setData(d),
       (e: unknown) => {

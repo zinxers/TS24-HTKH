@@ -74,6 +74,16 @@ describe('ReconcilePanel', () => {
     await waitFor(() => expect(rec).toHaveBeenLastCalledWith({ from: '2026-10-16', to: '2026-11-10' }));
   });
 
+  it('đổi kỳ: không hiện bảng kỳ cũ cho tới khi có dữ liệu mới', async () => {
+    const rec = vi.spyOn(apiClient.reports, 'reconcile').mockResolvedValueOnce(base);
+    render(<ReconcilePanel onUnauthorized={vi.fn()} />);
+    await screen.findByRole('table');
+    rec.mockReturnValueOnce(new Promise(() => {}));
+    fireEvent.change(screen.getByLabelText('Đến ngày'), { target: { value: '2026-11-10' } });
+    await waitFor(() => expect(screen.queryByRole('table')).not.toBeInTheDocument());
+    expect(screen.queryByText('Tải file xlsx')).not.toBeInTheDocument();
+  });
+
   it('bấm Tải file gọi reconcileFile', async () => {
     vi.spyOn(apiClient.reports, 'reconcile').mockResolvedValue(base);
     const file = vi.spyOn(apiClient.reports, 'reconcileFile').mockResolvedValue({ blob: new Blob(['x']), fileName: base.fileName });

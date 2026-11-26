@@ -1,11 +1,8 @@
 import { getContainer } from '@ts24-htkh/core';
-import { kpiRangeSchema } from '@ts24-htkh/shared';
+import { kpiRangeSchema, reconcileFileNameAscii } from '@ts24-htkh/shared';
 import { handle } from '../../../_lib/handle';
 import { parseVi } from '../../../_lib/parse-vi';
 import { requireUser } from '../../../_lib/require-user';
-
-/** yyyy-MM-dd → dd.MM.yyyy */
-const dmy = (iso: string) => iso.split('-').reverse().join('.');
 
 export function GET(req: Request): Promise<Response> {
   return handle(async () => {
@@ -15,7 +12,7 @@ export function GET(req: Request): Promise<Response> {
     const q = new URL(req.url).searchParams;
     const range = parseVi(kpiRangeSchema, { from: q.get('from'), to: q.get('to') });
     const { fileName, bytes } = await reconcileService.file(user, range);
-    const ascii = `HTKH - Doi soat KPI ${dmy(range.from)}-${dmy(range.to)}.xlsx`;
+    const ascii = reconcileFileNameAscii(range);
     return new Response(bytes as BodyInit, {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
