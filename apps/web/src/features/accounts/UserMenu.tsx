@@ -59,23 +59,33 @@ export function UserMenu({
       </button>
       {pos &&
         createPortal(
-          <div ref={menuRef} className="popover user" role="menu" aria-label="Tài khoản" style={pos} onKeyDown={onKeyDown}>
+          <div ref={menuRef} className="popover user" style={pos} onKeyDown={onKeyDown}>
             <div className="items">
               <div className="meta">
                 <b>{user.fullName}</b>
                 {ROLE_LABEL[user.role]} · {user.email}
               </div>
-              <button
-                role="menuitem"
-                type="button"
-                onClick={() => {
-                  close();
-                  setEditing(true);
-                }}
-              >
-                Sửa họ tên
-              </button>
-              <LogoutButton role="menuitem" className="" onError={onLogoutError} />
+              <div role="menu" aria-label="Tài khoản">
+                <button
+                  role="menuitem"
+                  type="button"
+                  onClick={() => {
+                    close();
+                    setEditing(true);
+                  }}
+                >
+                  Sửa họ tên
+                </button>
+                <LogoutButton
+                  role="menuitem"
+                  className=""
+                  onError={(message) => {
+                    // Nút đang khóa mất focus: lỗi thì đóng menu, focus về nút avatar, thông báo hiện trên màn hình.
+                    if (message) close();
+                    onLogoutError(message);
+                  }}
+                />
+              </div>
             </div>
             <button type="button" className="cancel" onClick={close}>
               Hủy

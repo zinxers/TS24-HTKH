@@ -288,7 +288,4 @@
     padding: 14px 16px;
     text-align: center;
   }
-  .popover.user .meta + button {
-    border-top: 0;
-  }
 }

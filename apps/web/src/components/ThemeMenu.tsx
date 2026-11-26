@@ -60,8 +60,8 @@ export function ThemeMenu() {
       </button>
       {pos &&
         createPortal(
-          <div ref={menuRef} className="popover theme" role="menu" aria-label="Giao diện" style={pos} onKeyDown={onKeyDown}>
-            <div className="items">
+          <div ref={menuRef} className="popover theme" style={pos} onKeyDown={onKeyDown}>
+            <div className="items" role="menu" aria-label="Giao diện">
               {OPTIONS.map((o) => (
                 <button
                   key={o.value}
