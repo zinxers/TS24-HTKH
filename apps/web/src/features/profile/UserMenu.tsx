@@ -1,7 +1,7 @@
 'use client';
 
 import type { CurrentUser } from '@ts24-htkh/shared';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { usePopover } from '../../components/usePopover';
@@ -30,6 +30,7 @@ export function UserMenu({
 }) {
   const { pos, triggerRef, menuRef, open, toggle, close, onKeyDown } = usePopover(WIDTH);
   const [editing, setEditing] = useState(false);
+  const metaId = useId();
   // Màn hình không truyền onUserChange vẫn thấy tên mới trên thanh trên.
   const [renamed, setRenamed] = useState<CurrentUser | null>(null);
   // Màn hình đưa user mới (vd sau onUserChange) thì dùng cái đó, bỏ bản tạm.
@@ -61,11 +62,11 @@ export function UserMenu({
         createPortal(
           <div ref={menuRef} className="popover user" style={pos} onKeyDown={onKeyDown}>
             <div className="items">
-              <div className="meta">
+              <div className="meta" id={metaId}>
                 <b>{user.fullName}</b>
                 {ROLE_LABEL[user.role]} · {user.email}
               </div>
-              <div role="menu" aria-label="Tài khoản">
+              <div role="menu" aria-label="Tài khoản" aria-describedby={metaId}>
                 <button
                   role="menuitem"
                   type="button"

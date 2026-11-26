@@ -15,4 +15,13 @@ describe('RowMenu', () => {
     expect(within(menu).queryByRole('button', { name: 'Hủy' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Hủy' })).toBeInTheDocument();
   });
+
+  it('Tab đóng menu và đưa focus về nút ⋯ để Tab đi tiếp từ đó (menu nằm cuối body)', () => {
+    render(<RowMenu label="Thao tác cho A" items={[{ label: 'Sửa…', onSelect: () => {} }]} />);
+    const btn = screen.getByRole('button', { name: 'Thao tác cho A' });
+    fireEvent.click(btn);
+    fireEvent.keyDown(screen.getByRole('menuitem', { name: 'Sửa…' }), { key: 'Tab' });
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    expect(btn).toHaveFocus();
+  });
 });

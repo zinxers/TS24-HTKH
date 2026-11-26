@@ -43,7 +43,11 @@ export function usePopover(width: number) {
       e.preventDefault();
       return close();
     }
-    if (e.key === 'Tab') return setPos(null);
+    if (e.key === 'Tab') {
+      // Menu nằm cuối body (portal): đưa focus về nút trước để Tab mặc định đi tiếp từ nút, không nhảy về đầu trang.
+      triggerRef.current?.focus();
+      return setPos(null);
+    }
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
     e.preventDefault();
     const all = [...menuRef.current!.querySelectorAll<HTMLElement>('[role^=menuitem]')];

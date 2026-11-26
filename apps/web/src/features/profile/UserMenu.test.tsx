@@ -54,6 +54,6 @@ describe('UserMenu', () => {
     const menu = screen.getByRole('menu', { name: 'Tài khoản' });
     expect(within(menu).queryByText(/nhan\.vien\.1a@example\.com/)).not.toBeInTheDocument();
     expect(within(menu).queryByRole('button', { name: 'Hủy' })).not.toBeInTheDocument();
-    expect(screen.getByText(/nhan\.vien\.1a@example\.com/)).toBeInTheDocument();
+    expect(menu).toHaveAccessibleDescription(/Lê Văn Một A.*nhan\.vien\.1a@example\.com/);
   });
 });
