@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { AppBar } from '../../components/AppBar';
+import { UserMenu } from '../profile/UserMenu';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { ApiError, apiClient } from '../../lib/api-client';
 import { CreateAccountDialog, EditAccountDialog, PasswordDialog, TransferDialog } from './AccountDialogs';
@@ -73,7 +74,7 @@ export function AccountsScreen() {
   if (!me) {
     return (
       <>
-        <AppBar user={null} onLogoutError={setNotice} />
+        <AppBar />
         <main className="content wide">
           <Link className="back" href="/">
             ‹ Trang chủ
@@ -94,13 +95,17 @@ export function AccountsScreen() {
   return (
     <>
       <AppBar
-        user={me}
-        onUserChange={(u) => {
-          setMe(u);
-          // Dòng của mình trong bảng đổi tên ngay, không chờ tải lại danh sách.
-          setAccounts((list) => list.map((a) => (a.id === u.id ? { ...a, fullName: u.fullName } : a)));
-        }}
-        onLogoutError={setNotice}
+        userMenu={
+          <UserMenu
+            user={me}
+            onUserChange={(u) => {
+              setMe(u);
+              // Dòng của mình trong bảng đổi tên ngay, không chờ tải lại danh sách.
+              setAccounts((list) => list.map((a) => (a.id === u.id ? { ...a, fullName: u.fullName } : a)));
+            }}
+            onLogoutError={setNotice}
+          />
+        }
       />
       <main className="content wide">
         <Link className="back" href="/">

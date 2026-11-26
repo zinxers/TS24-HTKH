@@ -6,10 +6,10 @@ import { createPortal } from 'react-dom';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { usePopover } from '../../components/usePopover';
 import { apiClient } from '../../lib/api-client';
-import { LogoutButton } from '../auth/LogoutButton';
-import { ProfileDialog } from './AccountDialogs';
-import { ROLE_LABEL } from './labels';
-import { useConfirmAction } from './useConfirmAction';
+import { LogoutButton } from './LogoutButton';
+import { ROLE_LABEL } from '../accounts/labels';
+import { useConfirmAction } from '../accounts/useConfirmAction';
+import { ProfileDialog } from './ProfileDialog';
 
 const WIDTH = 260;
 

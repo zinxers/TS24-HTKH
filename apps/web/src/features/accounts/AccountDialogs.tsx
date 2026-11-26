@@ -197,17 +197,3 @@ export function TransferDialog({
     </FormDialog>
   );
 }
-
-export function ProfileDialog({
-  fullName,
-  onSubmit,
-  ...common
-}: Common & { fullName: string; onSubmit: (fullName: string) => void }) {
-  return (
-    <FormDialog title="Sửa họ tên" submitLabel="Lưu" {...common} onSubmit={(d) => onSubmit(str(d, 'fullName'))}>
-      <Field label="Họ tên">
-        {(id) => <input id={id} name="fullName" defaultValue={fullName} required maxLength={100} />}
-      </Field>
-    </FormDialog>
-  );
-}
