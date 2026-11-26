@@ -141,7 +141,7 @@ describe('trang /', () => {
     expect(replace).not.toHaveBeenCalled();
   });
 
-  it('Đăng xuất lỗi → báo lỗi, ở lại trang, mở lại nút', async () => {
+  it('Đăng xuất lỗi → báo lỗi, ở lại trang, đóng menu; mở lại thì nút dùng được', async () => {
     vi.spyOn(apiClient.auth, 'me').mockResolvedValue(USER);
     vi.spyOn(apiClient.auth, 'logout').mockRejectedValue(new ApiError('INTERNAL', 500, 'Lỗi hệ thống, vui lòng thử lại'));
     render(<Page />);
@@ -149,6 +149,8 @@ describe('trang /', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'Đăng xuất' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Đăng xuất không thành công: Lỗi hệ thống, vui lòng thử lại');
     expect(replace).not.toHaveBeenCalled();
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    await openUserMenu();
     expect(screen.getByRole('menuitem', { name: 'Đăng xuất' })).toBeEnabled();
   });
 
