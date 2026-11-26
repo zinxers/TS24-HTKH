@@ -112,7 +112,7 @@ describe('ReconcileService', () => {
     const f = await svc.file(H, range);
     const xml = zipEntry(f.bytes, 'xl/worksheets/sheet1.xml');
     const row = /<c r="A(\d+)"[^>]*[^/>]>(?:(?!<\/c>)[\s\S])*TỔNG/.exec(xml)?.[1];
-    const cell = (col: string) => new RegExp(`<c r="${col}${row}"[^>]*[^/>]>(?:(?!</c>)[\s\S])*?<v>([^<]*)</v>`).exec(xml)?.[1];
+    const cell = (col: string) => new RegExp(`<c r="${col}${row}"[^>]*[^/>]>(?:(?!</c>)[^])*?<v>([^<]*)</v>`).exec(xml)?.[1];
     expect(row).toBeDefined();
     expect(Number(cell('B'))).toBe(v.totals.total);
     expect(Number(cell('N'))).toBe(v.totals.money);
