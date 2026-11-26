@@ -27,6 +27,12 @@ describe('ThemeMenu', () => {
     expect(screen.getByRole('menuitemradio', { name: 'Tối' })).toHaveAttribute('aria-checked', 'true');
   });
 
+  it('nút có sẵn cả 3 icon (CSS chọn theo html[data-theme]) để HTML server không đổi sau khi mount', () => {
+    render(<ThemeMenu />);
+    const icons = screen.getByRole('button', { name: 'Giao diện' }).querySelectorAll('svg[data-icon]');
+    expect([...icons].map((i) => i.getAttribute('data-icon'))).toEqual(['system', 'light', 'dark']);
+  });
+
   it('Esc đóng menu và trả focus về nút', () => {
     render(<ThemeMenu />);
     const btn = screen.getByRole('button', { name: 'Giao diện' });

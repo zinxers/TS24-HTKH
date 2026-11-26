@@ -208,7 +208,13 @@
 .theme-btn {
   color: var(--secondary);
 }
+/* Hiện đúng một icon theo html[data-theme] (không có = Theo hệ thống); không chờ JS nên không chớp. */
 .theme-btn svg {
+  display: none;
+}
+:root:not([data-theme]) .theme-btn [data-icon='system'],
+:root[data-theme='light'] .theme-btn [data-icon='light'],
+:root[data-theme='dark'] .theme-btn [data-icon='dark'] {
   display: block;
 }
 .popover.theme {
