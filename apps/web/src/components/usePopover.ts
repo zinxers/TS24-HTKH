@@ -34,7 +34,13 @@ export function usePopover(width: number) {
 
   function toggle() {
     if (open) return close();
-    const r = triggerRef.current!.getBoundingClientRect();
+    const trigger = triggerRef.current!;
+    // Phần tử cha còn đang trượt lên (hiệu ứng hiện dần, motion.css): cho chạy xong ngay để đo đúng chỗ, menu không lệch.
+    for (const a of document.getAnimations?.() ?? []) {
+      const target = (a.effect as KeyframeEffect | null)?.target;
+      if (target?.contains(trigger)) a.finish();
+    }
+    const r = trigger.getBoundingClientRect();
     setPos({ top: r.bottom + 4, left: Math.max(8, r.right - width) });
   }
 
