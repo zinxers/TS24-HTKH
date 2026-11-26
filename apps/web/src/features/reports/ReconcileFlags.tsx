@@ -1,5 +1,5 @@
 import { toVnDate, type ReconcileFlag } from '@ts24-htkh/shared';
-import { fmtDate, fmtNumber } from '../kpi/KpiShell';
+import { fmtDate, fmtNumber } from '../../lib/format';
 
 const RULES: Record<ReconcileFlag['rule'], string> = {
   1: 'Tỉ lệ kênh giá cao',

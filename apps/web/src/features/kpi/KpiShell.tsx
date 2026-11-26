@@ -9,11 +9,6 @@ import { ApiError, apiClient } from '../../lib/api-client';
 import { errorMessage } from '../accounts/labels';
 import { UserMenu } from '../profile/UserMenu';
 
-/** Số nguyên dạng 1.234.567 (không phụ thuộc ICU của máy). */
-export const fmtNumber = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-/** 2026-11-19 → 19/11/2026. */
-export const fmtDate = (iso: string) => iso.split('-').reverse().join('/');
-
 /** Người dùng hiện tại + đăng xuất khi hết phiên (401) + thông báo chung của trang. */
 export function useKpiUser() {
   const router = useRouter();

@@ -4,7 +4,7 @@ import { tsWeekNumber, type KpiTrend } from '@ts24-htkh/shared';
 import { useEffect, useState } from 'react';
 import { apiClient } from '../../lib/api-client';
 import { errorMessage } from '../accounts/labels';
-import { fmtNumber } from '../kpi/KpiShell';
+import { fmtNumber } from '../../lib/format';
 
 type Unit = KpiTrend['unit'];
 const UNITS: { unit: Unit; label: string }[] = [

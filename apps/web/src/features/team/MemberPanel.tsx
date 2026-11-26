@@ -4,7 +4,7 @@ import { toVnDate, type Period, type TeamMemberKpi } from '@ts24-htkh/shared';
 import { useEffect, useState } from 'react';
 import { apiClient } from '../../lib/api-client';
 import { errorMessage } from '../accounts/labels';
-import { fmtDate, fmtNumber } from '../kpi/KpiShell';
+import { fmtDate, fmtNumber } from '../../lib/format';
 
 const vnTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 const fmtInstant = (iso: string) => `${fmtDate(toVnDate(new Date(iso)))} ${vnTime.format(new Date(iso))}`;

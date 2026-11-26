@@ -1,5 +1,5 @@
 import type { ReportPreview } from '@ts24-htkh/shared';
-import { fmtNumber } from '../kpi/KpiShell';
+import { fmtNumber } from '../../lib/format';
 
 /** 412.3 → "412,3"; số nguyên → "1.234". */
 const fmtValue = (n: number | null) => {

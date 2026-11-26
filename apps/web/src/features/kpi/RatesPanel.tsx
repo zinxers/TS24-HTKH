@@ -8,7 +8,8 @@ import { Field, FormDialog } from '../../components/FormDialog';
 import { apiClient } from '../../lib/api-client';
 import { errorMessage } from '../accounts/labels';
 import { useConfirmAction } from '../accounts/useConfirmAction';
-import { KpiShell, fmtDate, fmtNumber, useKpiUser } from './KpiShell';
+import { fmtDate, fmtNumber } from '../../lib/format';
+import { KpiShell, useKpiUser } from './KpiShell';
 
 // Bản mặc định do migration tạo; bản khác có thể có createdBy null (dữ liệu seed).
 const DEFAULT_FROM = '2000-01-01';

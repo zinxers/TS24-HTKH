@@ -4,7 +4,7 @@ import { KENH_GROUPS, type KenhCounts, type Period, type TeamKpi } from '@ts24-h
 import { useEffect, useState } from 'react';
 import { apiClient } from '../../lib/api-client';
 import { errorMessage } from '../accounts/labels';
-import { fmtNumber } from '../kpi/KpiShell';
+import { fmtNumber } from '../../lib/format';
 import { MemberPanel } from './MemberPanel';
 import { TrendCard } from './TrendCard';
 

@@ -11,7 +11,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiClient } from '../../lib/api-client';
 import { errorMessage } from '../accounts/labels';
-import { KpiShell, fmtDate, fmtNumber, useKpiUser } from './KpiShell';
+import { fmtDate, fmtNumber } from '../../lib/format';
+import { KpiShell, useKpiUser } from './KpiShell';
 import { PeriodPicker, defaultPeriod } from './PeriodPicker';
 
 /** KPI của chính người đăng nhập theo khoảng ngày; mặc định kỳ tháng đang chạy. */
