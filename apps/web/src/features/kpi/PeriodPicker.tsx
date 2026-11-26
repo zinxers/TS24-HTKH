@@ -27,8 +27,16 @@ const DEFAULT_PRESET = 'Tháng này';
 export const defaultPeriod = (): Period => runningMonthPeriod(toVnDate(new Date()));
 
 /** Nút kỳ nhanh + từ ngày – đến ngày. Nhập tay thì bỏ chọn chip. */
-export function PeriodPicker({ value, onChange }: { value: Period; onChange: (p: Period) => void }) {
-  const [preset, setPreset] = useState<string | null>(DEFAULT_PRESET);
+export function PeriodPicker({
+  value,
+  onChange,
+  defaultPreset = DEFAULT_PRESET,
+}: {
+  value: Period;
+  onChange: (p: Period) => void;
+  defaultPreset?: string;
+}) {
+  const [preset, setPreset] = useState<string | null>(defaultPreset);
 
   const pick = (p: (typeof PRESETS)[number]) => {
     setPreset(p.label);

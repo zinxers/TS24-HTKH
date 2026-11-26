@@ -99,10 +99,10 @@ describe('ReportService.file', () => {
 });
 
 describe('FsTemplateStore', () => {
-  it('đọc report-<type>.xlsx và giữ trong bộ nhớ', async () => {
+  it('đọc <name>.xlsx và giữ trong bộ nhớ', async () => {
     const store = new FsTemplateStore(path.resolve(process.cwd(), '..', '..', 'templates'));
-    const a = await store.load('QR');
+    const a = await store.load('report-QR');
     expect(a.length).toBeGreaterThan(0);
-    expect(await store.load('QR')).toBe(a);
+    expect(await store.load('report-QR')).toBe(a);
   });
 });

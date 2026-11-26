@@ -76,7 +76,7 @@ export class ReportService {
 
   async file(actor: CurrentUser, type: ReportType, start: IsoDate): Promise<{ fileName: string; bytes: Uint8Array }> {
     const { cells } = await this.compute(actor, type, start);
-    const template = await this.deps.templates.load(type);
+    const template = await this.deps.templates.load(`report-${type}`);
     return { fileName: reportFileName(type, this.today()), bytes: fillReport(template, type, cells) };
   }
 

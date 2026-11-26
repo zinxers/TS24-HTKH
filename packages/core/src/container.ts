@@ -5,6 +5,7 @@ import {
   KpiRateRepository,
   KpiReportRepository,
   KpiTeamRepository,
+  ReconcileRepository,
   ReportNoteRepository,
   SessionRepository,
   TeamRepository,
@@ -18,6 +19,7 @@ import { Argon2PasswordHasher } from './modules/auth/password-hasher';
 import { KpiRateService } from './modules/kpi/kpi-rate.service';
 import { KpiReportService } from './modules/kpi/kpi-report.service';
 import { TeamKpiService } from './modules/kpi/team-kpi.service';
+import { ReconcileService } from './modules/reports/reconcile.service';
 import { ReportService } from './modules/reports/report.service';
 import { FsTemplateStore } from './modules/reports/template-store';
 import type { UnitOfWork } from './unit-of-work';
@@ -29,6 +31,7 @@ export interface Container {
   kpiRateService: KpiRateService;
   teamKpiService: TeamKpiService;
   reportService: ReportService;
+  reconcileService: ReconcileService;
 }
 
 let container: Container | undefined;
@@ -57,6 +60,8 @@ export function getContainer(): Container {
   const kpiRates = new KpiRateRepository(sql);
   const teams = new TeamRepository(sql);
   const kpiTeam = new KpiTeamRepository(sql);
+  // cwd của Next.js là apps/web; mẫu nằm ở templates/ gốc repo.
+  const templates = new FsTemplateStore(path.resolve(process.cwd(), '..', '..', 'templates'));
   container = {
     authService: new AuthService({
       users,
@@ -74,9 +79,9 @@ export function getContainer(): Container {
       kpiTeam,
       reportNotes: new ReportNoteRepository(sql),
       uow,
-      // cwd của Next.js là apps/web; mẫu nằm ở templates/ gốc repo.
-      templates: new FsTemplateStore(path.resolve(process.cwd(), '..', '..', 'templates')),
+      templates,
     }),
+    reconcileService: new ReconcileService({ teams, kpiRates, reconcile: new ReconcileRepository(sql), templates }),
   };
   return container;
 }

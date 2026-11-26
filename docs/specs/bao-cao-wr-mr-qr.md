@@ -2,7 +2,7 @@
 
 Nguồn quy tắc: `HTKH-KPI/app/src/Pure.js` dòng 939-1180 (`REPORT_FORMS_`, `reportCells`, `reportPreview`) và `HTKH-KPI/app/src/Weekly.js` (hệ thống cũ, chỉ tham khảo).
 Chuyển sang `@ts24-htkh/shared` (`report.ts`), `@ts24-htkh/xlsx-report`, `packages/core/src/modules/reports/`. Thiết kế: `docs/superpowers/specs/2026-11-23-moc-6a-bao-cao-wr-mr-qr-design.md`.
-Ngoài Mốc 6a: đối soát (6b), lịch làm việc, gửi email, lưu file qua Tauri.
+Đối soát KPI (6b) xem `docs/specs/doi-soat.md`. Ngoài Mốc 6a: lịch làm việc, gửi email, lưu file qua Tauri.
 
 ## Quy tắc
 

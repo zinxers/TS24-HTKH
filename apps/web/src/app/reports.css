@@ -21,3 +21,35 @@
 .nf .cnt.warn { color: var(--danger); }
 .row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0 12px; }
 .notes-foot { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-top: 8px; }
+
+/* Tab Đối soát KPI (mẫu duyệt 2026-11-25) */
+.rc-warn { background: var(--danger-bg); color: var(--label); border-radius: 10px; padding: 10px 14px; font-size: 14px; margin: 0 0 16px; }
+.rc-warn b { color: var(--danger); }
+.rc-wrap { background: var(--group); border-radius: 12px; overflow-x: auto; }
+.rc-table { border-collapse: separate; border-spacing: 0; font-size: 14px; table-layout: fixed; width: 100%; min-width: 1196px; font-variant-numeric: tabular-nums; }
+.rc-table col.c-name { width: 220px; } .rc-table col.c-tot { width: 64px; } .rc-table col.c-k { width: 72px; } .rc-table col.c-kpi { width: 120px; }
+.rc-table th, .rc-table td { padding: 8px 10px; border-top: 0.5px solid var(--separator); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rc-table th:first-child, .rc-table td:first-child { text-align: left; position: sticky; left: 0; background: var(--group); z-index: 1; box-shadow: 1px 0 0 var(--separator); }
+.rc-table thead th { border-top: 0; color: var(--secondary); font-size: 12px; font-weight: 600; white-space: normal; vertical-align: bottom; }
+.rc-table thead tr.grp th { text-align: left; color: var(--label); }
+.rc-table thead tr.grp th.g { border-bottom: 2px solid var(--accent); }
+.rc-table tr.rate td { color: var(--secondary); font-size: 12px; }
+.rc-table tr.team td { position: static; background: linear-gradient(var(--fill), var(--fill)), var(--group); font-weight: 600; font-size: 13px; text-align: left; box-shadow: none; overflow: visible; }
+.rc-table tr.team td span { position: sticky; left: 10px; }
+.rc-table tr.mgr td { color: var(--secondary); }
+.rc-table tr.mgr td.note { text-align: left; font-size: 12px; }
+.rc-table tr.sum td { font-weight: 700; background: linear-gradient(var(--fill), var(--fill)), var(--group); border-top: 1px solid var(--label); }
+.rc-table td.kpi { font-weight: 600; }
+.rc-table td.z { color: var(--secondary); opacity: .55; }
+.flags { margin-top: 28px; }
+.flags h2 { font-size: 22px; margin: 0 0 4px; }
+.flag-list { list-style: none; padding: 0; margin: 12px 0 0; background: var(--group); border-radius: 12px; }
+.flag-list li { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; padding: 12px 16px; border-top: 0.5px solid var(--separator); }
+.flag-list li:first-child { border-top: 0; }
+.flag-list .who { font-weight: 600; }
+.flag-list .tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: var(--fill); color: var(--secondary); margin-right: 8px; }
+.flag-list .why { grid-column: 1; color: var(--secondary); font-size: 14px; }
+.flag-list .m { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-weight: 600; font-variant-numeric: tabular-nums; }
+details.items { grid-column: 1 / -1; font-size: 13px; color: var(--secondary); }
+details.items summary { cursor: pointer; color: var(--link); }
+@media (max-width: 600px) { .rc-table { min-width: 1066px; } .rc-table col.c-name { width: 150px; } .rc-table th:first-child, .rc-table td:first-child { white-space: normal; } .flag-list li { grid-template-columns: 1fr; } .flag-list .m { grid-row: auto; grid-column: 1; } }

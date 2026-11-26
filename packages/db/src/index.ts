@@ -26,4 +26,5 @@ export {
 } from './repositories/kpi-report.repository';
 export { KpiRateRepository, type RateVersionRow } from './repositories/kpi-rate.repository';
 export { KpiTeamRepository } from './repositories/kpi-team.repository';
+export { ReconcileRepository } from './repositories/reconcile.repository';
 export { ReportNoteRepository, type ReportNoteInput, type ReportNoteRow } from './repositories/report-note.repository';

@@ -6,12 +6,14 @@ import type {
   CurrentUser,
   DeptOverview,
   IsoDate,
+  KpiRange,
   KpiSubmitResult,
   KpiTrend,
   LoginInput,
   MyKpi,
   RateSetInput,
   RateVersion,
+  Reconcile,
   ReportNotes,
   ReportNoteSaveInput,
   ReportPreview,
@@ -113,6 +115,19 @@ export const apiClient = {
       const res = await fetch(`/api/v1/reports/${type}/file?start=${start}`, { credentials: 'same-origin' });
       if (!res.ok) return throwApiError(res);
       const fileName = /filename="([^"]+)"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ?? `${type}.xlsx`;
+      return { blob: await res.blob(), fileName };
+    },
+    reconcile: async (range: KpiRange) =>
+      (await request<{ reconcile: Reconcile }>(`/reports/reconcile?from=${range.from}&to=${range.to}`)).reconcile,
+    /** Tải .xlsx đối soát; đọc `filename*` (tiếng Việt) trước, rồi `filename`. */
+    reconcileFile: async (range: KpiRange) => {
+      const res = await fetch(`/api/v1/reports/reconcile/file?from=${range.from}&to=${range.to}`, {
+        credentials: 'same-origin',
+      });
+      if (!res.ok) return throwApiError(res);
+      const cd = res.headers.get('content-disposition') ?? '';
+      const star = /filename\*=UTF-8''([^;]+)/i.exec(cd)?.[1];
+      const fileName = (star && decodeURIComponent(star)) || /filename="([^"]+)"/.exec(cd)?.[1] || 'doi-soat.xlsx';
       return { blob: await res.blob(), fileName };
     },
   },

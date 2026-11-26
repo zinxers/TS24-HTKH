@@ -90,3 +90,8 @@ export function canReport(actor: CurrentUser, _action: ReportAction, scope: Repo
   if (actor.role === 'head') return true;
   return actor.role === 'manager' && actor.teamId !== null && actor.teamId === scope;
 }
+
+/** Đối soát KPI: chỉ Trưởng phòng. */
+export function canReconcile(actor: CurrentUser): boolean {
+  return actor.role === 'head';
+}
