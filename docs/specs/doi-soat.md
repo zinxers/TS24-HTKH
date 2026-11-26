@@ -47,6 +47,9 @@ Chỉ xét dòng được trả tiền: team có thật, người không phải 
 - **Kỳ tự do** tối đa 400 ngày (theo `kpiRangeSchema`). Giao diện mặc định chọn "Tháng trước" (tháng TS24 gần nhất đã kết thúc).
 - **Nhãn "Quản lý, không tính KPI"** chỉ hiện trên web, ở dòng Quản lý. Trong file dòng Quản lý chỉ có tên, các ô số trống, như `doiSoatSheetXml`.
 - **Tên file** là `HTKH - Đối soát KPI dd.MM.yyyy-dd.MM.yyyy.xlsx` (`reconcileFileName`).
+- **Thứ tự dòng** trong mỗi team sắp theo họ tên (`localeCompare` `vi`) rồi `id`; bản cũ theo thứ tự sheet USER.
+- **Thời điểm trong cờ** (`items[].at`) là chuỗi ISO; giao diện tự định dạng giờ Việt Nam. Bản cũ gửi sẵn chuỗi đã định dạng.
+- **Nhãn team trong cờ** (`people[].team`) ngắn, dạng `TEAM n`; bảng và file dùng `TEAM n (tên)`.
 
 ## Phân quyền
 
@@ -65,6 +68,6 @@ Chỉ xét dòng được trả tiền: team có thật, người không phải 
 ## Vị trí trong code
 
 - Quy tắc thuần và cờ: `packages/shared/src/reconcile.ts`, `packages/core/src/modules/reports/reconcile.ts`, `reconcile-flags.ts`.
-- Dữ liệu (chỉ đọc): `packages/db/src/repositories/reconcile.repository.ts` (`rows`, `users`).
+- Dữ liệu (chỉ đọc): `packages/db/src/repositories/reconcile.repository.ts` (`lines`, `users`).
 - Điền mẫu xlsx: `packages/xlsx-report/src/reconcile-sheet.ts` (`fillReconcile`), mẫu `templates/doi-soat.xlsx`.
 - Giao diện: `apps/web/src/features/reports/Reconcile*.tsx`, tab "Đối soát KPI" tại `/reports`, chỉ Trưởng phòng thấy.
