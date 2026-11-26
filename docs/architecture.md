@@ -101,7 +101,7 @@ apps/web/src/app/api/v1/accounts/      route.ts · [id]/route.ts · [id]/status 
 apps/web/src/features/accounts/        AccountsScreen.tsx · AccountDialogs.tsx · RowMenu.tsx · useConfirmAction.ts
 ```
 
-Module `reports` (Mốc 6a, `docs/specs/bao-cao-wr-mr-qr.md`): `packages/core/src/modules/reports/` (`report.service.ts`, `report.policy.ts`, `report-cells.ts`), `packages/xlsx-report/src/`, route `apps/web/src/app/api/v1/reports/[type]/` (`route.ts`, `notes`, `file`), màn hình `apps/web/src/features/reports/` tại trang `/reports`.
+Module `reports` (Mốc 6a, `docs/specs/bao-cao-wr-mr-qr.md`): `packages/core/src/modules/reports/` (`report.service.ts`, `report.policy.ts`, `report-cells.ts`, `reconcile.ts`, `reconcile-flags.ts`, `reconcile.service.ts`), `packages/xlsx-report/src/`, route `apps/web/src/app/api/v1/reports/[type]/` (`route.ts`, `notes`, `file`) và `apps/web/src/app/api/v1/reports/reconcile/` (`route.ts`, `file`), màn hình `apps/web/src/features/reports/` tại trang `/reports`.
 
 Bố cục web dùng token trong `apps/web/src/app/globals.css`: `--page-max: 1440px` (khổ desktop tối đa) và `--gutter: clamp(16px, 3vw, 48px)` (lề hai bên), áp cho toàn app.
 
