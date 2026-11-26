@@ -6,7 +6,10 @@ const nextConfig: NextConfig = {
   agentRules: false,
   // Monorepo: trace từ gốc repo để chép templates/*.xlsx vào route tải file.
   outputFileTracingRoot: path.join(__dirname, '../..'),
-  outputFileTracingIncludes: { '/api/v1/reports/[type]/file': ['../../templates/*.xlsx'] },
+  outputFileTracingIncludes: {
+    '/api/v1/reports/[type]/file': ['../../templates/*.xlsx'],
+    '/api/v1/reports/reconcile/file': ['../../templates/doi-soat.xlsx'],
+  },
   transpilePackages: [
     '@ts24-htkh/shared',
     '@ts24-htkh/platform',
