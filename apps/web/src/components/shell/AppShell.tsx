@@ -3,7 +3,7 @@
 import { toVnDate, type CurrentUser } from '@ts24-htkh/shared';
 import { MotionConfig, motion } from 'motion/react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ApiError, apiClient } from '../../lib/api-client';
 import { CurrentUserContext, type CurrentUserValue } from '../../lib/current-user';
 import { errorMessage } from '../../lib/errors';
@@ -44,14 +44,29 @@ export function AppShell({ initialCollapsed, userMenu, children }: AppShellProps
     router.replace('/login');
   }, [router]);
 
+  // Mỗi lần tải (hoặc gỡ khung) tăng `gen`; phản hồi của lần cũ bị bỏ, tránh setState sau unmount và leave() chạy đôi dưới StrictMode.
+  const gen = useRef(0);
   const load = useCallback(() => {
-    apiClient.auth.me().then(setMe, (e: unknown) => {
-      if (e instanceof ApiError && e.status === 401) void leave();
-      else setLoadError(errorMessage(e));
-    });
+    const mine = ++gen.current;
+    apiClient.auth.me().then(
+      (user) => mine === gen.current && setMe(user),
+      (e: unknown) => {
+        if (mine !== gen.current) return;
+        if (e instanceof ApiError && e.status === 401) void leave();
+        else setLoadError(errorMessage(e));
+      },
+    );
   }, [leave]);
 
-  useEffect(load, [load]);
+  useEffect(() => {
+    load();
+    return () => {
+      gen.current++;
+    };
+  }, [load]);
+
+  // Thông báo chung chỉ có nghĩa ở trang đã sinh ra nó.
+  useEffect(() => setNotice(null), [pathname]);
 
   const value = useMemo<CurrentUserValue | null>(
     () => (me ? { me, setMe, notice, setNotice, leave } : null),

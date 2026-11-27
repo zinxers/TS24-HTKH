@@ -179,3 +179,12 @@ describe('AccountsScreen: tự sửa họ tên', () => {
     expect(within(table).queryByText('Trưởng Phòng')).not.toBeInTheDocument();
   });
 });
+
+describe('AccountsScreen: thông báo chung', () => {
+  it('thông báo của context do AppShell hiện, màn hình không hiện lần hai', async () => {
+    const { value } = setup(H, [H, M]);
+    await screen.findByRole('table');
+    act(() => value.setNotice('Lỗi chung'));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+});

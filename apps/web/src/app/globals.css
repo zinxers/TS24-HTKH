@@ -14,7 +14,6 @@
   --on-danger: light-dark(#fff, #3a0a0f); /* chữ trắng trên #ff6961 chỉ 2.82:1; #3a0a0f đạt 6.05:1 */
   --danger-bg: light-dark(#fff0f1, #3a1d26);
   --success: light-dark(#1a7f37, #32d74b);
-  --bar: light-dark(rgba(243, 246, 250, 0.8), rgba(10, 22, 38, 0.8));
   --ring: light-dark(rgba(18, 165, 148, 0.45), rgba(61, 214, 192, 0.45));
   --shadow-color: light-dark(rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.6));
   --shadow-edge: light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.12));

@@ -1,14 +1,16 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { CurrentUser } from '@ts24-htkh/shared';
+import { StrictMode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, apiClient } from '../../lib/api-client';
 import { useCurrentUser } from '../../lib/current-user';
 import { AppShell } from './AppShell';
 
+const path = vi.hoisted(() => ({ current: '/' }));
 const replace = vi.fn();
 // Router ổn định giữa các lần render, như useRouter thật của Next.
 const router = { replace: (...args: unknown[]) => replace(...args) };
-vi.mock('next/navigation', () => ({ useRouter: () => router, usePathname: () => '/' }));
+vi.mock('next/navigation', () => ({ useRouter: () => router, usePathname: () => path.current }));
 
 const USER: CurrentUser = {
   id: 'u1',
@@ -39,6 +41,7 @@ const shell = () =>
 beforeEach(() => {
   vi.restoreAllMocks();
   replace.mockReset();
+  path.current = '/';
   document.cookie = 'sidebar=; Max-Age=0; Path=/';
 });
 
@@ -112,5 +115,34 @@ describe('AppShell', () => {
     });
     expect(document.cookie).toContain('sidebar=collapsed');
     expect(screen.getByRole('button', { name: 'Mở rộng thanh bên' })).toBeInTheDocument();
+  });
+
+  it('đổi trang: thông báo chung bị xóa', async () => {
+    vi.spyOn(apiClient.auth, 'me').mockResolvedValue(USER);
+    const ui = () => (
+      <AppShell initialCollapsed={false} userMenu={<span>menu</span>}>
+        <Child />
+      </AppShell>
+    );
+    const { rerender } = render(ui());
+    fireEvent.click(await screen.findByRole('button', { name: 'báo lỗi' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Lỗi X');
+    path.current = '/team';
+    rerender(ui());
+    await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
+  });
+
+  it('StrictMode + me 401: chỉ đăng xuất một lần', async () => {
+    vi.spyOn(apiClient.auth, 'me').mockRejectedValue(new ApiError('AUTH', 401, 'Hết phiên'));
+    const logout = vi.spyOn(apiClient.auth, 'logout').mockResolvedValue(undefined);
+    render(
+      <StrictMode>
+        <AppShell initialCollapsed={false} userMenu={<span>menu</span>}>
+          <Child />
+        </AppShell>
+      </StrictMode>,
+    );
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
+    expect(logout).toHaveBeenCalledTimes(1);
   });
 });

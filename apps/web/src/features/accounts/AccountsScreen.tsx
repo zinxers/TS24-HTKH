@@ -21,7 +21,7 @@ const who = (a: AccountView) => `${a.fullName} (${a.email})`;
 
 /** Màn hình quản lý tài khoản. Ẩn/hiện nút chỉ là gợi ý; API mới là luật. */
 export function AccountsScreen() {
-  const { me, notice, leave } = useCurrentUser();
+  const { me, leave } = useCurrentUser();
   const [accounts, setAccounts] = useState<AccountView[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -64,130 +64,130 @@ export function AccountsScreen() {
   const canEdit = (a: AccountView) => head || ownStaff(a);
   const canManage = (a: AccountView) => a.id !== me.id && a.role !== 'head' && (head || ownStaff(a));
   const common = { error: action.error, busy: action.busy, onCancel: () => setForm(null) };
-  const banner = form ? null : (action.error ?? notice);
+  const banner = form ? null : action.error;
 
   return (
     <>
-        <div className="page-head">
-          <div>
-            <h1>Quản lý tài khoản</h1>
-            <p className="count">{accounts.length} tài khoản</p>
-          </div>
-          <div className="page-actions">
-            {head && (
-              <button className="btn btn-secondary" type="button" onClick={() => setForm({ kind: 'transfer' })}>
-                Bàn giao Trưởng phòng
-              </button>
-            )}
-            <button className="btn btn-primary" type="button" onClick={() => setForm({ kind: 'create' })}>
-              Tạo tài khoản
+      <div className="page-head">
+        <div>
+          <h1>Quản lý tài khoản</h1>
+          <p className="count">{accounts.length} tài khoản</p>
+        </div>
+        <div className="page-actions">
+          {head && (
+            <button className="btn btn-secondary" type="button" onClick={() => setForm({ kind: 'transfer' })}>
+              Bàn giao Trưởng phòng
             </button>
-          </div>
+          )}
+          <button className="btn btn-primary" type="button" onClick={() => setForm({ kind: 'create' })}>
+            Tạo tài khoản
+          </button>
         </div>
-        {banner && (
-          <p role="alert" className="banner-error">
-            {banner}
-          </p>
-        )}
-        <div className="table-wrap">
-          <table className="accounts-table">
-            <colgroup>
-              <col className="c-name" />
-              <col className="c-email" />
-              <col className="c-role" />
-              <col className="c-team" />
-              <col className="c-status" />
-              <col className="c-actions" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th>Họ tên</th>
-                <th>Email</th>
-                <th>Vai trò</th>
-                <th>Team</th>
-                <th>Trạng thái</th>
-                <th>
-                  <span className="visually-hidden">Thao tác</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {accounts.map((a) => {
-                const locked = a.status === 'locked';
-                const items: RowMenuItem[] = [];
-                if (canEdit(a)) items.push({ label: 'Sửa…', onSelect: () => setForm({ kind: 'edit', account: a }) });
-                if (canManage(a)) {
-                  items.push(
-                    { label: 'Đặt mật khẩu…', onSelect: () => setForm({ kind: 'password', account: a }) },
-                    locked
-                      ? {
-                          label: 'Mở khóa',
-                          onSelect: () =>
-                            action.ask({
-                              title: 'Mở khóa tài khoản?',
-                              message: `${who(a)} đăng nhập lại được.`,
-                              confirmLabel: 'Mở khóa',
-                              run: () => changeStatus(a, 'active'),
-                            }),
-                        }
-                      : {
-                          label: 'Khóa…',
-                          onSelect: () =>
-                            action.ask({
-                              title: 'Khóa tài khoản?',
-                              message: `${who(a)} bị đăng xuất ngay và không đăng nhập được cho tới khi mở khóa.`,
-                              confirmLabel: 'Khóa',
-                              danger: true,
-                              run: () => changeStatus(a, 'locked'),
-                            }),
+      </div>
+      {banner && (
+        <p role="alert" className="banner-error">
+          {banner}
+        </p>
+      )}
+      <div className="table-wrap">
+        <table className="accounts-table">
+          <colgroup>
+            <col className="c-name" />
+            <col className="c-email" />
+            <col className="c-role" />
+            <col className="c-team" />
+            <col className="c-status" />
+            <col className="c-actions" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Họ tên</th>
+              <th>Email</th>
+              <th>Vai trò</th>
+              <th>Team</th>
+              <th>Trạng thái</th>
+              <th>
+                <span className="visually-hidden">Thao tác</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {accounts.map((a) => {
+              const locked = a.status === 'locked';
+              const items: RowMenuItem[] = [];
+              if (canEdit(a)) items.push({ label: 'Sửa…', onSelect: () => setForm({ kind: 'edit', account: a }) });
+              if (canManage(a)) {
+                items.push(
+                  { label: 'Đặt mật khẩu…', onSelect: () => setForm({ kind: 'password', account: a }) },
+                  locked
+                    ? {
+                        label: 'Mở khóa',
+                        onSelect: () =>
+                          action.ask({
+                            title: 'Mở khóa tài khoản?',
+                            message: `${who(a)} đăng nhập lại được.`,
+                            confirmLabel: 'Mở khóa',
+                            run: () => changeStatus(a, 'active'),
+                          }),
+                      }
+                    : {
+                        label: 'Khóa…',
+                        onSelect: () =>
+                          action.ask({
+                            title: 'Khóa tài khoản?',
+                            message: `${who(a)} bị đăng xuất ngay và không đăng nhập được cho tới khi mở khóa.`,
+                            confirmLabel: 'Khóa',
+                            danger: true,
+                            run: () => changeStatus(a, 'locked'),
+                          }),
+                      },
+                  {
+                    label: 'Xóa…',
+                    destructive: true,
+                    onSelect: () =>
+                      action.ask({
+                        title: 'Xóa tài khoản?',
+                        message: `${who(a)} bị đăng xuất và không còn trong danh sách. Báo cáo đã gửi vẫn giữ nguyên.`,
+                        confirmLabel: 'Xóa',
+                        danger: true,
+                        run: async () => {
+                          await apiClient.accounts.remove(a.id);
+                          await reload();
                         },
-                    {
-                      label: 'Xóa…',
-                      destructive: true,
-                      onSelect: () =>
-                        action.ask({
-                          title: 'Xóa tài khoản?',
-                          message: `${who(a)} bị đăng xuất và không còn trong danh sách. Báo cáo đã gửi vẫn giữ nguyên.`,
-                          confirmLabel: 'Xóa',
-                          danger: true,
-                          run: async () => {
-                            await apiClient.accounts.remove(a.id);
-                            await reload();
-                          },
-                        }),
-                    },
-                  );
-                }
-                const team = a.teamName ? ` · ${a.teamName}` : '';
-                return (
-                  <tr
-                    key={a.id}
-                    className={[locked && 'is-locked', flashId === a.id && 'flash'].filter(Boolean).join(' ') || undefined}
-                    onAnimationEnd={() => setFlashId(null)}
-                  >
-                    <td className="cell-name">
-                      <span className="name">{a.id === me.id ? me.fullName : a.fullName}</span>
-                      {a.id === me.id && <span className="me"> (bạn)</span>}
-                      <span className="sub">
-                        {a.email}
-                        <br />
-                        {ROLE_LABEL[a.role]}
-                        {team}
-                      </span>
-                    </td>
-                    <td>{a.email}</td>
-                    <td>{ROLE_LABEL[a.role]}</td>
-                    <td>{a.teamName ?? '—'}</td>
-                    <td className="status">{locked && <span className="state-locked">{STATUS_LABEL.locked}</span>}</td>
-                    <td className="actions">
-                      {items.length > 0 && <RowMenu label={`Thao tác cho ${a.fullName}`} items={items} />}
-                    </td>
-                  </tr>
+                      }),
+                  },
                 );
-              })}
-            </tbody>
-          </table>
-        </div>
+              }
+              const team = a.teamName ? ` · ${a.teamName}` : '';
+              return (
+                <tr
+                  key={a.id}
+                  className={[locked && 'is-locked', flashId === a.id && 'flash'].filter(Boolean).join(' ') || undefined}
+                  onAnimationEnd={() => setFlashId(null)}
+                >
+                  <td className="cell-name">
+                    <span className="name">{a.id === me.id ? me.fullName : a.fullName}</span>
+                    {a.id === me.id && <span className="me"> (bạn)</span>}
+                    <span className="sub">
+                      {a.email}
+                      <br />
+                      {ROLE_LABEL[a.role]}
+                      {team}
+                    </span>
+                  </td>
+                  <td>{a.email}</td>
+                  <td>{ROLE_LABEL[a.role]}</td>
+                  <td>{a.teamName ?? '—'}</td>
+                  <td className="status">{locked && <span className="state-locked">{STATUS_LABEL.locked}</span>}</td>
+                  <td className="actions">
+                    {items.length > 0 && <RowMenu label={`Thao tác cho ${a.fullName}`} items={items} />}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
 
       {form?.kind === 'create' && (
         <CreateAccountDialog
