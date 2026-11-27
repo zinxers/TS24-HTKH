@@ -4,7 +4,7 @@ import { previousPeriod, runningMonthPeriod, toVnDate, type Period, type Reconci
 import { useEffect, useState } from 'react';
 import { ApiError, apiClient } from '../../lib/api-client';
 import { errorMessage } from '../accounts/labels';
-import { fmtNumber } from '../kpi/KpiShell';
+import { fmtNumber } from '../../lib/format';
 import { PeriodPicker } from '../kpi/PeriodPicker';
 import { ReconcileFlags } from './ReconcileFlags';
 import { ReconcileTable } from './ReconcileTable';

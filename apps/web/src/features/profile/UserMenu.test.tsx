@@ -1,6 +1,7 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, apiClient } from '../../lib/api-client';
+import { renderWithUser } from '../../test/render-with-user';
 import { UserMenu } from './UserMenu';
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: vi.fn() }) }));
@@ -20,36 +21,37 @@ beforeEach(() => vi.restoreAllMocks());
 afterEach(() => Object.defineProperty(window, 'location', { value: realLocation, configurable: true }));
 
 describe('UserMenu', () => {
-  it('màn hình không truyền onUserChange: thanh trên vẫn hiện tên mới', async () => {
-    vi.spyOn(apiClient.me, 'updateProfile').mockResolvedValue({ ...USER, fullName: 'Tên Mới' });
-    render(<UserMenu user={USER} onLogoutError={() => {}} />);
+  it('đổi tên thành công: setMe với tên mới và nút hiện tên mới', async () => {
+    const updated = { ...USER, fullName: 'Tên Mới' };
+    vi.spyOn(apiClient.me, 'updateProfile').mockResolvedValue(updated);
+    const { value } = renderWithUser(<UserMenu />, USER);
     rename('Tên Mới');
     expect(await screen.findByRole('button', { name: 'Tài khoản Tên Mới' })).toBeInTheDocument();
+    expect(value.setMe).toHaveBeenCalledWith(updated);
   });
 
   it('hết phiên (401) khi sửa tên: tải lại trang', async () => {
     const reload = vi.fn();
     Object.defineProperty(window, 'location', { value: { ...realLocation, reload }, configurable: true });
     vi.spyOn(apiClient.me, 'updateProfile').mockRejectedValue(new ApiError('AUTH', 401, 'hết hạn'));
-    render(<UserMenu user={USER} onLogoutError={() => {}} />);
+    renderWithUser(<UserMenu />, USER);
     rename('Tên Mới');
     await waitFor(() => expect(reload).toHaveBeenCalled());
   });
 
   it('đăng xuất lỗi: đóng menu, trả focus về nút và báo lỗi', async () => {
     vi.spyOn(apiClient.auth, 'logout').mockRejectedValue(new ApiError('INTERNAL', 500, 'Lỗi máy chủ'));
-    const onLogoutError = vi.fn();
-    render(<UserMenu user={USER} onLogoutError={onLogoutError} />);
+    const { value } = renderWithUser(<UserMenu />, USER);
     const btn = screen.getByRole('button', { name: /^Tài khoản / });
     fireEvent.click(btn);
     fireEvent.click(screen.getByRole('menuitem', { name: 'Đăng xuất' }));
     await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
     expect(btn).toHaveFocus();
-    expect(onLogoutError).toHaveBeenLastCalledWith('Đăng xuất không thành công: Lỗi máy chủ');
+    expect(value.setNotice).toHaveBeenLastCalledWith('Đăng xuất không thành công: Lỗi máy chủ');
   });
 
   it('menu chỉ chứa mục chọn; họ tên, email và nút Hủy nằm ngoài role=menu', () => {
-    render(<UserMenu user={USER} onLogoutError={() => {}} />);
+    renderWithUser(<UserMenu />, USER);
     fireEvent.click(screen.getByRole('button', { name: /^Tài khoản / }));
     const menu = screen.getByRole('menu', { name: 'Tài khoản' });
     expect(within(menu).queryByText(/nhan\.vien\.1a@example\.com/)).not.toBeInTheDocument();

@@ -48,7 +48,7 @@ export function ThemeMenu() {
     <>
       <button
         ref={triggerRef}
-        className="icon-btn theme-btn"
+        className="pill theme-btn"
         type="button"
         aria-label="Giao diện"
         title={`Giao diện: ${current.label}`}
@@ -60,6 +60,7 @@ export function ThemeMenu() {
         {OPTIONS.map((o) => (
           <Fragment key={o.value}>{ICON[o.value]}</Fragment>
         ))}
+        <span className="tool-label">Giao diện</span>
       </button>
       {pos &&
         createPortal(

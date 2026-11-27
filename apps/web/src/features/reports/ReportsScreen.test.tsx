@@ -1,13 +1,12 @@
 import type { CurrentUser } from '@ts24-htkh/shared';
 import { DEPT_SCOPE, reportPeriods } from '@ts24-htkh/shared';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi, type MockInstance } from 'vitest';
 import { ApiError, apiClient } from '../../lib/api-client';
 import { TEAMS, TODAY, preview, scopeNote } from './fixtures.test-utils';
+import { renderWithUser } from '../../test/render-with-user';
 import { ReportsScreen } from './ReportsScreen';
 
-const router = { replace: vi.fn() };
-vi.mock('next/navigation', () => ({ useRouter: () => router }));
 
 const HEAD: CurrentUser = { id: 'h', email: 'truong.phong@example.com', fullName: 'Trưởng Phòng', role: 'head', teamId: null };
 const MANAGER: CurrentUser = { id: 'm2', email: 'quan.ly.2@example.com', fullName: 'Quản Lý Hai', role: 'manager', teamId: TEAMS[1]!.id };
@@ -26,8 +25,7 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers());
 
 const asHead = async () => {
-  vi.spyOn(apiClient.auth, 'me').mockResolvedValue(HEAD);
-  render(<ReportsScreen />);
+  renderWithUser(<ReportsScreen />, HEAD);
   await screen.findByRole('table', { name: 'Số liệu theo team' });
 };
 
@@ -54,9 +52,8 @@ describe('ReportsScreen', () => {
   });
 
   it('Quản lý: không có tab phạm vi, bảng 1 cột, form có trường tóm tắt và team', async () => {
-    vi.spyOn(apiClient.auth, 'me').mockResolvedValue(MANAGER);
     load.mockImplementation(async (type, start) => preview(type, start, { managerTeam: 1 }));
-    render(<ReportsScreen />);
+    renderWithUser(<ReportsScreen />, MANAGER);
     const table = await screen.findByRole('table', { name: 'Số liệu theo team' });
     expect(within(table).getAllByRole('columnheader').map((h) => h.textContent)).toEqual(['Mục', 'iBHXH']);
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
@@ -223,8 +220,7 @@ describe('ReportsScreen', () => {
   it('chip Đối soát KPI chỉ có với Trưởng phòng', async () => {
     await asHead();
     expect(screen.getByRole('button', { name: 'Đối soát KPI' })).toBeInTheDocument();
-    vi.spyOn(apiClient.auth, 'me').mockResolvedValue(MANAGER);
-    render(<ReportsScreen />);
+    renderWithUser(<ReportsScreen />, MANAGER);
     await screen.findAllByRole('table', { name: 'Số liệu theo team' });
     expect(screen.getAllByRole('button', { name: 'Đối soát KPI' })).toHaveLength(1);
   });

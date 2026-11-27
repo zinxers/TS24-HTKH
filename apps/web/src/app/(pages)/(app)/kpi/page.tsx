@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { KpiEntryScreen } from '../../../features/kpi/KpiEntryScreen';
+import { KpiEntryScreen } from '../../../../features/kpi/KpiEntryScreen';
 
 export const metadata: Metadata = { title: 'Báo cáo KPI · TS24-HTKH' };
 

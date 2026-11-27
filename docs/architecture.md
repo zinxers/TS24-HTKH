@@ -64,12 +64,14 @@ ts24-htkh/
 ├─ apps/
 │  ├─ web/                        @ts24-htkh/web — Next.js, deploy Vercel (Root Directory = apps/web)
 │  │  ├─ src/app/(pages)/          login, kpi (kpi, kpi/mine, kpi/rates), team, reports, schedule, ts24, accounts
+│  │  │  └─ (app)/                 nhóm route có khung app (AppShell); login nằm ngoài nhóm
 │  │  ├─ src/app/api/v1/           route handler mỏng → @ts24-htkh/core
 │  │  │  └─ _lib/                  handle() (lỗi → JSON), parseVi() (thông báo zod tiếng Việt), requireUser(), cookie phiên
 │  │  ├─ src/proxy.ts              gợi ý điều hướng theo cookie có/không (lớp giao diện, không phải luật)
-│  │  ├─ src/components/           ConfirmDialog, DateRange, Chart
+│  │  ├─ src/components/           ConfirmDialog, FormDialog, shell/ (AppShell, Sidebar, TopBar, PageSkeleton)
 │  │  ├─ src/features/<nghiệp vụ>/ màn hình + hook (vd team: TeamKpiScreen)
 │  │  ├─ src/lib/api-client.ts     nơi duy nhất giao diện gọi API
+│  │  ├─ src/lib/current-user.tsx  context người dùng hiện tại cho khung app
 │  │  └─ tests/e2e/
 │  └─ desktop/                    @ts24-htkh/desktop — Tauri 2 vỏ mỏng
 │     ├─ src/offline.html
@@ -101,7 +103,7 @@ apps/web/src/app/api/v1/accounts/      route.ts · [id]/route.ts · [id]/status 
 apps/web/src/features/accounts/        AccountsScreen.tsx · AccountDialogs.tsx · RowMenu.tsx · useConfirmAction.ts
 ```
 
-Hồ sơ cá nhân (Mốc 7a): `apps/web/src/features/profile/` (`UserMenu.tsx`, `ProfileDialog.tsx`, `LogoutButton.tsx`). `components/AppBar` không import `features/`: màn hình truyền `UserMenu` vào prop `userMenu`.
+Hồ sơ cá nhân (Mốc 7a): `apps/web/src/features/profile/` (`UserMenu.tsx`, `ProfileDialog.tsx`, `LogoutButton.tsx`). `UserMenu` nằm trong thanh bên qua prop `userMenu` của `AppShell`; `(app)/layout.tsx` (lớp `app/`) truyền nó vào nên `components/` không import `features/`.
 
 Module `reports` (Mốc 6a, `docs/specs/bao-cao-wr-mr-qr.md`): `packages/core/src/modules/reports/` (`report.service.ts`, `report.policy.ts`, `report-cells.ts`, `reconcile.ts`, `reconcile-flags.ts`, `reconcile.service.ts`), `packages/xlsx-report/src/`, route `apps/web/src/app/api/v1/reports/[type]/` (`route.ts`, `notes`, `file`) và `apps/web/src/app/api/v1/reports/reconcile/` (`route.ts`, `file`), màn hình `apps/web/src/features/reports/` tại trang `/reports`.
 

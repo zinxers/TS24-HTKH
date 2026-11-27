@@ -1,13 +1,11 @@
 'use client';
 
-import type { AccountView, CurrentUser, Team } from '@ts24-htkh/shared';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import { AppBar } from '../../components/AppBar';
-import { UserMenu } from '../profile/UserMenu';
+import type { AccountView, Team } from '@ts24-htkh/shared';
+import { useEffect, useState } from 'react';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { PageSkeleton } from '../../components/shell/PageSkeleton';
 import { ApiError, apiClient } from '../../lib/api-client';
+import { useCurrentUser } from '../../lib/current-user';
 import { CreateAccountDialog, EditAccountDialog, PasswordDialog, TransferDialog } from './AccountDialogs';
 import { ROLE_LABEL, STATUS_LABEL, errorMessage } from './labels';
 import { RowMenu, type RowMenuItem } from './RowMenu';
@@ -23,34 +21,22 @@ const who = (a: AccountView) => `${a.fullName} (${a.email})`;
 
 /** Màn hình quản lý tài khoản. Ẩn/hiện nút chỉ là gợi ý; API mới là luật. */
 export function AccountsScreen() {
-  const router = useRouter();
-  const [me, setMe] = useState<CurrentUser | null>(null);
+  const { me, leave } = useCurrentUser();
   const [accounts, setAccounts] = useState<AccountView[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [form, setForm] = useState<Form | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
   const [flashId, setFlashId] = useState<string | null>(null);
-
-  // Xóa cookie cũ trước, nếu không proxy sẽ đưa /login về lại trang này.
-  const leave = useCallback(async () => {
-    try {
-      await apiClient.auth.logout();
-    } catch (e) {
-      setNotice(errorMessage(e));
-      return;
-    }
-    router.replace('/login');
-  }, [router]);
 
   const action = useConfirmAction(() => void leave());
 
   useEffect(() => {
-    Promise.all([apiClient.auth.me(), apiClient.accounts.list(), apiClient.teams.list()]).then(
-      ([user, list, teamList]) => {
-        setMe(user);
+    Promise.all([apiClient.accounts.list(), apiClient.teams.list()]).then(
+      ([list, teamList]) => {
         setAccounts(list);
         setTeams(teamList);
+        setLoaded(true);
       },
       (e: unknown) => {
         if (e instanceof ApiError && e.status === 401) void leave();
@@ -71,167 +57,137 @@ export function AccountsScreen() {
     await reload();
   };
 
-  if (!me) {
-    return (
-      <>
-        <AppBar />
-        <main className="content wide">
-          <Link className="back" href="/">
-            ‹ Trang chủ
-          </Link>
-          {loadError ? <p role="alert">{loadError}</p> : <p aria-busy="true">Đang tải…</p>}
-        </main>
-      </>
-    );
-  }
+  if (!loaded) return loadError ? <p role="alert">{loadError}</p> : <PageSkeleton />;
 
   const head = me.role === 'head';
   const ownStaff = (a: AccountView) => me.role === 'manager' && a.role === 'staff' && a.teamId === me.teamId;
   const canEdit = (a: AccountView) => head || ownStaff(a);
   const canManage = (a: AccountView) => a.id !== me.id && a.role !== 'head' && (head || ownStaff(a));
   const common = { error: action.error, busy: action.busy, onCancel: () => setForm(null) };
-  const banner = form ? null : (action.error ?? notice);
+  const banner = form ? null : action.error;
 
   return (
     <>
-      <AppBar
-        userMenu={
-          <UserMenu
-            user={me}
-            onUserChange={(u) => {
-              setMe(u);
-              // Dòng của mình trong bảng đổi tên ngay, không chờ tải lại danh sách.
-              setAccounts((list) => list.map((a) => (a.id === u.id ? { ...a, fullName: u.fullName } : a)));
-            }}
-            onLogoutError={setNotice}
-          />
-        }
-      />
-      <main className="content wide">
-        <Link className="back" href="/">
-          ‹ Trang chủ
-        </Link>
-        <div className="page-head">
-          <div>
-            <h1>Quản lý tài khoản</h1>
-            <p className="count">{accounts.length} tài khoản</p>
-          </div>
-          <div className="page-actions">
-            {head && (
-              <button className="btn btn-secondary" type="button" onClick={() => setForm({ kind: 'transfer' })}>
-                Bàn giao Trưởng phòng
-              </button>
-            )}
-            <button className="btn btn-primary" type="button" onClick={() => setForm({ kind: 'create' })}>
-              Tạo tài khoản
+      <div className="page-head">
+        <div>
+          <h1>Quản lý tài khoản</h1>
+          <p className="count">{accounts.length} tài khoản</p>
+        </div>
+        <div className="page-actions">
+          {head && (
+            <button className="btn btn-secondary" type="button" onClick={() => setForm({ kind: 'transfer' })}>
+              Bàn giao Trưởng phòng
             </button>
-          </div>
+          )}
+          <button className="btn btn-primary" type="button" onClick={() => setForm({ kind: 'create' })}>
+            Tạo tài khoản
+          </button>
         </div>
-        {banner && (
-          <p role="alert" className="banner-error">
-            {banner}
-          </p>
-        )}
-        <div className="table-wrap">
-          <table className="accounts-table">
-            <colgroup>
-              <col className="c-name" />
-              <col className="c-email" />
-              <col className="c-role" />
-              <col className="c-team" />
-              <col className="c-status" />
-              <col className="c-actions" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th>Họ tên</th>
-                <th>Email</th>
-                <th>Vai trò</th>
-                <th>Team</th>
-                <th>Trạng thái</th>
-                <th>
-                  <span className="visually-hidden">Thao tác</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {accounts.map((a) => {
-                const locked = a.status === 'locked';
-                const items: RowMenuItem[] = [];
-                if (canEdit(a)) items.push({ label: 'Sửa…', onSelect: () => setForm({ kind: 'edit', account: a }) });
-                if (canManage(a)) {
-                  items.push(
-                    { label: 'Đặt mật khẩu…', onSelect: () => setForm({ kind: 'password', account: a }) },
-                    locked
-                      ? {
-                          label: 'Mở khóa',
-                          onSelect: () =>
-                            action.ask({
-                              title: 'Mở khóa tài khoản?',
-                              message: `${who(a)} đăng nhập lại được.`,
-                              confirmLabel: 'Mở khóa',
-                              run: () => changeStatus(a, 'active'),
-                            }),
-                        }
-                      : {
-                          label: 'Khóa…',
-                          onSelect: () =>
-                            action.ask({
-                              title: 'Khóa tài khoản?',
-                              message: `${who(a)} bị đăng xuất ngay và không đăng nhập được cho tới khi mở khóa.`,
-                              confirmLabel: 'Khóa',
-                              danger: true,
-                              run: () => changeStatus(a, 'locked'),
-                            }),
+      </div>
+      {banner && (
+        <p role="alert" className="banner-error">
+          {banner}
+        </p>
+      )}
+      <div className="table-wrap">
+        <table className="accounts-table">
+          <colgroup>
+            <col className="c-name" />
+            <col className="c-email" />
+            <col className="c-role" />
+            <col className="c-team" />
+            <col className="c-status" />
+            <col className="c-actions" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Họ tên</th>
+              <th>Email</th>
+              <th>Vai trò</th>
+              <th>Team</th>
+              <th>Trạng thái</th>
+              <th>
+                <span className="visually-hidden">Thao tác</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {accounts.map((a) => {
+              const locked = a.status === 'locked';
+              const items: RowMenuItem[] = [];
+              if (canEdit(a)) items.push({ label: 'Sửa…', onSelect: () => setForm({ kind: 'edit', account: a }) });
+              if (canManage(a)) {
+                items.push(
+                  { label: 'Đặt mật khẩu…', onSelect: () => setForm({ kind: 'password', account: a }) },
+                  locked
+                    ? {
+                        label: 'Mở khóa',
+                        onSelect: () =>
+                          action.ask({
+                            title: 'Mở khóa tài khoản?',
+                            message: `${who(a)} đăng nhập lại được.`,
+                            confirmLabel: 'Mở khóa',
+                            run: () => changeStatus(a, 'active'),
+                          }),
+                      }
+                    : {
+                        label: 'Khóa…',
+                        onSelect: () =>
+                          action.ask({
+                            title: 'Khóa tài khoản?',
+                            message: `${who(a)} bị đăng xuất ngay và không đăng nhập được cho tới khi mở khóa.`,
+                            confirmLabel: 'Khóa',
+                            danger: true,
+                            run: () => changeStatus(a, 'locked'),
+                          }),
+                      },
+                  {
+                    label: 'Xóa…',
+                    destructive: true,
+                    onSelect: () =>
+                      action.ask({
+                        title: 'Xóa tài khoản?',
+                        message: `${who(a)} bị đăng xuất và không còn trong danh sách. Báo cáo đã gửi vẫn giữ nguyên.`,
+                        confirmLabel: 'Xóa',
+                        danger: true,
+                        run: async () => {
+                          await apiClient.accounts.remove(a.id);
+                          await reload();
                         },
-                    {
-                      label: 'Xóa…',
-                      destructive: true,
-                      onSelect: () =>
-                        action.ask({
-                          title: 'Xóa tài khoản?',
-                          message: `${who(a)} bị đăng xuất và không còn trong danh sách. Báo cáo đã gửi vẫn giữ nguyên.`,
-                          confirmLabel: 'Xóa',
-                          danger: true,
-                          run: async () => {
-                            await apiClient.accounts.remove(a.id);
-                            await reload();
-                          },
-                        }),
-                    },
-                  );
-                }
-                const team = a.teamName ? ` · ${a.teamName}` : '';
-                return (
-                  <tr
-                    key={a.id}
-                    className={[locked && 'is-locked', flashId === a.id && 'flash'].filter(Boolean).join(' ') || undefined}
-                    onAnimationEnd={() => setFlashId(null)}
-                  >
-                    <td className="cell-name">
-                      <span className="name">{a.fullName}</span>
-                      {a.id === me.id && <span className="me"> (bạn)</span>}
-                      <span className="sub">
-                        {a.email}
-                        <br />
-                        {ROLE_LABEL[a.role]}
-                        {team}
-                      </span>
-                    </td>
-                    <td>{a.email}</td>
-                    <td>{ROLE_LABEL[a.role]}</td>
-                    <td>{a.teamName ?? '—'}</td>
-                    <td className="status">{locked && <span className="state-locked">{STATUS_LABEL.locked}</span>}</td>
-                    <td className="actions">
-                      {items.length > 0 && <RowMenu label={`Thao tác cho ${a.fullName}`} items={items} />}
-                    </td>
-                  </tr>
+                      }),
+                  },
                 );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </main>
+              }
+              const team = a.teamName ? ` · ${a.teamName}` : '';
+              return (
+                <tr
+                  key={a.id}
+                  className={[locked && 'is-locked', flashId === a.id && 'flash'].filter(Boolean).join(' ') || undefined}
+                  onAnimationEnd={() => setFlashId(null)}
+                >
+                  <td className="cell-name">
+                    <span className="name">{a.id === me.id ? me.fullName : a.fullName}</span>
+                    {a.id === me.id && <span className="me"> (bạn)</span>}
+                    <span className="sub">
+                      {a.email}
+                      <br />
+                      {ROLE_LABEL[a.role]}
+                      {team}
+                    </span>
+                  </td>
+                  <td>{a.email}</td>
+                  <td>{ROLE_LABEL[a.role]}</td>
+                  <td>{a.teamName ?? '—'}</td>
+                  <td className="status">{locked && <span className="state-locked">{STATUS_LABEL.locked}</span>}</td>
+                  <td className="actions">
+                    {items.length > 0 && <RowMenu label={`Thao tác cho ${a.fullName}`} items={items} />}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
 
       {form?.kind === 'create' && (
         <CreateAccountDialog

@@ -1,13 +1,11 @@
 import type { CurrentUser, Kenh, RateVersion } from '@ts24-htkh/shared';
 import { DEFAULT_KPI_RATES, KENH } from '@ts24-htkh/shared';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, apiClient } from '../../lib/api-client';
+import { renderWithUser } from '../../test/render-with-user';
 import { RatesPanel } from './RatesPanel';
 
-const replace = vi.fn();
-const router = { replace: (...args: unknown[]) => replace(...args) };
-vi.mock('next/navigation', () => ({ useRouter: () => router }));
 
 const user = (role: CurrentUser['role']): CurrentUser => ({ id: 'u', email: 'a@example.com', fullName: 'Người Dùng', role, teamId: null });
 const V0: RateVersion = { from: '2000-01-01' as never, rates: DEFAULT_KPI_RATES, createdBy: null, createdAt: '2026-11-01T00:00:00Z' };
@@ -19,14 +17,12 @@ const V1: RateVersion = {
 };
 
 function setup(role: CurrentUser['role']) {
-  vi.spyOn(apiClient.auth, 'me').mockResolvedValue(user(role));
   vi.spyOn(apiClient.kpi, 'rates').mockResolvedValue([V0, V1]);
-  render(<RatesPanel />);
+  return renderWithUser(<RatesPanel />, user(role));
 }
 
 beforeEach(() => {
   vi.restoreAllMocks();
-  replace.mockReset();
 });
 
 describe('RatesPanel', () => {
@@ -42,10 +38,9 @@ describe('RatesPanel', () => {
 
   it('nhãn cột: "Mặc định" chỉ cho bản 2000-01-01; bản khác createdBy null hiện ngày; không cảnh báo key', async () => {
     const err = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    vi.spyOn(apiClient.auth, 'me').mockResolvedValue(user('staff'));
     const seeded: RateVersion = { ...V1, from: '2026-11-09' as never, createdBy: null };
     vi.spyOn(apiClient.kpi, 'rates').mockResolvedValue([V0, seeded]);
-    render(<RatesPanel />);
+    renderWithUser(<RatesPanel />, user('staff'));
     const table = await screen.findByRole('table', { name: 'Lịch sử đơn giá' });
     const heads = within(table).getAllByRole('columnheader').map((h) => h.textContent);
     expect(heads[1]).toContain('Từ 09/11/2026');

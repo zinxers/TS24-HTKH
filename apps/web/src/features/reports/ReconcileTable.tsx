@@ -1,5 +1,5 @@
 import type { Reconcile } from '@ts24-htkh/shared';
-import { fmtNumber } from '../kpi/KpiShell';
+import { fmtNumber } from '../../lib/format';
 
 const HEADS = ['PI', 'PO', 'Chat', 'Email', 'PI', 'PO', 'Chat', 'Email', 'Team­viewer', 'Trường hợp khó', 'Chăm sóc KH'];
 

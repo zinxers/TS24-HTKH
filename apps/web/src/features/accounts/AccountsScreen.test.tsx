@@ -1,13 +1,9 @@
 import type { AccountView, CurrentUser } from '@ts24-htkh/shared';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, apiClient } from '../../lib/api-client';
+import { renderWithUser } from '../../test/render-with-user';
 import { AccountsScreen } from './AccountsScreen';
-
-const replace = vi.fn();
-// Router ổn định giữa các lần render, như useRouter thật của Next.
-const router = { replace: (...args: unknown[]) => replace(...args) };
-vi.mock('next/navigation', () => ({ useRouter: () => router }));
 
 const A = 'team-a';
 const B = 'team-b';
@@ -31,14 +27,13 @@ const SL = account('sl', 'Nhân Viên Khóa', 'staff', A, 'locked');
 const asUser = (a: AccountView): CurrentUser => ({ id: a.id, email: a.email, fullName: a.fullName, role: a.role, teamId: a.teamId });
 
 function setup(me: AccountView, accounts: AccountView[]) {
-  vi.spyOn(apiClient.auth, 'me').mockResolvedValue(asUser(me));
   const list = vi.spyOn(apiClient.accounts, 'list').mockResolvedValue(accounts);
   vi.spyOn(apiClient.teams, 'list').mockResolvedValue([
     { id: A, name: 'Team A', shortName: 'TA' },
     { id: B, name: 'Team B', shortName: 'TB' },
   ]);
-  render(<AccountsScreen />);
-  return { list };
+  const { value } = renderWithUser(<AccountsScreen />, asUser(me));
+  return { list, value };
 }
 
 const confirmDialog = () => screen.getAllByRole('dialog').at(-1)!;
@@ -59,15 +54,13 @@ async function rowAction(fullName: string, item: string) {
 
 beforeEach(() => {
   vi.restoreAllMocks();
-  replace.mockReset();
 });
 
 describe('AccountsScreen: quyền gợi ý', () => {
   it('Nhân Viên (API 403) thấy thông báo không có quyền, không có bảng', async () => {
-    vi.spyOn(apiClient.auth, 'me').mockResolvedValue(asUser(SA));
     vi.spyOn(apiClient.accounts, 'list').mockRejectedValue(new ApiError('FORBIDDEN', 403, MSG_FORBIDDEN));
     vi.spyOn(apiClient.teams, 'list').mockResolvedValue([]);
-    render(<AccountsScreen />);
+    renderWithUser(<AccountsScreen />, asUser(SA));
     expect(await screen.findByText(MSG_FORBIDDEN)).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
@@ -156,40 +149,42 @@ describe('AccountsScreen: thao tác ghi qua ConfirmDialog', () => {
   });
 
   it('Bàn giao xong → đăng xuất, về /login', async () => {
-    setup(H, [H, M, SA]);
+    const { value } = setup(H, [H, M, SA]);
     const transfer = vi.spyOn(apiClient.accounts, 'transferHead').mockResolvedValue();
-    const logout = vi.spyOn(apiClient.auth, 'logout').mockResolvedValue();
     fireEvent.click(await screen.findByRole('button', { name: 'Bàn giao Trưởng phòng' }));
     const form = screen.getByRole('dialog', { name: 'Bàn giao Trưởng phòng' });
     fireEvent.change(within(form).getByLabelText('Người nhận'), { target: { value: 'm' } });
     fireEvent.submit(form.querySelector('form')!);
     fireEvent.click(within(confirmDialog()).getByRole('button', { name: 'Bàn giao' }));
     await waitFor(() => expect(transfer).toHaveBeenCalledWith({ toUserId: 'm', newRole: 'manager', newTeamId: A }));
-    await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
-    expect(logout).toHaveBeenCalled();
+    await waitFor(() => expect(value.leave).toHaveBeenCalled());
   });
 
   it('phiên hết (401) khi thao tác → đăng xuất, về /login', async () => {
-    setup(H, [H, SA]);
+    const { value } = setup(H, [H, SA]);
     vi.spyOn(apiClient.accounts, 'setStatus').mockRejectedValue(new ApiError('AUTH', 401, 'hết hạn'));
-    vi.spyOn(apiClient.auth, 'logout').mockResolvedValue();
     await rowAction('Nhân Viên A', 'Khóa…');
     fireEvent.click(within(confirmDialog()).getByRole('button', { name: 'Khóa' }));
-    await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
+    await waitFor(() => expect(value.leave).toHaveBeenCalled());
   });
 });
 
 describe('AccountsScreen: tự sửa họ tên', () => {
-  it('sửa họ tên ở thanh trên: dòng của mình trong bảng đổi ngay, không cần tải lại', async () => {
-    setup(H, [H, M]);
-    vi.spyOn(apiClient.me, 'updateProfile').mockResolvedValue({ ...asUser(H), fullName: 'Tên Mới' });
-    fireEvent.click(await screen.findByRole('button', { name: 'Tài khoản Trưởng Phòng' }));
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Sửa họ tên' }));
-    fireEvent.change(screen.getByLabelText('Họ tên'), { target: { value: 'Tên Mới' } });
-    fireEvent.submit(screen.getByRole('dialog', { name: 'Sửa họ tên' }).querySelector('form')!);
-    fireEvent.click(within(confirmDialog()).getByRole('button', { name: 'Lưu' }));
-    const table = screen.getByRole('table');
+  it('đổi họ tên trong context: dòng của mình trong bảng đổi ngay, không cần tải lại', async () => {
+    const { value } = setup(H, [H, M]);
+    const table = await screen.findByRole('table');
+    expect(within(table).getByText('Trưởng Phòng')).toBeInTheDocument();
+    act(() => value.setMe({ ...asUser(H), fullName: 'Tên Mới' }));
     expect(await within(table).findByText('Tên Mới')).toBeInTheDocument();
     expect(within(table).queryByText('Trưởng Phòng')).not.toBeInTheDocument();
+  });
+});
+
+describe('AccountsScreen: thông báo chung', () => {
+  it('thông báo của context do AppShell hiện, màn hình không hiện lần hai', async () => {
+    const { value } = setup(H, [H, M]);
+    await screen.findByRole('table');
+    act(() => value.setNotice('Lỗi chung'));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 });

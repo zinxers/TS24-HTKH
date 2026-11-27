@@ -4,7 +4,7 @@ import type { Period, Team } from '@ts24-htkh/shared';
 import { useEffect, useState, type KeyboardEvent } from 'react';
 import { apiClient } from '../../lib/api-client';
 import { errorMessage } from '../accounts/labels';
-import { KpiShell, useKpiUser } from '../kpi/KpiShell';
+import { useCurrentUser } from '../../lib/current-user';
 import { PeriodPicker, defaultPeriod } from '../kpi/PeriodPicker';
 import { DeptOverviewPanel } from './DeptOverviewPanel';
 import { TeamTable } from './TeamTable';
@@ -17,12 +17,12 @@ const PANEL = 'team-tabpanel';
  * Ẩn/hiện chỉ là gợi ý; API kiểm quyền (Nhân viên nhận 403 và thấy thông báo).
  */
 export function TeamKpiScreen() {
-  const { me, notice, setNotice } = useKpiUser();
+  const { me } = useCurrentUser();
   const [range, setRange] = useState<Period>(defaultPeriod);
   const [teams, setTeams] = useState<Team[]>([]);
   const [tab, setTab] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const isHead = me?.role === 'head';
+  const isHead = me.role === 'head';
 
   useEffect(() => {
     if (!isHead) return;
@@ -40,7 +40,7 @@ export function TeamKpiScreen() {
     };
   }, [isHead]);
 
-  const teamId = isHead ? (tab === DEPT ? null : tab) : (me?.teamId ?? null);
+  const teamId = isHead ? (tab === DEPT ? null : tab) : (me.teamId ?? null);
   const tabs = [...teams.map((t) => ({ id: t.id, label: t.shortName, title: t.name })), { id: DEPT, label: 'Tổng quan phòng', title: undefined }];
   const showTabs = isHead && teams.length > 0;
 
@@ -63,7 +63,7 @@ export function TeamKpiScreen() {
   );
 
   return (
-    <KpiShell me={me} notice={notice} onNotice={setNotice}>
+    <>
       <h1>KPI theo team</h1>
 
       {showTabs && (
@@ -94,7 +94,7 @@ export function TeamKpiScreen() {
           {error}
         </p>
       )}
-      {me && !isHead && !me.teamId && (
+      {!isHead && !me.teamId && (
         <p role="alert" className="banner-error">
           Bạn không có quyền xem báo cáo team
         </p>
@@ -106,6 +106,6 @@ export function TeamKpiScreen() {
       ) : (
         content
       )}
-    </KpiShell>
+    </>
   );
 }

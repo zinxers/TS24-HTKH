@@ -1,7 +1,7 @@
 'use client';
 
 import { MAX_NOTE_TEXT, toVnDate, type ReportField, type ReportNoteScope, type ReportType } from '@ts24-htkh/shared';
-import { fmtDate, fmtNumber } from '../kpi/KpiShell';
+import { fmtDate, fmtNumber } from '../../lib/format';
 
 /** Tiêu đề mục. WR theo mẫu duyệt 2026-11-23; MR, QR theo ViewPeriodic.html của hệ thống cũ. */
 const SECTIONS: Record<ReportType, Record<string, string>> = {

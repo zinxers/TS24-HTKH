@@ -4,7 +4,7 @@ import type { DeptLine, DeptOverview, Period } from '@ts24-htkh/shared';
 import { useEffect, useState } from 'react';
 import { apiClient } from '../../lib/api-client';
 import { errorMessage } from '../accounts/labels';
-import { fmtDate, fmtNumber } from '../kpi/KpiShell';
+import { fmtDate, fmtNumber } from '../../lib/format';
 import { TrendCard } from './TrendCard';
 
 const pct = (change: number | null) => {

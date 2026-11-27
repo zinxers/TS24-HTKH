@@ -247,26 +247,51 @@
 .who-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-height: 36px;
-  padding: 2px 10px 2px 3px;
+  gap: 12px;
+  width: 100%;
+  padding: 8px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 14px;
   background: transparent;
-  color: inherit;
+  color: var(--on-shell);
   font: inherit;
+  text-align: left;
   cursor: pointer;
 }
 .who-btn:hover,
 .who-btn[aria-expanded='true'] {
-  background: var(--fill);
+  background: var(--shell-hover);
+}
+.who-btn .who-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+.who-btn .name {
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.who-btn .role {
+  color: var(--on-shell-muted);
+  font-size: 13px;
+}
+.side.is-collapsed .who-btn {
+  padding: 8px 0;
+  justify-content: center;
+}
+.side.is-collapsed .who-btn .who-text,
+.side.is-collapsed .who-btn .caret {
+  display: none;
 }
 .who-btn:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--ring);
 }
 .who-btn .caret {
-  color: var(--secondary);
+  color: var(--on-shell-muted);
   font-size: 11px;
 }
 .popover.user {
