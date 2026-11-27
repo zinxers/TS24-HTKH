@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { RatesPanel } from '../../../../features/kpi/RatesPanel';
+import { RatesPanel } from '../../../../../features/kpi/RatesPanel';
 
 export const metadata: Metadata = { title: 'Đơn giá KPI · TS24-HTKH' };
 

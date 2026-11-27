@@ -103,7 +103,7 @@ apps/web/src/app/api/v1/accounts/      route.ts · [id]/route.ts · [id]/status 
 apps/web/src/features/accounts/        AccountsScreen.tsx · AccountDialogs.tsx · RowMenu.tsx · useConfirmAction.ts
 ```
 
-Hồ sơ cá nhân (Mốc 7a): `apps/web/src/features/profile/` (`UserMenu.tsx`, `ProfileDialog.tsx`, `LogoutButton.tsx`). `components/AppBar` không import `features/`: màn hình truyền `UserMenu` vào prop `userMenu`.
+Hồ sơ cá nhân (Mốc 7a): `apps/web/src/features/profile/` (`UserMenu.tsx`, `ProfileDialog.tsx`, `LogoutButton.tsx`). `UserMenu` nằm trong thanh bên qua prop `userMenu` của `AppShell`; `(app)/layout.tsx` (lớp `app/`) truyền nó vào nên `components/` không import `features/`.
 
 Module `reports` (Mốc 6a, `docs/specs/bao-cao-wr-mr-qr.md`): `packages/core/src/modules/reports/` (`report.service.ts`, `report.policy.ts`, `report-cells.ts`, `reconcile.ts`, `reconcile-flags.ts`, `reconcile.service.ts`), `packages/xlsx-report/src/`, route `apps/web/src/app/api/v1/reports/[type]/` (`route.ts`, `notes`, `file`) và `apps/web/src/app/api/v1/reports/reconcile/` (`route.ts`, `file`), màn hình `apps/web/src/features/reports/` tại trang `/reports`.
 

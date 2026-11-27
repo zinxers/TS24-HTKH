@@ -12,19 +12,19 @@ import { useEffect, useState } from 'react';
 import { apiClient } from '../../lib/api-client';
 import { errorMessage } from '../accounts/labels';
 import { fmtDate, fmtNumber } from '../../lib/format';
-import { KpiShell, useKpiUser } from './KpiShell';
+import { useCurrentUser } from '../../lib/current-user';
 import { PeriodPicker, defaultPeriod } from './PeriodPicker';
 
 /** KPI của chính người đăng nhập theo khoảng ngày; mặc định kỳ tháng đang chạy. */
 export function MyKpiScreen() {
-  const { me, notice, setNotice } = useKpiUser();
+  const { me } = useCurrentUser();
   const [teamName, setTeamName] = useState<string | null>(null);
   const [range, setRange] = useState<Period>(defaultPeriod);
   const [kpi, setKpi] = useState<MyKpi | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!me?.teamId) return;
+    if (!me.teamId) return;
     // Tên team chỉ để hiển thị; không tải được thì bỏ qua.
     apiClient.teams.list().then(
       (teams) => setTeamName(teams.find((t) => t.id === me.teamId)?.name ?? null),
@@ -33,7 +33,6 @@ export function MyKpiScreen() {
   }, [me]);
 
   useEffect(() => {
-    if (!me) return;
     let stale = false;
     setError(null);
     apiClient.kpi.mine({ from: range.start, to: range.end }).then(
@@ -46,7 +45,7 @@ export function MyKpiScreen() {
   }, [me, range]);
 
   return (
-    <KpiShell me={me} notice={notice} onNotice={setNotice}>
+    <>
       <div className="page-head">
         <div>
           <h1>KPI của tôi</h1>
@@ -70,7 +69,7 @@ export function MyKpiScreen() {
         </p>
       )}
       {kpi && <KpiResult kpi={kpi} />}
-    </KpiShell>
+    </>
   );
 }
 

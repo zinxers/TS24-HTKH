@@ -1,13 +1,11 @@
 'use client';
 
-import type { AccountView, CurrentUser, Team } from '@ts24-htkh/shared';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import { AppBar } from '../../components/AppBar';
-import { UserMenu } from '../profile/UserMenu';
+import type { AccountView, Team } from '@ts24-htkh/shared';
+import { useEffect, useState } from 'react';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { PageSkeleton } from '../../components/shell/PageSkeleton';
 import { ApiError, apiClient } from '../../lib/api-client';
+import { useCurrentUser } from '../../lib/current-user';
 import { CreateAccountDialog, EditAccountDialog, PasswordDialog, TransferDialog } from './AccountDialogs';
 import { ROLE_LABEL, STATUS_LABEL, errorMessage } from './labels';
 import { RowMenu, type RowMenuItem } from './RowMenu';
@@ -23,34 +21,22 @@ const who = (a: AccountView) => `${a.fullName} (${a.email})`;
 
 /** Màn hình quản lý tài khoản. Ẩn/hiện nút chỉ là gợi ý; API mới là luật. */
 export function AccountsScreen() {
-  const router = useRouter();
-  const [me, setMe] = useState<CurrentUser | null>(null);
+  const { me, notice, leave } = useCurrentUser();
   const [accounts, setAccounts] = useState<AccountView[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [form, setForm] = useState<Form | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
   const [flashId, setFlashId] = useState<string | null>(null);
-
-  // Xóa cookie cũ trước, nếu không proxy sẽ đưa /login về lại trang này.
-  const leave = useCallback(async () => {
-    try {
-      await apiClient.auth.logout();
-    } catch (e) {
-      setNotice(errorMessage(e));
-      return;
-    }
-    router.replace('/login');
-  }, [router]);
 
   const action = useConfirmAction(() => void leave());
 
   useEffect(() => {
-    Promise.all([apiClient.auth.me(), apiClient.accounts.list(), apiClient.teams.list()]).then(
-      ([user, list, teamList]) => {
-        setMe(user);
+    Promise.all([apiClient.accounts.list(), apiClient.teams.list()]).then(
+      ([list, teamList]) => {
         setAccounts(list);
         setTeams(teamList);
+        setLoaded(true);
       },
       (e: unknown) => {
         if (e instanceof ApiError && e.status === 401) void leave();
@@ -71,19 +57,7 @@ export function AccountsScreen() {
     await reload();
   };
 
-  if (!me) {
-    return (
-      <>
-        <AppBar />
-        <main className="content wide">
-          <Link className="back" href="/">
-            ‹ Trang chủ
-          </Link>
-          {loadError ? <p role="alert">{loadError}</p> : <p aria-busy="true">Đang tải…</p>}
-        </main>
-      </>
-    );
-  }
+  if (!loaded) return loadError ? <p role="alert">{loadError}</p> : <PageSkeleton />;
 
   const head = me.role === 'head';
   const ownStaff = (a: AccountView) => me.role === 'manager' && a.role === 'staff' && a.teamId === me.teamId;
@@ -94,15 +68,6 @@ export function AccountsScreen() {
 
   return (
     <>
-      <AppBar
-        userMenu={
-          <UserMenu />
-        }
-      />
-      <main className="content wide">
-        <Link className="back" href="/">
-          ‹ Trang chủ
-        </Link>
         <div className="page-head">
           <div>
             <h1>Quản lý tài khoản</h1>
@@ -201,7 +166,7 @@ export function AccountsScreen() {
                     onAnimationEnd={() => setFlashId(null)}
                   >
                     <td className="cell-name">
-                      <span className="name">{a.fullName}</span>
+                      <span className="name">{a.id === me.id ? me.fullName : a.fullName}</span>
                       {a.id === me.id && <span className="me"> (bạn)</span>}
                       <span className="sub">
                         {a.email}
@@ -223,7 +188,6 @@ export function AccountsScreen() {
             </tbody>
           </table>
         </div>
-      </main>
 
       {form?.kind === 'create' && (
         <CreateAccountDialog

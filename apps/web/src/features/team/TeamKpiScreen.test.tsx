@@ -1,13 +1,12 @@
 import type { CurrentUser } from '@ts24-htkh/shared';
 import { runningMonthPeriod } from '@ts24-htkh/shared';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, apiClient } from '../../lib/api-client';
 import { TEAMS, overview, row, teamKpi, trend } from './fixtures.test-utils';
+import { renderWithUser } from '../../test/render-with-user';
 import { TeamKpiScreen } from './TeamKpiScreen';
 
-const router = { replace: vi.fn() };
-vi.mock('next/navigation', () => ({ useRouter: () => router }));
 
 const MANAGER: CurrentUser = { id: 'm2', email: 'quan.ly.2@example.com', fullName: 'Quản Lý Hai', role: 'manager', teamId: 't2' };
 const HEAD: CurrentUser = { id: 'h', email: 'truong.phong@example.com', fullName: 'Trưởng Phòng', role: 'head', teamId: null };
@@ -28,9 +27,8 @@ afterEach(() => vi.useRealTimers());
 
 describe('TeamKpiScreen', () => {
   it('Quản lý: không có hàng tab, gọi kpi.team(team mình, kỳ tháng đang chạy)', async () => {
-    vi.spyOn(apiClient.auth, 'me').mockResolvedValue(MANAGER);
     const p = runningMonthPeriod('2026-11-19' as never);
-    render(<TeamKpiScreen />);
+    renderWithUser(<TeamKpiScreen />, MANAGER);
     await waitFor(() => expect(team).toHaveBeenCalledWith('t2', { from: p.start, to: p.end }));
     expect(await screen.findByRole('table', { name: 'Thành viên' })).toBeInTheDocument();
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
@@ -38,8 +36,7 @@ describe('TeamKpiScreen', () => {
   });
 
   it('Trưởng phòng: 3 tab theo shortName (title = tên đầy đủ) + "Tổng quan phòng"', async () => {
-    vi.spyOn(apiClient.auth, 'me').mockResolvedValue(HEAD);
-    render(<TeamKpiScreen />);
+    renderWithUser(<TeamKpiScreen />, HEAD);
     const tabs = await screen.findAllByRole('tab');
     expect(tabs.map((t) => t.textContent)).toEqual(['TaxOnline', 'iBHXH', 'iXHD', 'Tổng quan phòng']);
     expect(tabs[0]).toHaveAttribute('title', TEAMS[0]!.name);
@@ -55,8 +52,7 @@ describe('TeamKpiScreen', () => {
   });
 
   it('Trưởng phòng: phím ←/→/Home/End chuyển tab, tab chọn giữ tabIndex 0, panel gắn aria-controls', async () => {
-    vi.spyOn(apiClient.auth, 'me').mockResolvedValue(HEAD);
-    render(<TeamKpiScreen />);
+    renderWithUser(<TeamKpiScreen />, HEAD);
     const tabs = await screen.findAllByRole('tab');
     expect(tabs.map((t) => t.tabIndex)).toEqual([0, -1, -1, -1]);
     const panel = screen.getByRole('tabpanel');
@@ -80,17 +76,15 @@ describe('TeamKpiScreen', () => {
   });
 
   it('đổi kỳ nhanh gọi lại kpi.team', async () => {
-    vi.spyOn(apiClient.auth, 'me').mockResolvedValue(MANAGER);
-    render(<TeamKpiScreen />);
+    renderWithUser(<TeamKpiScreen />, MANAGER);
     await screen.findByRole('table', { name: 'Thành viên' });
     fireEvent.click(screen.getByRole('button', { name: 'Tháng trước' }));
     await waitFor(() => expect(team).toHaveBeenLastCalledWith('t2', { from: '2026-10-16', to: '2026-11-15' }));
   });
 
   it('Nhân viên: hiện thông báo 403 của API', async () => {
-    vi.spyOn(apiClient.auth, 'me').mockResolvedValue({ ...MANAGER, role: 'staff' });
     team.mockRejectedValue(new ApiError('FORBIDDEN', 403, 'Bạn không có quyền xem báo cáo team'));
-    render(<TeamKpiScreen />);
+    renderWithUser(<TeamKpiScreen />, { ...MANAGER, role: 'staff' });
     expect(await screen.findByRole('alert')).toHaveTextContent('Bạn không có quyền xem báo cáo team');
   });
 });

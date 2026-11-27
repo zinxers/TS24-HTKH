@@ -1,13 +1,11 @@
 import type { CurrentUser, Kenh, MyKpi } from '@ts24-htkh/shared';
 import { KENH, KENH_GROUPS, runningMonthPeriod } from '@ts24-htkh/shared';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, apiClient } from '../../lib/api-client';
+import { renderWithUser } from '../../test/render-with-user';
 import { MyKpiScreen } from './MyKpiScreen';
 
-const replace = vi.fn();
-const router = { replace: (...args: unknown[]) => replace(...args) };
-vi.mock('next/navigation', () => ({ useRouter: () => router }));
 
 const USER: CurrentUser = { id: 'u1', email: 'a@example.com', fullName: 'Nhân Viên A', role: 'staff', teamId: 't1' };
 const TODAY = '2026-11-19';
@@ -32,10 +30,8 @@ let mine: ReturnType<typeof vi.spyOn>;
 
 beforeEach(() => {
   vi.restoreAllMocks();
-  replace.mockReset();
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(new Date('2026-11-19T05:00:00Z'));
-  vi.spyOn(apiClient.auth, 'me').mockResolvedValue(USER);
   vi.spyOn(apiClient.teams, 'list').mockResolvedValue([{ id: 't1', name: 'Team Hỗ trợ 1A', shortName: 'T1A' }]);
   mine = vi.spyOn(apiClient.kpi, 'mine').mockResolvedValue(kpi());
 });
@@ -44,7 +40,7 @@ afterEach(() => vi.useRealTimers());
 describe('MyKpiScreen', () => {
   it('chọn "Tháng này" gọi mine với runningMonthPeriod(hôm nay VN)', async () => {
     const p = runningMonthPeriod(TODAY as never);
-    render(<MyKpiScreen />);
+    renderWithUser(<MyKpiScreen />, USER);
     await screen.findByText('Team Hỗ trợ 1A');
     fireEvent.click(screen.getByRole('button', { name: 'Tuần trước' }));
     await waitFor(() => expect(screen.getByRole('button', { name: 'Tuần trước' })).toHaveAttribute('aria-pressed', 'true'));
@@ -54,7 +50,7 @@ describe('MyKpiScreen', () => {
   });
 
   it('nhập tay ngày thì chip bỏ chọn', async () => {
-    render(<MyKpiScreen />);
+    renderWithUser(<MyKpiScreen />, USER);
     await screen.findByText('Team Hỗ trợ 1A');
     fireEvent.change(screen.getByLabelText('Từ ngày'), { target: { value: '2026-10-01' } });
     await waitFor(() => expect(mine).toHaveBeenLastCalledWith(expect.objectContaining({ from: '2026-10-01' })));
@@ -62,7 +58,7 @@ describe('MyKpiScreen', () => {
   });
 
   it('bảng 6 nhóm / 11 kênh; donGia null hiện "Nhiều mức"; ô tổng; ngày theo giờ VN', async () => {
-    render(<MyKpiScreen />);
+    renderWithUser(<MyKpiScreen />, USER);
     const table = await screen.findByRole('table', { name: 'Tổng hợp theo kênh' });
     for (const g of KENH_GROUPS) expect(within(table).getByRole('rowheader', { name: g.name })).toBeInTheDocument();
     for (const k of KENH) expect(within(table).getByRole('cell', { name: k })).toBeInTheDocument();
@@ -76,14 +72,14 @@ describe('MyKpiScreen', () => {
 
   it('không có cảnh báo key trùng trong console', async () => {
     const err = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    render(<MyKpiScreen />);
+    renderWithUser(<MyKpiScreen />, USER);
     await screen.findByRole('table', { name: 'Tổng hợp theo kênh' });
     expect(err.mock.calls.filter((c) => String(c[0]).includes('same key'))).toEqual([]);
   });
 
   it('lỗi từ API hiện message', async () => {
     mine.mockRejectedValue(new ApiError('VALIDATION', 400, 'Khoảng ngày tối đa 400 ngày'));
-    render(<MyKpiScreen />);
+    renderWithUser(<MyKpiScreen />, USER);
     expect(await screen.findByText('Khoảng ngày tối đa 400 ngày')).toBeInTheDocument();
   });
 });

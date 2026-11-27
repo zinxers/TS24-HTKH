@@ -9,7 +9,7 @@ import { apiClient } from '../../lib/api-client';
 import { errorMessage } from '../accounts/labels';
 import { useConfirmAction } from '../accounts/useConfirmAction';
 import { fmtDate, fmtNumber } from '../../lib/format';
-import { KpiShell, useKpiUser } from './KpiShell';
+import { useCurrentUser } from '../../lib/current-user';
 
 // Bản mặc định do migration tạo; bản khác có thể có createdBy null (dữ liệu seed).
 const DEFAULT_FROM = '2000-01-01';
@@ -19,7 +19,7 @@ const parseAmount = (s: string) => (s.trim() === '' ? NaN : Number(s.replace(/[.
 
 /** Lịch sử đơn giá (mọi người xem) và nút đổi đơn giá (chỉ Trưởng phòng; API mới là luật). */
 export function RatesPanel() {
-  const { me, notice, setNotice, leave } = useKpiUser();
+  const { me, setNotice, leave } = useCurrentUser();
   const [versions, setVersions] = useState<RateVersion[] | null>(null);
   const [editing, setEditing] = useState(false);
   const action = useConfirmAction(() => void leave());
@@ -48,7 +48,7 @@ export function RatesPanel() {
   }
 
   return (
-    <KpiShell me={me} notice={notice} onNotice={setNotice}>
+    <>
       <div className="section-actions">
         <div>
           <h1>Đơn giá</h1>
@@ -58,7 +58,7 @@ export function RatesPanel() {
           <Link className="btn btn-secondary" href="/kpi/mine">
             KPI của tôi
           </Link>
-          {me?.role === 'head' && versions && (
+          {me.role === 'head' && versions && (
             <button className="btn btn-primary" type="button" onClick={() => setEditing(true)}>
               Đổi đơn giá
             </button>
@@ -132,6 +132,6 @@ export function RatesPanel() {
         </FormDialog>
       )}
       <ConfirmDialog {...action.dialogProps} />
-    </KpiShell>
+    </>
   );
 }

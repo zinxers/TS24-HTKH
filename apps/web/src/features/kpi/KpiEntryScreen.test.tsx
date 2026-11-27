@@ -1,24 +1,20 @@
 import type { CurrentUser } from '@ts24-htkh/shared';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, apiClient } from '../../lib/api-client';
+import { renderWithUser } from '../../test/render-with-user';
 import { KpiEntryScreen } from './KpiEntryScreen';
 
-const replace = vi.fn();
-const router = { replace: (...args: unknown[]) => replace(...args) };
-vi.mock('next/navigation', () => ({ useRouter: () => router }));
 
 const USER: CurrentUser = { id: 'u1', email: 'a@example.com', fullName: 'Nhân Viên A', role: 'staff', teamId: 't1' };
 
 beforeEach(() => {
   vi.restoreAllMocks();
   localStorage.clear();
-  replace.mockReset();
-  vi.spyOn(apiClient.auth, 'me').mockResolvedValue(USER);
 });
 
 async function openWithRow() {
-  render(<KpiEntryScreen />);
+  renderWithUser(<KpiEntryScreen />, USER);
   fireEvent.click(await screen.findByRole('button', { name: '+ Thêm dòng' }));
 }
 
@@ -31,7 +27,7 @@ function fillRow(n: number, ticket: string) {
 
 describe('KpiEntryScreen', () => {
   it('nút Gửi tắt khi chưa có dòng; Thêm dòng không hỏi xác nhận', async () => {
-    render(<KpiEntryScreen />);
+    renderWithUser(<KpiEntryScreen />, USER);
     const send = await screen.findByRole('button', { name: /^Gửi/ });
     expect(send).toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: '+ Thêm dòng' }));
@@ -43,7 +39,7 @@ describe('KpiEntryScreen', () => {
   it('tắt Thêm dòng khi đủ 200 dòng', async () => {
     const rows = Array.from({ length: 200 }, (_, i) => ({ rowId: `row-${String(i).padStart(8, '0')}`, ticket: '', kenh: '', phanLoai: '', noiDung: '' }));
     localStorage.setItem('ts24-htkh:kpi-draft:u1', JSON.stringify(rows));
-    render(<KpiEntryScreen />);
+    renderWithUser(<KpiEntryScreen />, USER);
     expect(await screen.findByRole('button', { name: '+ Thêm dòng' })).toBeDisabled();
   });
 
@@ -96,12 +92,5 @@ describe('KpiEntryScreen', () => {
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Gửi' }));
     expect(await screen.findByText('Mỗi lần gửi tối đa 200 dòng')).toBeInTheDocument();
     await waitFor(() => expect(screen.getByLabelText('Ticket dòng 1')).toHaveValue('TICKET/1'));
-  });
-
-  it('401 khi tải: đăng xuất rồi về /login', async () => {
-    vi.spyOn(apiClient.auth, 'me').mockRejectedValue(new ApiError('AUTH', 401, 'Chưa đăng nhập'));
-    vi.spyOn(apiClient.auth, 'logout').mockResolvedValue(undefined);
-    render(<KpiEntryScreen />);
-    await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
   });
 });

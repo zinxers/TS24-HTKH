@@ -7,7 +7,7 @@ import { ApiError, apiClient } from '../../lib/api-client';
 import { errorMessage } from '../accounts/labels';
 import { useConfirmAction } from '../accounts/useConfirmAction';
 import { fmtDate } from '../../lib/format';
-import { KpiShell, useKpiUser } from '../kpi/KpiShell';
+import { useCurrentUser } from '../../lib/current-user';
 import { NotesForm } from './NotesForm';
 import { ReconcilePanel } from './ReconcilePanel';
 import { ReportTable } from './ReportTable';
@@ -26,7 +26,7 @@ const PANEL = 'report-scope-panel';
  * Ẩn/hiện chỉ là gợi ý; API kiểm quyền.
  */
 export function ReportsScreen() {
-  const { me, notice, setNotice, leave } = useKpiUser();
+  const { me, leave } = useCurrentUser();
   const today = useMemo(() => toVnDate(new Date()), []);
   const [type, setType] = useState<ReportType>('WR');
   const [start, setStart] = useState(() => reportPeriods('WR', today)[1]!.start);
@@ -40,13 +40,13 @@ export function ReportsScreen() {
   const [recon, setRecon] = useState(false);
   const actions = useConfirmAction(() => void leave());
 
-  const isHead = me?.role === 'head';
-  const curScope = isHead ? scope : (me?.teamId ?? null);
+  const isHead = me.role === 'head';
+  const curScope = isHead ? scope : (me.teamId ?? null);
   const periods = useMemo(() => reportPeriods(type, today), [type, today]);
   const period = periods.find((p) => p.start === start) ?? periods[1]!;
 
   useEffect(() => {
-    if (!me || recon) return;
+    if (recon) return;
     let stale = false;
     setLoadError(null);
     apiClient.reports.preview(type, start).then(
@@ -190,7 +190,7 @@ export function ReportsScreen() {
   );
 
   return (
-    <KpiShell me={me} notice={notice} onNotice={setNotice}>
+    <>
       <div className="head-row">
         <h1>Báo cáo tổng hợp</h1>
         <span className="muted">{isHead ? 'Cả phòng' : (teams[0]?.shortName ?? '')}</span>
@@ -230,7 +230,7 @@ export function ReportsScreen() {
             Từ {fmtDate(period.start)} đến {fmtDate(period.end)}
           </p>
 
-          {me && !isHead && !me.teamId && me.role === 'manager' && (
+          {!isHead && !me.teamId && me.role === 'manager' && (
             <p role="alert" className="banner-error">
               Bạn chưa thuộc team nào
             </p>
@@ -293,6 +293,6 @@ export function ReportsScreen() {
       )}
 
       <ConfirmDialog {...actions.dialogProps} />
-    </KpiShell>
+    </>
   );
 }

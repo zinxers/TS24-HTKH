@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { apiClient } from '../../lib/api-client';
 import { useConfirmAction } from '../accounts/useConfirmAction';
-import { KpiShell, useKpiUser } from './KpiShell';
+import { useCurrentUser } from '../../lib/current-user';
 import { toInput, useKpiDraft, type DraftRow } from './useKpiDraft';
 
 interface SentRow {
@@ -23,12 +23,8 @@ const hhmm = (iso: string) =>
 
 /** Màn hình nhập KPI: nháp tự lưu trên máy; gửi qua ConfirmDialog, lỗi hiện cạnh từng ô. */
 export function KpiEntryScreen() {
-  const { me, notice, setNotice, leave } = useKpiUser();
-  return (
-    <KpiShell me={me} notice={notice} onNotice={setNotice}>
-      {me && <EntryBody userId={me.id} onAuthLost={() => void leave()} />}
-    </KpiShell>
-  );
+  const { me, leave } = useCurrentUser();
+  return <EntryBody userId={me.id} onAuthLost={() => void leave()} />;
 }
 
 function EntryBody({ userId, onAuthLost }: { userId: string; onAuthLost: () => void }) {
