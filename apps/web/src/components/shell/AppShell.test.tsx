@@ -145,4 +145,39 @@ describe('AppShell', () => {
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
     expect(logout).toHaveBeenCalledTimes(1);
   });
+
+  it('màn hẹp: ☰ mở ngăn kéo, Esc đóng; rộng ra rồi hẹp lại thì không tự mở', async () => {
+    let narrow = true;
+    const listeners = new Set<() => void>();
+    vi.spyOn(window, 'matchMedia').mockImplementation(
+      (query) =>
+        ({
+          matches: narrow,
+          media: query,
+          addEventListener: (_: string, fn: () => void) => listeners.add(fn),
+          removeEventListener: (_: string, fn: () => void) => listeners.delete(fn),
+        }) as unknown as MediaQueryList,
+    );
+    const resize = (v: boolean) => {
+      narrow = v;
+      act(() => listeners.forEach((fn) => fn()));
+    };
+    vi.spyOn(apiClient.auth, 'me').mockResolvedValue(USER);
+    const { container } = shell();
+    await screen.findByText('Tên: Trần Thị Quản Lý Một');
+    const dialog = () => container.querySelector('dialog.drawer');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Mở menu' }));
+    expect(dialog()).toHaveAttribute('open');
+    expect(screen.getByRole('button', { name: 'Mở menu' })).toHaveAttribute('aria-expanded', 'true');
+    fireEvent(dialog()!, new Event('cancel', { cancelable: true }));
+    expect(dialog()).not.toHaveAttribute('open');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Mở menu' }));
+    resize(false);
+    expect(dialog()).toBeNull();
+    resize(true);
+    expect(dialog()).not.toHaveAttribute('open');
+    expect(screen.getByRole('button', { name: 'Mở menu' })).toHaveAttribute('aria-expanded', 'false');
+  });
 });

@@ -64,12 +64,15 @@ describe('report routes', () => {
 
   it('500 chung khi lỗi lạ, không lộ message', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    reportService.preview.mockRejectedValue(new Error('Cần đúng 3 team để điền báo cáo'));
-    const res = await preview.GET(get(), ctx('WR'));
-    expect(res.status).toBe(500);
-    expect(await msg(res)).not.toContain('3 team');
-    expect(spy).toHaveBeenCalled();
-    spy.mockRestore();
+    try {
+      reportService.preview.mockRejectedValue(new Error('Cần đúng 3 team để điền báo cáo'));
+      const res = await preview.GET(get(), ctx('WR'));
+      expect(res.status).toBe(500);
+      expect(await msg(res)).not.toContain('3 team');
+      expect(spy).toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it('preview và notes trả dữ liệu', async () => {

@@ -69,6 +69,11 @@ export function AppShell({ initialCollapsed, userMenu, children }: AppShellProps
   // Thông báo chung chỉ có nghĩa ở trang đã sinh ra nó.
   useEffect(() => setNotice(null), [pathname]);
 
+  // Màn rộng ra thì bỏ trạng thái mở, để hẹp lại ngăn kéo không tự mở.
+  useEffect(() => {
+    if (!narrow) setDrawerOpen(false);
+  }, [narrow]);
+
   const value = useMemo<CurrentUserValue | null>(
     () => (me ? { me, setMe, notice, setNotice, leave } : null),
     [me, notice, leave],
@@ -104,7 +109,7 @@ export function AppShell({ initialCollapsed, userMenu, children }: AppShellProps
       <CurrentUserContext.Provider value={value}>
         <div className="app">
           {narrow ? (
-            <Drawer open={narrow && drawerOpen} onClose={() => setDrawerOpen(false)}>
+            <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
               <Sidebar role={role} collapsed={false} onNavigate={() => setDrawerOpen(false)} userMenu={menu} />
             </Drawer>
           ) : (
