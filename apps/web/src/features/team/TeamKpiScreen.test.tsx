@@ -7,7 +7,6 @@ import { TEAMS, overview, row, teamKpi, trend } from './fixtures.test-utils';
 import { renderWithUser } from '../../test/render-with-user';
 import { TeamKpiScreen } from './TeamKpiScreen';
 
-
 const MANAGER: CurrentUser = { id: 'm2', email: 'quan.ly.2@example.com', fullName: 'Quản Lý Hai', role: 'manager', teamId: 't2' };
 const HEAD: CurrentUser = { id: 'h', email: 'truong.phong@example.com', fullName: 'Trưởng Phòng', role: 'head', teamId: null };
 
@@ -73,6 +72,8 @@ describe('TeamKpiScreen', () => {
     fireEvent.keyDown(tabs[3]!, { key: 'Home' });
     expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
     expect(tabs[0]).toHaveFocus();
+    await waitFor(() => expect(team).toHaveBeenLastCalledWith('t1', expect.anything()));
+    await screen.findByRole('table', { name: 'Thành viên' });
   });
 
   it('đổi kỳ nhanh gọi lại kpi.team', async () => {

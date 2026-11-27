@@ -1,7 +1,7 @@
 'use client';
 
 import { toVnDate, type CurrentUser } from '@ts24-htkh/shared';
-import { MotionConfig, motion } from 'motion/react';
+import { MotionConfig, motion, useReducedMotion } from 'motion/react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ApiError, apiClient } from '../../lib/api-client';
@@ -26,6 +26,7 @@ interface AppShellProps {
 export function AppShell({ initialCollapsed, userMenu, children }: AppShellProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const reduced = useReducedMotion();
   const narrow = useMediaQuery('(max-width: 767px)');
   const [me, setMe] = useState<CurrentUser | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -103,7 +104,7 @@ export function AppShell({ initialCollapsed, userMenu, children }: AppShellProps
       <CurrentUserContext.Provider value={value}>
         <div className="app">
           {narrow ? (
-            <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+            <Drawer open={narrow && drawerOpen} onClose={() => setDrawerOpen(false)}>
               <Sidebar role={role} collapsed={false} onNavigate={() => setDrawerOpen(false)} userMenu={menu} />
             </Drawer>
           ) : (
@@ -116,7 +117,7 @@ export function AppShell({ initialCollapsed, userMenu, children }: AppShellProps
               menuOpen={drawerOpen}
             />
             {/* Chỉ phần này có transform; TopBar, thanh bên ở ngoài để menu position:fixed đo đúng. */}
-            <motion.div key={pathname} className="content wide" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={ENTER}>
+            <motion.div key={pathname} className="content wide" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={reduced ? { duration: 0.15 } : ENTER}>
               {notice && (
                 <p role="alert" className="banner-error">
                   {notice}

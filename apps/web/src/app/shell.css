@@ -67,6 +67,8 @@
   .menu-btn { display: inline-flex; }
   .appbar { gap: 8px; }
   .app { grid-template-columns: minmax(0, 1fr); }
+  .app > .side { display: none; } /* SSR luôn dựng sidebar desktop; ẩn trước khi hydrate. Sidebar trong drawer không phải con trực tiếp của .app */
+  .tool-label { display: none; }
   .panel { margin: 0; border-radius: 0; box-shadow: none; }
 }
 @media (prefers-reduced-motion: reduce) {

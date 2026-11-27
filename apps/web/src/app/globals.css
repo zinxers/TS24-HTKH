@@ -191,15 +191,15 @@ body {
 
 .avatar {
   flex: none;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: var(--secondary);
-  color: var(--group);
+  background: var(--avatar-bg);
+  color: var(--on-avatar);
   display: grid;
   place-items: center;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
 }
 .text-btn {
   flex: none;
