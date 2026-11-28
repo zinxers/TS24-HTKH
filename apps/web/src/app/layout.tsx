@@ -11,6 +11,7 @@ import './team.css';
 import './reports.css';
 import './home.css';
 import './shell.css';
+import './login.css';
 import './motion.css';
 
 export const metadata: Metadata = {

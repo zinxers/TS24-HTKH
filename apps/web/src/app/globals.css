@@ -37,6 +37,11 @@
   --avatar-bg: #3dd6c0;
   --on-avatar: #0b2a4a; /* 8.0:1 */
   --shadow-lift: light-dark(0 10px 24px rgba(11, 42, 74, 0.14), 0 10px 24px rgba(0, 0, 0, 0.5));
+  /* Token trang đăng nhập (Mốc 8b, duyệt 2026-11-28). Nửa trái: sáng xanh nhạt như mẫu, tối dùng navy khung. */
+  --login-art-a: light-dark(#e6eef8, #0b2a4a);
+  --login-art-b: light-dark(#f1f5fa, #0a1626);
+  --login-title: light-dark(#0b3a6f, #eaf0f7); /* sáng 9.7:1 trên #e6eef8 · 11.4:1 trên --card; tối 12.7:1 trên #0b2a4a · 13.0:1 trên --card */
+  --login-art-sub: light-dark(#5b6b7f, #acb9c7); /* sáng 4.7:1 trên #e6eef8 · 5.0:1 trên #f1f5fa; tối 7.3:1 · 9.1:1 */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --page-max: 1440px;
   --gutter: clamp(16px, 3vw, 48px);
@@ -64,32 +69,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ---------- /login ---------- */
-.signin {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 12vh 20px 40px;
-}
-.mark {
-  width: 64px;
-  height: 64px;
-  margin-bottom: 20px;
-}
-.mark svg {
-  width: 64px;
-  height: 64px;
-}
-.signin h1,
+/* ---------- tiêu đề trang, ô nhóm (FormDialog) ---------- */
 .content h1 {
   font-size: 34px;
   line-height: 1.12;
   font-weight: 700;
   letter-spacing: -0.4px;
   margin: 0 0 6px;
-}
-.signin .sub {
-  color: var(--secondary);
-  margin: 0 0 28px;
 }
 .group {
   background: var(--group);
@@ -142,33 +128,6 @@ body {
   flex: none;
   margin-top: 2px;
 }
-.primary {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  height: 50px;
-  margin-top: 24px;
-  border: 0;
-  border-radius: 12px;
-  background: var(--accent);
-  color: var(--on-accent);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-.primary:hover {
-  background: var(--accent-hover);
-}
-.primary:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 4px var(--ring);
-}
-.primary[disabled] {
-  opacity: 0.55;
-  cursor: default;
-}
 .spinner {
   width: 18px;
   height: 18px;
@@ -181,12 +140,6 @@ body {
   to {
     transform: rotate(360deg);
   }
-}
-.note {
-  margin: 16px 4px 0;
-  color: var(--secondary);
-  font-size: 13px;
-  text-align: center;
 }
 
 .avatar {
@@ -251,9 +204,6 @@ body {
 }
 
 @media (max-width: 480px) {
-  .signin {
-    padding-top: 8vh;
-  }
   .content {
     padding-block: 24px;
   }

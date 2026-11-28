@@ -48,4 +48,14 @@ describe('LoginForm', () => {
     expect(screen.getByRole('button', { name: 'Đăng nhập' })).toBeEnabled();
     expect(replace).not.toHaveBeenCalled();
   });
+  it('nút Hiện/Ẩn đổi kiểu ô mật khẩu, không gửi form', () => {
+    const login = vi.spyOn(apiClient.auth, 'login');
+    render(<LoginForm />);
+    const pw = screen.getByLabelText('Mật khẩu');
+    fireEvent.click(screen.getByRole('button', { name: 'Hiện mật khẩu' }));
+    expect(pw).toHaveAttribute('type', 'text');
+    fireEvent.click(screen.getByRole('button', { name: 'Ẩn mật khẩu' }));
+    expect(pw).toHaveAttribute('type', 'password');
+    expect(login).not.toHaveBeenCalled();
+  });
 });

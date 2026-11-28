@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
-import { ShieldMark } from '../../components/Logo';
 import { ApiError, apiClient } from '../../lib/api-client';
 
 export function LoginForm() {
@@ -11,6 +10,7 @@ export function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [shown, setShown] = useState(false);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -26,15 +26,12 @@ export function LoginForm() {
   }
 
   return (
-    <form className="signin" onSubmit={onSubmit} noValidate>
-      <div className="mark" aria-hidden="true">
-        <ShieldMark />
-      </div>
+    <form className="login-card" onSubmit={onSubmit} noValidate>
       <h1>Đăng nhập</h1>
-      <p className="sub">Hệ thống báo cáo Phòng Hỗ trợ khách hàng TS24</p>
-      <div className="group">
-        <div className="field">
-          <label htmlFor="email">Email</label>
+      <p className="sub">Báo cáo và KPI của Phòng Hỗ trợ khách hàng.</p>
+      <div className="login-field">
+        <label htmlFor="email">Email</label>
+        <div className="login-input">
           <input
             id="email"
             type="email"
@@ -46,22 +43,34 @@ export function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-        <div className="field">
-          <label htmlFor="password">Mật khẩu</label>
+      </div>
+      <div className="login-field">
+        <label htmlFor="password">Mật khẩu</label>
+        <div className="login-input">
           <input
             id="password"
-            type="password"
+            type={shown ? 'text' : 'password'}
             autoComplete="current-password"
-            placeholder="Bắt buộc"
+            placeholder="Nhập mật khẩu"
             required
             disabled={pending}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          <button
+            type="button"
+            className="login-reveal"
+            aria-controls="password"
+            aria-label={shown ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+            disabled={pending}
+            onClick={() => setShown((v) => !v)}
+          >
+            {shown ? 'Ẩn' : 'Hiện'}
+          </button>
         </div>
       </div>
       {error && (
-        <div className="error" role="alert">
+        <div className="login-error" role="alert">
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
             <circle cx="8" cy="8" r="7.25" fill="none" stroke="currentColor" strokeWidth="1.5" />
             <path d="M8 4.2v4.6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -70,11 +79,14 @@ export function LoginForm() {
           <span>{error}</span>
         </div>
       )}
-      <button className="primary" type="submit" disabled={pending} aria-busy={pending}>
+      <button className="login-submit" type="submit" disabled={pending} aria-busy={pending}>
         {pending && <span className="spinner" aria-hidden="true" />}
         {pending ? 'Đang đăng nhập…' : 'Đăng nhập'}
       </button>
-      <p className="note">Quên mật khẩu? Liên hệ Quản lý hoặc Trưởng phòng.</p>
+      <div className="login-note">
+        <p>Quên mật khẩu? Nhờ Trưởng phòng hoặc Quản lý team đặt lại.</p>
+        <p>Nhập sai 10 lần thì phải chờ 15 phút mới thử lại được.</p>
+      </div>
     </form>
   );
 }
