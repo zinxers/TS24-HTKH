@@ -36,7 +36,7 @@ export function LoginForm() {
             id="email"
             type="email"
             autoComplete="username"
-            placeholder="ten@ts24.com.vn"
+            placeholder="ten@ts24corp.com"
             required
             disabled={pending}
             value={email}
