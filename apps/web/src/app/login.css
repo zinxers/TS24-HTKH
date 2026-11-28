@@ -99,5 +99,8 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .login-card { animation: login-fade 150ms linear backwards; }
+  .login-input,
+  .login-reveal,
+  .login-submit { transition: none; }
   @keyframes login-fade { from { opacity: 0; } }
 }

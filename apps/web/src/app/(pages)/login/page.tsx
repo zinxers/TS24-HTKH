@@ -11,7 +11,7 @@ export default function LoginPage() {
         <Logo className="logo" />
         <div className="login-art-img" aria-hidden="true">
           {/* eslint-disable-next-line @next/next/no-img-element -- ảnh tĩnh trang trí, không cần tối ưu của next/image */}
-          <img src="/login-art.png" alt="" width={690} height={539} />
+          <img src="/login-art.png" alt="" width={690} height={539} loading="lazy" />
         </div>
         <p className="login-art-title">TS24 - Nhà phát triển giải pháp số cho doanh nghiệp</p>
         <p className="login-art-foot">Công ty Cổ phần TS24 · Phòng Hỗ trợ Khách hàng</p>
