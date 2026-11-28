@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Trang `/login` chia đôi theo `D:\Downloads\AI\TEMPLATES\TS24-HTKH\Wallpaper-icon\Trang-login.png`: trái nền khung navy có logo, khiên lớn mờ, dòng tên công ty; phải là thẻ đăng nhập trên nền `--panel`. Hành vi đăng nhập giữ nguyên.
+**Goal:** Trang `/login` chia đôi theo mockup đã duyệt `docs/superpowers/specs/2026-11-28-moc-8b-dang-nhap-mockup.html` (mẫu `Wallpaper-icon/trang-login.png`): trái nền xanh nhạt (tối: navy) có logo, hình minh họa `public/login-art.png`, tiêu đề và tên công ty; phải là thẻ đăng nhập trên nền `--panel`. Hành vi gửi giữ nguyên; thêm nút Hiện/Ẩn mật khẩu.
 
 **Architecture:** `app/(pages)/login/page.tsx` (server component) dựng bố cục hai nửa và đặt `LoginForm` (client, `features/auth/`) vào thẻ bên phải. CSS trang đăng nhập tách ra `app/login.css`, dùng lại token khung app của Mốc 8a (`--shell`, `--on-shell`, `--on-shell-muted`, `--panel`, `--card`). Không thêm dependency, không dùng `motion` (trang này nằm ngoài `AppShell`); chuyển động vào thẻ bằng CSS.
 
@@ -17,10 +17,10 @@
 - Không thêm dependency. Lớp giao diện gọi API chỉ qua `lib/api-client.ts`. `components/` không import `features/`.
 - Chữ giao diện tiếng Việt có dấu. Mỗi file ≲ 200 dòng.
 - **Giữ nguyên hành vi `LoginForm`:** hai trường Email, Mật khẩu (nhãn, `type`, `autocomplete`, `required`, placeholder), `noValidate`, khóa nút và ô khi chờ, spinner, thông báo lỗi `role="alert"`, đúng thì `router.replace('/')`, dòng "Quên mật khẩu? Liên hệ Quản lý hoặc Trưởng phòng.". Chỉ đổi markup/class phục vụ bố cục mới.
-- **Không thêm** (spec 4.5): "Ghi nhớ đăng nhập", "Quên mật khẩu?" dạng link, nút "Hiện" mật khẩu, liên kết Hotline/Email, ba icon ở nửa trái của ảnh mẫu.
+- **Không thêm** (spec 4.5): "Ghi nhớ đăng nhập", "Quên mật khẩu?" dạng link, liên kết Hotline/Email. **Có thêm** (người dùng duyệt 2026-11-28): nút "Hiện"/"Ẩn" mật khẩu (`type="button"`, `aria-pressed`, `aria-controls`, khóa khi chờ) và dòng "Nhập sai 10 lần thì phải chờ 15 phút mới thử lại được.".
 - Không sửa luật CSS dùng chung với chỗ khác: `.group`, `.field`, `.error` đang được `FormDialog` dùng; `.content h1` đang ghép chung selector với `.signin h1` (`globals.css` dòng ~82). Trang đăng nhập dùng class riêng tiền tố `login-`; chỉ xóa khỏi `globals.css` những luật mà sau thay đổi không còn ai dùng (`grep` để chắc), và tách `.content h1` ra khỏi selector ghép chứ không xóa.
 - Màu: chỉ dùng token sẵn có. Nếu cần token mới (vd chữ phụ trên thẻ), thêm vào `globals.css` kèm tỉ lệ tương phản trong comment, đạt WCAG AA (chữ 4.5:1, thành phần 3:1) cả sáng lẫn tối.
-- Khiên lớn ở nửa trái là trang trí: `aria-hidden`, không nhận focus, không chặn chọn chữ.
+- **Mockup đã duyệt là nguồn chuẩn cho CSS và markup:** chép class `login-*`, token mới `--login-art`, `--login-title`, `--login-art-sub` (kèm tỉ lệ tương phản) từ mockup. Hình minh họa là trang trí: `alt=""`, bọc `aria-hidden`, dùng `next/image` hoặc `<img>` với `width`/`height` để không nhảy bố cục.
 - Dưới 768px: ẩn nửa trái, logo ngang (`Logo`, không `onDark`) hiện trên thẻ; không tràn ngang ở 375px.
 - Chuyển động: thẻ hiện từ `opacity 0, translateY 12px` lên, 350ms, ease `var(--ease)` (đã là `cubic-bezier(0.22, 1, 0.36, 1)` trong `globals.css`); `prefers-reduced-motion: reduce` thì chỉ đổi độ mờ ≤150ms hoặc tắt. Nút giữ quy tắc Mốc 7 (hover đổi màu 200ms).
 - Theme sáng/tối đi theo cookie `theme` sẵn có ở `app/layout.tsx`; trang đăng nhập không có nút đổi theme (không thêm).
@@ -30,8 +30,8 @@
 1. Hành vi `LoginForm` không đổi: mọi test trong `LoginForm.test.tsx` vẫn qua mà không sửa phần khẳng định (chỉ được sửa selector nếu markup đổi, và phải nói rõ lý do).
 2. `FormDialog` và các trang trong khung app không đổi giao diện sau khi dọn CSS login (kiểm `/accounts` mở dialog Tạo tài khoản, xem `h1` các trang).
 3. 375px: `document.documentElement.scrollWidth <= 375`, thẻ đủ chỗ, bàn phím ảo không che nút (thẻ không `height: 100vh` cứng).
-4. Khiên trang trí không lọt vào cây accessibility; trang chỉ có một `h1` ("Đăng nhập").
-5. Tương phản chữ "Công ty Cổ phần TS24 · Phòng Hỗ trợ Khách hàng" trên nền khung đạt 4.5:1 cả sáng và tối.
+4. Hình minh họa không lọt vào cây accessibility; trang chỉ có một `h1` ("Đăng nhập").
+5. Tương phản chữ "Công ty Cổ phần TS24 · Phòng Hỗ trợ Khách hàng" trên nền nửa trái đạt 4.5:1 cả sáng và tối.
 
 ---
 
@@ -40,16 +40,18 @@
 **Files:**
 - Create: `docs/superpowers/specs/2026-11-28-moc-8b-dang-nhap-mockup.html`
 
-- [ ] **Step 1: Kiểm nhánh** đang ở `feat/moc-8b-dang-nhap` (đã tạo từ `main`, có sẵn commit plan); `git status` sạch, trừ `.claude/settings.json`, `.superpowers/` chưa theo dõi có sẵn.
-- [ ] **Step 2: Viết mockup HTML tĩnh một file** (CSS + JS thuần, không thư viện), lấy màu từ token thật trong `apps/web/src/app/globals.css` và SVG logo từ `apps/web/src/components/Logo.tsx`:
+- [x] **Step 1: Kiểm nhánh** đang ở `feat/moc-8b-dang-nhap` (đã tạo từ `main`, có sẵn commit plan); `git status` sạch, trừ `.claude/settings.json`, `.superpowers/` chưa theo dõi có sẵn.
+- [x] **Step 2: Viết mockup HTML tĩnh một file** (CSS + JS thuần, không thư viện), lấy màu từ token thật trong `apps/web/src/app/globals.css` và SVG logo từ `apps/web/src/components/Logo.tsx`:
   - trái 50%: nền `--shell`, logo ngang `onDark` góc trên trái, khiên lớn mờ (đường viền nhạt, như ảnh mẫu) tràn góc dưới phải, dòng "Công ty Cổ phần TS24 · Phòng Hỗ trợ Khách hàng" ở đáy;
   - phải 50%: nền `--panel`, thẻ `--card` bo góc, bóng nhẹ, rộng ~400px, giữa theo chiều dọc: `h1` "Đăng nhập", dòng phụ "Hệ thống báo cáo Phòng Hỗ trợ khách hàng TS24", nhãn đặt trên ô (Email, Mật khẩu), ô viền bo góc, nút chính full width, khối lỗi mẫu, dòng "Quên mật khẩu? Liên hệ Quản lý hoặc Trưởng phòng.";
   - trạng thái: thường, focus ô, đang đăng nhập (spinner), có lỗi; nút chuyển sáng/tối; khung 375px (bỏ nửa trái, logo trên thẻ).
-- [ ] **Step 3: Mở bằng browser pane** (`preview_start` cấu hình `mockup` trong `.claude/launch.json`), chụp desktop 1440px sáng + tối, 375px, gửi người dùng.
-- [ ] **Step 4: Dừng, chờ người dùng duyệt.** Sửa theo góp ý tới khi duyệt.
-- [ ] **Step 5: Commit** `docs: mockup trang đăng nhập Mốc 8b`.
+- [x] **Step 3: Mở bằng browser pane** (`preview_start` cấu hình `mockup` trong `.claude/launch.json`), chụp desktop 1440px sáng + tối, 375px, gửi người dùng.
+- [x] **Step 4: Dừng, chờ người dùng duyệt.** Sửa theo góp ý tới khi duyệt.
+- [x] **Step 5: Commit** `docs: mockup trang đăng nhập Mốc 8b`.
 
 ### Task 2: Bố cục chia đôi và thẻ đăng nhập
+
+> Sau duyệt 2026-11-28: chỗ nào trong task này nói "khiên lớn", `--shell`/`--on-shell` cho nửa trái thì thay bằng hình minh họa và token `--login-*` của mockup. Test trang khẳng định hình minh họa nằm trong `aria-hidden` thay cho khiên; thêm test nút Hiện/Ẩn trong `LoginForm.test.tsx`.
 
 **Files:**
 - Modify: `apps/web/src/app/(pages)/login/page.tsx`
@@ -67,7 +69,7 @@
   <div className="login-page">
     <aside className="login-art">
       <Logo onDark className="login-art-logo" />
-      <div className="login-art-shield" aria-hidden="true"><ShieldMark onDark /></div>
+      <div className="login-art-shield" aria-hidden="true"><img src="/login-art.png" alt="" width={690} height={539} /></div>
       <p className="login-art-foot">Công ty Cổ phần TS24 · Phòng Hỗ trợ Khách hàng</p>
     </aside>
     <main className="login-main">

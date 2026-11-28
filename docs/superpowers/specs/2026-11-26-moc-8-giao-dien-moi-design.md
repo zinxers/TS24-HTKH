@@ -123,7 +123,7 @@ Giá trị chính xác do builder chọn sao cho đạt AA, ghi tỉ lệ tươn
 
 ### 4.5. Đăng nhập (8b)
 
-Theo `Trang-login.png`: trái 50% nền `--shell` có logo ngang nền tối ở góc trên, hình khiên lớn mờ ở góc dưới, dòng "Công ty Cổ phần TS24 · Phòng Hỗ trợ Khách hàng" ở đáy. Phải là thẻ đăng nhập trên nền `--panel`. Giữ nguyên trường và hành vi của `LoginForm` hiện có. Không thêm "Ghi nhớ đăng nhập", "Quên mật khẩu?", liên kết Hotline/Email (chưa có tính năng; quên mật khẩu đã có quy trình Trưởng phòng đặt lại). Dưới 768px: bỏ nửa trái, logo lên trên thẻ.
+Theo `Wallpaper-icon/trang-login.png` (người dùng duyệt mockup `2026-11-28-moc-8b-dang-nhap-mockup.html` ngày 2026-11-28): trái 50% nền xanh nhạt (`--login-art`; tối dùng navy khung) có logo màu gốc ở góc trên, hình minh họa văn phòng `login1.png` (chép thành `apps/web/public/login-art.png`) ở giữa, tiêu đề "TS24 - Nhà phát triển giải pháp số cho doanh nghiệp" và dòng "Công ty Cổ phần TS24 · Phòng Hỗ trợ Khách hàng" ở đáy. Phải là thẻ đăng nhập trên nền `--panel`: nhãn trên ô, nút "Hiện"/"Ẩn" mật khẩu (người dùng chọn giữ), ghi chú quên mật khẩu và giới hạn 10 lần sai / chờ 15 phút (khớp `MAX_LOGIN_FAILS`, `LOGIN_BLOCK_SECONDS`). Giữ nguyên trường và hành vi gửi của `LoginForm`. Không thêm "Ghi nhớ đăng nhập", link "Quên mật khẩu?", liên kết Hotline/Email. Dưới 768px: bỏ nửa trái, logo lên trên thẻ.
 
 ### 4.6. Trang chủ (8c)
 
@@ -164,7 +164,7 @@ Theo `Trang-login.png`: trái 50% nền `--shell` có logo ngang nền tối ở
 ## 5. Quyết định do Claude đề xuất (người dùng kiểm khi đọc)
 
 - Màu navy/teal thay xanh lá của video.
-- Bỏ tìm kiếm, thông báo, Customize, "Ghi nhớ đăng nhập", "Quên mật khẩu?".
+- Bỏ tìm kiếm, thông báo, Customize, "Ghi nhớ đăng nhập", link "Quên mật khẩu?". Nút "Hiện" mật khẩu giữ theo mẫu login mới (người dùng duyệt 2026-11-28).
 - Ô "Kỳ" ở appbar thay ô ngày của video; nút `+` = Nhập KPI.
 - Chỉ có hiệu ứng vào trang, không có hiệu ứng rời trang.
 - Trạng thái thanh bên lưu cookie.
