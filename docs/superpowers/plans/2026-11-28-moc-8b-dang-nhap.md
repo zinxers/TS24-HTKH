@@ -40,7 +40,7 @@
 **Files:**
 - Create: `docs/superpowers/specs/2026-11-28-moc-8b-dang-nhap-mockup.html`
 
-- [ ] **Step 1: Tạo nhánh** `git switch -c feat/moc-8b-dang-nhap` (trước đó `git status` sạch, trừ `.claude/settings.json`, `.superpowers/` chưa theo dõi có sẵn).
+- [ ] **Step 1: Kiểm nhánh** đang ở `feat/moc-8b-dang-nhap` (đã tạo từ `main`, có sẵn commit plan); `git status` sạch, trừ `.claude/settings.json`, `.superpowers/` chưa theo dõi có sẵn.
 - [ ] **Step 2: Viết mockup HTML tĩnh một file** (CSS + JS thuần, không thư viện), lấy màu từ token thật trong `apps/web/src/app/globals.css` và SVG logo từ `apps/web/src/components/Logo.tsx`:
   - trái 50%: nền `--shell`, logo ngang `onDark` góc trên trái, khiên lớn mờ (đường viền nhạt, như ảnh mẫu) tràn góc dưới phải, dòng "Công ty Cổ phần TS24 · Phòng Hỗ trợ Khách hàng" ở đáy;
   - phải 50%: nền `--panel`, thẻ `--card` bo góc, bóng nhẹ, rộng ~400px, giữa theo chiều dọc: `h1` "Đăng nhập", dòng phụ "Hệ thống báo cáo Phòng Hỗ trợ khách hàng TS24", nhãn đặt trên ô (Email, Mật khẩu), ô viền bo góc, nút chính full width, khối lỗi mẫu, dòng "Quên mật khẩu? Liên hệ Quản lý hoặc Trưởng phòng.";
