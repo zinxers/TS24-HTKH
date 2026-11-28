@@ -1,4 +1,4 @@
-/* Chuyển động chung toàn web (Mốc 7): thẻ và khung đăng nhập hiện dần từ dưới lên (vào trang: AppShell, Mốc 8a); nút đổi màu mượt khi rê chuột.
+/* Chuyển động chung toàn web (Mốc 7): thẻ hiện dần từ dưới lên (vào trang: AppShell, Mốc 8a); nút đổi màu mượt khi rê chuột.
    Nhấn vẫn đổi tức thì (controls.css). Giảm chuyển động: tắt hết. */
 :root {
   --ease-reveal: cubic-bezier(0.28, 0.11, 0.32, 1);
@@ -11,7 +11,6 @@
   }
 }
 
-.signin,
 .tile {
   /* backwards: hết chuyển động thì trả transform cho hover và popover position:fixed. */
   animation: rise 700ms var(--ease-reveal) backwards;
@@ -42,7 +41,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .signin,
   .tile {
     animation: none;
   }
